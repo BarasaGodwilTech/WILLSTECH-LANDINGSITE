@@ -10,7 +10,7 @@
       "name": "Jbl Flip 6 Waterproof Portable Wireless Bluetooth Speaker - Black",
       "sku": "0100",
       "category": "accessories",
-      "description": "The beat goes on with the JBL Flip 6. This 2-way speaker system is engineered to deliver loud, crystal clear, and powerful sound. Its racetrack-shaped woofer produces exceptional low and mid-range frequencies, while a separate tweeter creates crisp highs. Optimized dual passive radiators, fine-tuned using Harman's advanced algorithm, deliver deep bass.\n\nBold audio meets bold design. Big-sounding yet easy to carry, the Flip 6 fits any personal style. Stand it vertically or horizontally and choose from a variety of vibrant colors.\n\nTake it to the pool or the park with confidence. The JBL Flip 6 is IP67 waterproof and dustproof, so you can bring your speaker anywhere.\n\nDon't sweat the small stuff like charging—the Flip 6 gives you up to 12 hours of playtime on a single charge.",
+      "description": "The beat goes on with the JBL Flip 6 2-way speaker system, engineered to deliver loud, crystal clear, powerful sound. Its racetrack-shaped woofer delivers exceptional low frequencies and midrange, while a separate tweeter produces crisp, clear high-frequencies. Flip 6 also features optimized dual passive radiators for deep bass, fine-tuned with using Harman's advanced algorithm.\nBold audio meets bold design. Big-sounding yet easy to carry, the design fits any personal style. Stand it vertical or horizontal and choose from a variety of vibrant colors.\nTo the pool. To the park. JBL Flip 6 is IP67 waterproof and dustproof, so you can bring your speaker anywhere.\nDon't sweat the small stuff like charging your battery. JBL Flip 6 gives you up to 12 hours of playtime on a single charge.",
       "price": 404500,
       "originalPrice": 500000,
       "images": [
@@ -43,16 +43,16 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-10-28T16:07:37.767Z",
-      "dateUpdated": "2025-10-28T18:06:25.469Z"
+      "dateUpdated": "2025-10-28T16:34:23.019Z"
     },
     {
       "id": 1761670093698,
       "name": "Jbl Xtreme 4 Portable Bluetooth Speaker ",
       "sku": "0101",
       "category": "accessories",
-      "description": "Next level massive JBL Pro Sound,\nTwo woofers, two powerful drivers and dual pumping JBL Bass Radiators effortlessly deliver dynamic, immersive sound with deeper bass and plenty of detail. You'll get lost in the music wherever you are.\nConvenient shoulder strap,\nThe speaker can be carried on the shoulder or can be adjusted as a crossbody, whatever your style or the mood. It also features a built-in bottle opener\nUp to 24 hours of playtime plus 6 hours with Playtime Boost,\nYour listening adventures can last all day long. Take the JBL Xtreme 4 with you from room to room, out to your backyard party, or off to the beach. With up to 24 hours of battery life, you can play music 'til the sun goes downÃÂ¢ÃÂÃÂand comes back up againÃÂ¢ÃÂÃÂbefore you'll need a recharge. Simply tap Playtime Boost to prolong the playtime, adding up to 6 hours to your battery life. It tunes and optimizes the performance for louder and crisper sound.\n\n\ncolour varriation: - green / black / blue.",
-      "price": "1023000",
-      "originalPrice": "1039000",
+      "description": "Next-Level Massive JBL Pro Sound\n\nImmerse yourself in powerful audio with the JBL Xtreme 4. Equipped with two woofers, two powerful drivers, and dual pumping JBL Bass Radiators, it delivers a dynamic soundscape with deep bass and exceptional clarity. Get lost in the music wherever you are.\n\nDesigned for Adventure\nCarry it effortlessly with the convenient, adjustable shoulder strap (wear it on your shoulder or as a crossbody) and enjoy practical features like a built-in bottle opener.\n\nAll-Day Playtime\nWith up to 24 hours of battery life and an extra 6 hours available with Playtime Boost your music can last from sunrise to sunset and beyond. This feature also tunes the performance for louder, crisper sound.\n\nColor Variations: Green, Black, Blue.",
+      "price": 1023000,
+      "originalPrice": 1039000,
       "images": [
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg"
       ],
@@ -77,7 +77,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-10-28T16:48:13.698Z"
+      "dateAdded": "2025-10-28T16:48:13.698Z",
+      "dateUpdated": "2025-10-28T18:11:16.079Z"
     },
     {
       "id": 1761671191331,
@@ -165,5 +166,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-28T18:06:25.469Z"
+  "lastUpdated": "2025-10-28T18:11:16.079Z"
 }

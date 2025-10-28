@@ -11,10 +11,12 @@
       "sku": "gg",
       "category": "accessories",
       "description": "egfe",
-      "price": "55555",
+      "price": 55555,
       "originalPrice": null,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761667577691.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761667577691.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761667861767.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761667934509.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -33,7 +35,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-10-28T16:07:37.767Z"
+      "dateAdded": "2025-10-28T16:07:37.767Z",
+      "dateUpdated": "2025-10-28T16:12:34.591Z"
     }
   ],
   "content": {
@@ -50,5 +53,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-28T16:07:37.767Z"
+  "lastUpdated": "2025-10-28T16:12:34.591Z"
 }

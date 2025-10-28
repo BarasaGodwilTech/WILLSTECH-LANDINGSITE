@@ -85,9 +85,9 @@
       "name": "Jbl Go 3 Portable Speaker",
       "sku": "0102",
       "category": "accessories",
-      "description": "BL Go 3 features bold styling and rich JBL Pro Sound. With its new eye-catching edgy design, colorful fabrics and expressive details this a must-have accessory for your next outing. \nYour tunes will lift you up with JBL Pro Sound, itÃ¢ÂÂs IP67 waterproof and dustproof so you can keep listening rain or shine, and with its integrated loop, you can carry it anywhere.\n Go 3 comes in completely new shades and color combinations inspired by current street fashion. JBL Go 3 looks as vivid as it sounds.\nJBL Pro Sound delivers surprisingly big audio and punchy bass from Go 3Ã¢ÂÂs ultra-compact size. JBL Go 3Ã¢ÂÂs ultra-portable design goes great with the latest styles, and its design make it look as great as it sounds.\nJBL Go 3 is IP67 waterproof and dustproof, so you can bring your speaker anywhere. Wirelessly stream music from your phone, tablet, or any other Bluetooth-enabled device.\nJBL Go 3 gives you up to 5 hours of playtime on a single charge. Included Components : JBL Go 3, Type C USB Cable, Quick Start Guide, Warranty Card, Safety Sheet\nOutput Wattage : 4.2 Watts\nPower Source Type : Battery Powered",
-      "price": "224900",
-      "originalPrice": "300000",
+      "description": "JBL Go 3: Bold Sound, Bold Style.\n\nElevate your every day with the JBL Go 3. Featuring JBL Pro Sound in an eye-catching, edgy design, it's the perfect fusion of style and performance. With colorful fabrics and expressive details, it's a must-have accessory for any outing.\n\nSurprisingly Powerful Audio\nDon't let its size fool you. The Go 3 delivers rich, powerful sound and punchy bass that brings your music to life.\n\nBuilt for Adventure\nAn integrated loop makes it easy to carry, while an IP67 rating means it's completely waterproof and dustproof. From the beach to the park, your music is protected.\n\nStyle that Sounds as Good as it Looks\nInspired by street fashion, the Go 3 comes in vibrant new color combinations that look as great as they sound.",
+      "price": 224900,
+      "originalPrice": 300000,
       "images": [
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761671139915.jpg"
       ],
@@ -99,13 +99,11 @@
         "new"
       ],
       "features": [
-        "JBL Pro Sound delivers surprisingly big audio and punchy bass ",
-        "JBL Go 3Ã¢ÂÂs ultra-portable design goes great with the latest styles",
-        "Its design makes it look as great as it sounds.",
-        "JBL Go 3 is IP67 waterproof and dustproof",
-        "Wirelessly stream music from your phone, tablet, or any other Bluetooth-enabled device.",
-        "JBL Go 3 gives you up to 5 hours of playtime on a single charge.",
-        "Power Source Type : Battery Powered"
+        "JBL Pro Sound: Powerful audio and punchy bass from a compact speaker.",
+        "Stylish & Portable: A design that goes great with the latest styles.",
+        "All-Weather Ready: IP67 waterproof and dustproof.",
+        "Wireless Streaming: Connects easily to your devices via Bluetooth.",
+        "5-Hour Playtime: Battery-powered for all-day entertainment."
       ],
       "specifications": {
         "battery": "Up to 6 hours",
@@ -114,7 +112,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-10-28T17:06:31.331Z"
+      "dateAdded": "2025-10-28T17:06:31.331Z",
+      "dateUpdated": "2025-10-28T18:19:07.067Z"
     },
     {
       "id": 1761671568551,
@@ -166,5 +165,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-28T18:11:16.079Z"
+  "lastUpdated": "2025-10-28T18:19:07.069Z"
 }

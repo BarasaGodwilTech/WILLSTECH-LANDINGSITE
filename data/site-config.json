@@ -4,80 +4,7 @@
     "description": "We're working hard to bring you the ultimate tech shopping experience, delivering authentic and top-notch technologies and innovation to your doorstep without lifting a foot. Uganda, are you ready? Join our WhatsApp channel for exclusive early-bird deals!",
     "whatsappLink": "https://wa.me/256751924844?text=Hi%20Will's%20Tech!%20I%20want%20to%20join%20your%20channel.%20Thanks."
   },
-  "products": [
-    {
-      "id": 1760700756545,
-      "name": "iPhone 14",
-      "sku": "0100",
-      "category": "smartphones",
-      "description": "Experience the latest innovation with the iPhone 14, featuring a stunning 6.1-inch Super Retina XDR display, a powerful A15 Bionic chip, and an advanced dual-camera system that captures life's moments with precision.",
-      "price": 1500000,
-      "originalPrice": null,
-      "stock": "in-stock",
-      "rating": 3.5,
-      "reviewCount": 86,
-      "badges": [
-        "sale",
-        "premium-used"
-      ],
-      "features": [
-        "Advanced dual-camera system for stunning photos and videos",
-        "6.1-inch Super Retina XDR display for an immersive viewing experience",
-        "A15 Bionic chip for fast performance and efficient battery life",
-        "Long-lasting battery life for up to 12 hours of internet use",
-        "Fast charging for quick top-ups(Up to 50% charge in just 30 minutes)"
-      ],
-      "specifications": {
-        "battery": "Up to 12 hours",
-        "charging": "Fast charging (up to 50% in 30 minutes), Wireless charging",
-        "connectivity": "Bluetooth 5.0, Wi-Fi 6"
-      },
-      "featured": true,
-      "status": "active",
-      "dateAdded": "2025-10-17T11:32:36.545Z",
-      "dateUpdated": "2025-10-22T15:21:31.992Z",
-      "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/update-proposed/branch-test/public/images/products/product-1761065755522.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/update-proposed/branch-test/public/images/products/product-1761137784796.jpg"
-      ],
-      "videos": [
-        "https://youtu.be/OHD--3Sc-Xg?list=PL3UeMmSqW6uaESNSPkwr-RMrZJNiOUmYV"
-      ]
-    },
-    {
-      "id": 1761034720188,
-      "name": "2019 MacBook Pro",
-      "sku": "0101",
-      "category": "laptops",
-      "description": "16GB RAM/ 512GB  ",
-      "price": "2000000",
-      "originalPrice": "2200000",
-      "stock": "limited",
-      "rating": 4.5,
-      "reviewCount": 92,
-      "badges": [
-        "limited",
-        "premium-used"
-      ],
-      "features": [
-        "2019 MacBook Pro ",
-        "16GB RAM/ 512GB ",
-        "i9"
-      ],
-      "specifications": {
-        "battery": "Up to 6 hours",
-        "charging": "Wireless charging case",
-        "connectivity": "Bluetooth 5.0"
-      },
-      "featured": true,
-      "status": "active",
-      "dateAdded": "2025-10-21T08:18:40.189Z",
-      "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/update-proposed/branch-test/public/images/products/product-1761034595474.jpg"
-      ],
-      "videos": []
-    }
-  ],
+  "products": [],
   "content": {
     "storeName": "Will's Tech Store | Premium Gadgets & Tech in Uganda, Kampala | Mbale",
     "tagline": "Elevate Your Lifestyle With Authentic Tech",
@@ -92,5 +19,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-22T15:21:31.994Z"
+  "lastUpdated": "2025-10-28T05:14:44.610Z"
 }

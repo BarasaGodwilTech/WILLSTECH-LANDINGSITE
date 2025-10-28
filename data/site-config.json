@@ -51,13 +51,10 @@
       "sku": "0101",
       "category": "accessories",
       "description": "Next level massive JBL Pro Sound,\nTwo woofers, two powerful drivers and dual pumping JBL Bass Radiators effortlessly deliver dynamic, immersive sound with deeper bass and plenty of detail. You'll get lost in the music wherever you are.\nConvenient shoulder strap,\nThe speaker can be carried on the shoulder or can be adjusted as a crossbody, whatever your style or the mood. It also features a built-in bottle opener\nUp to 24 hours of playtime plus 6 hours with Playtime Boost,\nYour listening adventures can last all day long. Take the JBL Xtreme 4 with you from room to room, out to your backyard party, or off to the beach. With up to 24 hours of battery life, you can play music 'til the sun goes downâand comes back up againâbefore you'll need a recharge. Simply tap Playtime Boost to prolong the playtime, adding up to 6 hours to your battery life. It tunes and optimizes the performance for louder and crisper sound.\n\n\ncolour varriation: - green / black / blue.",
-      "price": 1023000,
-      "originalPrice": 1039000,
+      "price": "1023000",
+      "originalPrice": "1039000",
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670632765.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670673500.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670691165.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -80,8 +77,43 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-10-28T16:48:13.698Z",
-      "dateUpdated": "2025-10-28T16:58:26.169Z"
+      "dateAdded": "2025-10-28T16:48:13.698Z"
+    },
+    {
+      "id": 1761671191331,
+      "name": "Jbl Go 3 Portable Speaker",
+      "sku": "0102",
+      "category": "accessories",
+      "description": "BL Go 3 features bold styling and rich JBL Pro Sound. With its new eye-catching edgy design, colorful fabrics and expressive details this a must-have accessory for your next outing. \nYour tunes will lift you up with JBL Pro Sound, it’s IP67 waterproof and dustproof so you can keep listening rain or shine, and with its integrated loop, you can carry it anywhere.\n Go 3 comes in completely new shades and color combinations inspired by current street fashion. JBL Go 3 looks as vivid as it sounds.\nJBL Pro Sound delivers surprisingly big audio and punchy bass from Go 3’s ultra-compact size. JBL Go 3’s ultra-portable design goes great with the latest styles, and its design make it look as great as it sounds.\nJBL Go 3 is IP67 waterproof and dustproof, so you can bring your speaker anywhere. Wirelessly stream music from your phone, tablet, or any other Bluetooth-enabled device.\nJBL Go 3 gives you up to 5 hours of playtime on a single charge. Included Components : JBL Go 3, Type C USB Cable, Quick Start Guide, Warranty Card, Safety Sheet\nOutput Wattage : 4.2 Watts\nPower Source Type : Battery Powered",
+      "price": "224900",
+      "originalPrice": "300000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761671139915.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 3.6,
+      "reviewCount": 79,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "JBL Pro Sound delivers surprisingly big audio and punchy bass ",
+        "JBL Go 3’s ultra-portable design goes great with the latest styles",
+        "Its design makes it look as great as it sounds.",
+        "JBL Go 3 is IP67 waterproof and dustproof",
+        "Wirelessly stream music from your phone, tablet, or any other Bluetooth-enabled device.",
+        "JBL Go 3 gives you up to 5 hours of playtime on a single charge.",
+        "Power Source Type : Battery Powered"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-10-28T17:06:31.331Z"
     }
   ],
   "content": {
@@ -98,5 +130,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-28T16:58:26.169Z"
+  "lastUpdated": "2025-10-28T17:06:31.331Z"
 }

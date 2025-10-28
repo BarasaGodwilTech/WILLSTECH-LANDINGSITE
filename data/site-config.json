@@ -44,6 +44,40 @@
       "status": "active",
       "dateAdded": "2025-10-28T16:07:37.767Z",
       "dateUpdated": "2025-10-28T16:34:23.019Z"
+    },
+    {
+      "id": 1761670093698,
+      "name": "Jbl Xtreme 4 Portable Bluetooth Speaker ",
+      "sku": "0101",
+      "category": "accessories",
+      "description": "Next level massive JBL Pro Sound,\nTwo woofers, two powerful drivers and dual pumping JBL Bass Radiators effortlessly deliver dynamic, immersive sound with deeper bass and plenty of detail. You'll get lost in the music wherever you are.\nConvenient shoulder strap,\nThe speaker can be carried on the shoulder or can be adjusted as a crossbody, whatever your style or the mood. It also features a built-in bottle opener\nUp to 24 hours of playtime plus 6 hours with Playtime Boost,\nYour listening adventures can last all day long. Take the JBL Xtreme 4 with you from room to room, out to your backyard party, or off to the beach. With up to 24 hours of battery life, you can play music 'til the sun goes down—and comes back up again—before you'll need a recharge. Simply tap Playtime Boost to prolong the playtime, adding up to 6 hours to your battery life. It tunes and optimizes the performance for louder and crisper sound.\n\n\ncolour varriation: - green / black / blue.",
+      "price": "1023000",
+      "originalPrice": "1039000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 4.9,
+      "reviewCount": 58,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Powerful JBL Pro Sound with dual woofers and dual tweeters",
+        "Deep bass from dual JBL passive radiators",
+        "Waterproof, dustproof and shockproof design",
+        "Built-in power bank to charge your devices",
+        "Up to 24 hours of playtime on a single charge"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-10-28T16:48:13.698Z"
     }
   ],
   "content": {
@@ -60,5 +94,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-28T16:34:23.020Z"
+  "lastUpdated": "2025-10-28T16:48:13.698Z"
 }

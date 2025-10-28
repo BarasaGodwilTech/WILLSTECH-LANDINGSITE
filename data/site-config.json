@@ -7,12 +7,12 @@
   "products": [
     {
       "id": 1761667657767,
-      "name": "ggg",
-      "sku": "gg",
+      "name": "Jbl Flip 6 Waterproof Portable Wireless Bluetooth Speaker - Black",
+      "sku": "0100",
       "category": "accessories",
-      "description": "egfe",
-      "price": 55555,
-      "originalPrice": null,
+      "description": "The beat goes on with the JBL Flip 6 2-way speaker system, engineered to deliver loud, crystal clear, powerful sound. Its racetrack-shaped woofer delivers exceptional low frequencies and midrange, while a separate tweeter produces crisp, clear high-frequencies. Flip 6 also features optimized dual passive radiators for deep bass, fine-tuned with using Harman's advanced algorithm.\nBold audio meets bold design. Big-sounding yet easy to carry, the design fits any personal style. Stand it vertical or horizontal and choose from a variety of vibrant colors.\nTo the pool. To the park. JBL Flip 6 is IP67 waterproof and dustproof, so you can bring your speaker anywhere.\nDon't sweat the small stuff like charging your battery. JBL Flip 6 gives you up to 12 hours of playtime on a single charge.",
+      "price": 404500,
+      "originalPrice": 500000,
       "images": [
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761667577691.jpg",
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761667861767.jpg",
@@ -21,12 +21,19 @@
       "videos": [],
       "stock": "in-stock",
       "rating": 5,
-      "reviewCount": 0,
+      "reviewCount": 93,
       "badges": [
         "new"
       ],
       "features": [
-        "ff"
+        "Wireless Bluetooth streaming",
+        "12 hours of playtime",
+        "IPX7 waterproof",
+        "Pair multiple speakers with party boost",
+        "Premium sound quality",
+        "Connector type: 3.5 millimeter stereo",
+        "Power source type: Battery powered",
+        "Included components: Quick start guide"
       ],
       "specifications": {
         "battery": "Up to 6 hours",
@@ -36,7 +43,7 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-10-28T16:07:37.767Z",
-      "dateUpdated": "2025-10-28T16:12:34.591Z"
+      "dateUpdated": "2025-10-28T16:34:23.019Z"
     }
   ],
   "content": {
@@ -53,5 +60,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-28T16:12:34.591Z"
+  "lastUpdated": "2025-10-28T16:34:23.020Z"
 }

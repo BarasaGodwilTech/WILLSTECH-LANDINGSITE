@@ -1656,6 +1656,32 @@ function initProductFilters() {
             window.open(whatsappUrl, '_blank');
             trackPurchaseIntent(productName, productPrice);
         }
+
+        // Share button functionality: open product-specific share page or use Web Share API
+        if (e.target.closest('.share-btn')) {
+            e.preventDefault();
+            const btn = e.target.closest('.share-btn');
+            // share URL can be in data-share-url or href on an <a>
+            const shareUrl = btn.getAttribute('data-share-url') || btn.getAttribute('href');
+            const productCard = btn.closest('.product-card');
+            const productName = productCard.querySelector('h3').textContent;
+            const productDesc = productCard.querySelector('.product-description')?.textContent || document.title;
+
+            // If Web Share API is available, prefer it (mobile native share)
+            if (navigator.share) {
+                navigator.share({
+                    title: productName,
+                    text: productDesc,
+                    url: shareUrl
+                }).catch(err => {
+                    // fallback to opening share page
+                    window.open(shareUrl, '_blank');
+                });
+            } else {
+                // Fallback: open the share page in a new tab so scrapers will see OG tags
+                window.open(shareUrl, '_blank');
+            }
+        }
     });
 
     // Keyboard navigation for category filters

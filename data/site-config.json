@@ -155,9 +155,9 @@
       "name": "Samsung Galaxy A17 5G -4GB RAM/ 128GB ROM Android 15 - Black",
       "sku": "0105",
       "category": "smartphones",
-      "description": "Samsung Galaxy A17 5G\n\n6.7Ã¢ÂÂ³ FHD+ Super AMOLED display with a 90Hz refresh rate and 800 nits peak brightness for crisp outdoor viewing; 5,000mAh battery with 25W fast charging that replenishes half capacity in minutes; and a camera system with a 50MP main sensor with optical image stabilization (OIS) for capturing sharp images even on the move.",
+      "description": "Samsung Galaxy A17 5G\n\n6.7 FHD+ Super AMOLED display with a 90Hz refresh rate and 800 nits peak brightness for crisp outdoor viewing; 5,000mAh battery with 25W fast charging that replenishes half capacity in minutes; and a camera system with a 50MP main sensor with optical image stabilization (OIS) for capturing sharp images even on the move.",
       "price": 795000,
-      "originalPrice": 850000,
+      "originalPrice": 1000000,
       "images": [
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761746998578.jpg",
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761748079968.jpg",
@@ -183,7 +183,7 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-10-29T14:22:05.876Z",
-      "dateUpdated": "2025-10-29T14:33:31.791Z"
+      "dateUpdated": "2025-10-29T14:37:54.974Z"
     }
   ],
   "content": {
@@ -200,5 +200,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-29T14:33:31.871Z"
+  "lastUpdated": "2025-10-29T14:37:55.013Z"
 }

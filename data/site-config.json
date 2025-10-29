@@ -121,10 +121,13 @@
       "sku": "0103",
       "category": "accessories",
       "description": "Ultra-portable JBL Pro Sound with punchier bass\nDon't let its little size fool you. The JBL Go 4 packs a serious musical punch, delivering big JBL Pro Sound with punchy bass. Your friends won't believe how much great JBL Pro Sound comes out of such a small speaker. \nUp to 7 hours of playtime plus 2 hours with Playtime Boost\nDon't sweat the small stuff like charging your battery. JBL Go 4 gives you up to 7 hours of playtime on a single charge. Simply tap Playtime Boost to prolong the playtime, adding up to 2 hours to your battery life. It tunes and optimizes the performance for louder and crisper sound. \nWaterproof and dustproof\nThe JBL Go 4's IP67 waterproof and dustproof rating ensures this portable speaker can handle almost any environment, from a poolside party to a seaside picnic.\n",
-      "price": "244500",
-      "originalPrice": "329000",
+      "price": 244500,
+      "originalPrice": 329000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761671544217.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761671544217.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761757862875.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761757883947.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761757898655.jpg"
       ],
       "videos": [],
       "stock": "limited",
@@ -148,7 +151,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-10-28T17:12:48.551Z"
+      "dateAdded": "2025-10-28T17:12:48.551Z",
+      "dateUpdated": "2025-10-29T17:11:43.906Z"
     },
     {
       "id": 1761747725876,
@@ -200,5 +204,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-29T14:37:55.013Z"
+  "lastUpdated": "2025-10-29T17:11:43.906Z"
 }

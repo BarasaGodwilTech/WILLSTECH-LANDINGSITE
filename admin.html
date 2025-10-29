@@ -519,11 +519,110 @@
 }
 
     </style>
+    <!-- Responsive styles -->
+    <style>
+        /* Mobile topbar (hidden on desktop) */
+        .mobile-topbar {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 56px;
+            background: var(--primary);
+            color: white;
+            z-index: 1050;
+            align-items: center;
+            padding: 0 1rem;
+            gap: 1rem;
+        }
+
+        .mobile-topbar .mobile-brand {
+            font-weight: 600;
+            margin-left: 0.5rem;
+        }
+
+        .mobile-topbar button {
+            background: transparent;
+            border: none;
+            color: white;
+            font-size: 1.25rem;
+            cursor: pointer;
+        }
+
+        /* Sidebar off-canvas behaviour for small screens */
+        .sidebar {
+            transition: transform 0.25s ease, visibility 0.25s ease;
+        }
+
+        .sidebar.mobile-hidden {
+            transform: translateX(-110%);
+        }
+
+        /* When sidebar is open on mobile, push an overlay under it */
+        .sidebar.mobile-open {
+            transform: translateX(0);
+            position: fixed;
+            z-index: 1060;
+        }
+
+        /* Ensure main content sits under the fixed mobile topbar */
+        .main-content { transition: margin-left 0.25s ease, padding-top 0.25s ease; }
+
+        /* Responsive adjustments */
+        @media (max-width: 900px) {
+            .admin-container { display: block; }
+
+            .mobile-topbar { display: flex; }
+
+            .sidebar {
+                width: 260px;
+                height: 100vh;
+                transform: translateX(-110%);
+                position: fixed;
+                top: 56px;
+                left: 0;
+                background: var(--primary);
+                padding-top: 1rem;
+                overflow-y: auto;
+            }
+
+            .main-content {
+                margin-left: 0 !important;
+                padding: 1rem;
+                padding-top: 72px; /* account for topbar */
+            }
+
+            /* Make header cards and forms cover full width nicely */
+            .header, .form-section { margin: 0 0 1rem 0; }
+
+            /* Make product image heights adapt */
+            .product-image { height: auto; padding-top: 56%; background-size: cover; }
+
+            /* Adjust stat card sizes */
+            .stat-card h3 { font-size: 1.5rem; }
+        }
+
+        @media (max-width: 520px) {
+            .nav-links a { padding: 0.6rem 0.75rem; }
+            .tab { padding: 0.6rem 0.8rem; }
+            .mobile-topbar .mobile-brand { font-size: 0.95rem; }
+            .btn { padding: 0.5rem 0.9rem; font-size: 0.95rem; }
+            .product-image { padding-top: 75%; }
+            .stats-grid { gap: 0.75rem; }
+        }
+    </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css">
 
 </head>
 <body>
+    <!-- Mobile topbar: visible on small screens to toggle sidebar -->
+    <div class="mobile-topbar" role="navigation">
+        <button id="mobileSidebarToggle" aria-label="Toggle menu">☰</button>
+        <div class="mobile-brand">Will's Tech Admin</div>
+    </div>
+    <div id="mobileOverlay" style="display:none; position:fixed; inset:0; background:rgba(0,0,0,0.35); z-index:1055;"></div>
     <div class="admin-container">
         <!-- Sidebar -->
         <div class="sidebar">
@@ -1232,6 +1331,57 @@ Business Hours: Mon-Sat 8:00 AM - 8:00 PM, Sun 10:00 AM - 6:00 PM</textarea>
         </div>
     </div>
 
+    <script>
+        // Sidebar toggle for small screens
+        (function(){
+            function ready(fn){
+                if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn);
+            }
+
+            ready(function(){
+                const sidebar = document.querySelector('.sidebar');
+                const toggle = document.getElementById('mobileSidebarToggle');
+                const overlay = document.getElementById('mobileOverlay');
+
+                if (!sidebar || !toggle || !overlay) return;
+
+                // Initialize mobile state
+                function setInitial() {
+                    if (window.innerWidth <= 900) {
+                        sidebar.classList.add('mobile-hidden');
+                        sidebar.classList.remove('mobile-open');
+                        overlay.style.display = 'none';
+                    } else {
+                        sidebar.classList.remove('mobile-hidden');
+                        sidebar.classList.remove('mobile-open');
+                        overlay.style.display = 'none';
+                    }
+                }
+
+                setInitial();
+
+                window.addEventListener('resize', setInitial);
+
+                function openSidebar(){
+                    sidebar.classList.remove('mobile-hidden');
+                    sidebar.classList.add('mobile-open');
+                    overlay.style.display = 'block';
+                }
+
+                function closeSidebar(){
+                    sidebar.classList.add('mobile-hidden');
+                    sidebar.classList.remove('mobile-open');
+                    overlay.style.display = 'none';
+                }
+
+                toggle.addEventListener('click', function(){
+                    if (sidebar.classList.contains('mobile-open')) closeSidebar(); else openSidebar();
+                });
+
+                overlay.addEventListener('click', closeSidebar);
+            });
+        })();
+    </script>
     <script src="admin.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
 </body>

@@ -155,11 +155,13 @@
       "name": "Samsung Galaxy A17 5G -",
       "sku": "0105",
       "category": "smartphones",
-      "description": "Samsung Galaxy A17 5G\n\n6.7″ FHD+ Super AMOLED display with a 90Hz refresh rate and 800 nits peak brightness for crisp outdoor viewing; 5,000mAh battery with 25W fast charging that replenishes half capacity in minutes; and a camera system with a 50MP main sensor with optical image stabilization (OIS) for capturing sharp images even on the move.",
-      "price": "795000",
-      "originalPrice": "850000",
+      "description": "Samsung Galaxy A17 5G\n\n6.7â³ FHD+ Super AMOLED display with a 90Hz refresh rate and 800 nits peak brightness for crisp outdoor viewing; 5,000mAh battery with 25W fast charging that replenishes half capacity in minutes; and a camera system with a 50MP main sensor with optical image stabilization (OIS) for capturing sharp images even on the move.",
+      "price": 795000,
+      "originalPrice": 850000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761746998578.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761746998578.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761748079968.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761748150057.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -180,7 +182,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-10-29T14:22:05.876Z"
+      "dateAdded": "2025-10-29T14:22:05.876Z",
+      "dateUpdated": "2025-10-29T14:29:21.401Z"
     }
   ],
   "content": {
@@ -197,5 +200,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-10-29T14:22:05.903Z"
+  "lastUpdated": "2025-10-29T14:29:21.404Z"
 }

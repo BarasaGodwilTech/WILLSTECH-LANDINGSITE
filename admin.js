@@ -68,6 +68,18 @@ class WillTechAdmin {
         }
         
         this.updateDeploymentTarget();
+        // Initialize share page generator (if available)
+        try {
+            const baseUrl = `https://${this.repoConfig.owner}.github.io/${this.repoConfig.repo}`;
+            if (typeof SharePageGenerator !== 'undefined') {
+                this.shareGenerator = new SharePageGenerator(baseUrl);
+                console.log('SharePageGenerator initialized with', baseUrl);
+            } else {
+                console.warn('SharePageGenerator not found - share pages will not be auto-generated');
+            }
+        } catch (e) {
+            console.warn('Failed to initialize SharePageGenerator', e);
+        }
     }
 
     async syncWithGitHub() {
@@ -1053,13 +1065,24 @@ const productData = {
             'data/site-config.json',
             JSON.stringify(this.currentData, null, 2)
         );
-        
+
+        // Generate or update the share page for this product (if generator available)
+        try {
+            if (this.shareGenerator) {
+                const shareHtml = this.shareGenerator.generateSharePage(updatedProduct);
+                const slug = this.shareGenerator.generateSlug(updatedProduct.name);
+                await this.updateFileOnGitHub(`share/${slug}.html`, shareHtml);
+            }
+        } catch (e) {
+            console.warn('Failed to create/update share page:', e);
+        }
+
         if (result && result.skipped) {
             this.showAlert('ℹ️ No changes detected, update skipped', 'info');
             return true;
         }
-        
-        this.showAlert(`✅ Product "${updatedProduct.name}" updated successfully!`, 'success');
+
+        this.showAlert(`✅ Product "${updatedProduct.name}" and share page updated successfully!`, 'success');
         return true;
         
     } catch (error) {
@@ -1087,12 +1110,29 @@ const productData = {
             // Update sync timestamp
             this.currentData.lastUpdated = new Date().toISOString();
             
+            // Ensure product exists in currentData (some callers add it before calling this)
+            this.currentData.products = this.currentData.products || [];
+            if (!this.currentData.products.find(p => p.id === newProduct.id)) {
+                this.currentData.products.push(newProduct);
+            }
+
             // Update site-config.json with new product
             await this.updateFileOnGitHub(
                 'data/site-config.json',
                 JSON.stringify(this.currentData, null, 2)
             );
-            
+
+            // Create share page for the new product
+            try {
+                if (this.shareGenerator) {
+                    const shareHtml = this.shareGenerator.generateSharePage(newProduct);
+                    const slug = this.shareGenerator.generateSlug(newProduct.name);
+                    await this.updateFileOnGitHub(`share/${slug}.html`, shareHtml);
+                }
+            } catch (e) {
+                console.warn('Failed to create share page for new product:', e);
+            }
+
             this.showAlert(`✅ Product "${newProduct.name}" added successfully!`, 'success');
             return true;
             
@@ -1129,12 +1169,22 @@ const productData = {
             // Update sync timestamp
             this.currentData.lastUpdated = new Date().toISOString();
             
+            // Delete share page (if exists)
+            try {
+                if (this.shareGenerator) {
+                    const slug = this.shareGenerator.generateSlug(product.name);
+                    await this.deleteFileOnGitHub(`share/${slug}.html`);
+                }
+            } catch (e) {
+                console.warn('Failed to delete share page (it may not exist):', e.message || e);
+            }
+
             // Update site-config.json
             await this.updateFileOnGitHub(
                 'data/site-config.json',
                 JSON.stringify(this.currentData, null, 2)
             );
-            
+
             this.loadProducts();
             this.showAlert(`✅ Product "${product.name}" deleted successfully!`, 'success');
             
@@ -1518,6 +1568,52 @@ async retryUpdateWithFreshData(filePath, content) {
     return await putResponse.json();
 }
 
+    // Delete a file from the repository (by path)
+    async deleteFileOnGitHub(path) {
+        if (!this.githubToken) {
+            throw new Error('GitHub token not set');
+        }
+
+        // Get file to obtain SHA
+        const getUrl = `https://api.github.com/repos/${this.repoConfig.owner}/${this.repoConfig.repo}/contents/${path}?ref=${this.repoConfig.branch}`;
+        const getRes = await fetch(getUrl, {
+            headers: {
+                'Authorization': `Bearer ${this.githubToken}`,
+                'Accept': 'application/vnd.github.v3+json'
+            }
+        });
+
+        if (!getRes.ok) {
+            if (getRes.status === 404) {
+                throw new Error('File not found');
+            }
+            throw new Error(`Failed to get file: ${getRes.status} - ${getRes.statusText}`);
+        }
+
+        const fileData = await getRes.json();
+
+        const delUrl = `https://api.github.com/repos/${this.repoConfig.owner}/${this.repoConfig.repo}/contents/${path}`;
+        const delRes = await fetch(delUrl, {
+            method: 'DELETE',
+            headers: {
+                'Authorization': `Bearer ${this.githubToken}`,
+                'Accept': 'application/vnd.github.v3+json',
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                message: `Delete ${path}`,
+                sha: fileData.sha,
+                branch: this.repoConfig.branch
+            })
+        });
+
+        if (!delRes.ok) {
+            const text = await delRes.text();
+            throw new Error(`Failed to delete file: ${delRes.status} - ${text}`);
+        }
+
+        return await delRes.json();
+    }
     async deployChanges() {
         const token = document.getElementById('githubToken')?.value;
         const repoOwner = document.getElementById('repoOwner')?.value || 'BarasaGodwilTech';

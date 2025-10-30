@@ -3918,6 +3918,10 @@ function createProductCard(product) {
                     <i class="fas fa-shopping-cart" aria-hidden="true"></i>
                     Buy Now
                 </button>
+                <!-- Share button: points to product-specific share page so social scrapers see product image -->
+                <button class="share-btn" data-share-url="share/${createProductSlug(product.name)}.html" aria-label="Share product">
+                    <i class="fas fa-share-alt"></i>
+                </button>
             </div>
         </div>
     `;
@@ -4067,14 +4071,17 @@ function getCurrentProductData() {
     if (window.currentProductData) {
         const product = window.currentProductData;
         const productSlug = createProductSlug(product.name);
+        // Product page URL (internal) and share page URL (used for social previews)
         const productUrl = generateProductUrl(productSlug, product.id);
+        const sharePageUrl = `${window.location.origin}/share/${productSlug}.html`;
         
         return {
             title: product.name,
             description: product.description || 'Check out this amazing product from Will\'s Tech Store!',
             price: `UGX ${formatPrice(product.price || 0)}`,
             image: product.images && product.images.length > 0 ? product.images[0] : product.image || '/placeholder.svg',
-            url: productUrl,
+            // Use the share page URL for sharing so social platforms pick up product OG tags
+            url: sharePageUrl,
             slug: productSlug,
             product: product,
             id: product.id

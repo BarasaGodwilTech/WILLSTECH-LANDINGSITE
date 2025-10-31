@@ -627,7 +627,6 @@ function updatePageForLiveState() {
 }
 
 // ===== END OF MISSING FUNCTIONS =====
-
 document.addEventListener("DOMContentLoaded", async () => {
   try {
     // Initialize onboarding first
@@ -660,10 +659,36 @@ document.addEventListener("DOMContentLoaded", async () => {
     setTimeout(() => {
         initQuickView();
         initModalActions(); // Ensure modal actions are initialized
-        initShareFunctionality(); // ADD THIS LINE
+        initShareFunctionality();
 
-         // Check if URL has product parameter and open it
-        checkUrlForProduct(); // ADD THIS LINE
+        // Check if URL has product parameter and open it
+        checkUrlForProduct();
+        
+        // ✅ ADD THIS NEW CODE BLOCK RIGHT HERE:
+        // Check for product in URL parameters and update meta tags for sharing
+        const urlParams = new URLSearchParams(window.location.search);
+        const productId = urlParams.get('id');
+        const productSlug = urlParams.get('product');
+        
+        if (productId && productId !== 'unknown') {
+            console.log('URL contains product parameters, updating meta tags...');
+            // Wait a bit more for products to fully load
+            setTimeout(() => {
+                if (window.siteData && window.siteData.products) {
+                    const product = window.siteData.products.find(p => 
+                        p.id.toString() === productId.toString()
+                    );
+                    if (product) {
+                        console.log('Product found in URL, updating Open Graph tags:', product.name);
+                        updateOpenGraphMetaTags(product);
+                    } else {
+                        console.log('Product not found in site data for ID:', productId);
+                    }
+                }
+            }, 3000);
+        }
+        // ✅ END OF NEW CODE BLOCK
+        
     }, 2500); // Increased delay to ensure everything is loaded
     
   } catch (error) {
@@ -2193,6 +2218,9 @@ function openProductFromUrl(productId, productSlug) {
         // Store product globally for URL sharing
     window.currentProductData = product;
     window.currentProductId = product.id;
+
+     // UPDATE OPEN GRAPH TAGS FOR SHARING
+    updateOpenGraphMetaTags(product);
 
     const modal = document.getElementById('quickViewModal');
     if (!modal) {
@@ -4032,7 +4060,46 @@ function createProductSlug(title) {
 // Generate unique product URL
 function generateProductUrl(slug, productId) {
     const baseUrl = window.location.origin + window.location.pathname;
-    return `${baseUrl}?product=${slug}&id=${productId}`;
+    return `${baseUrl}?product=${slug}&id=${productId}&share=true`;
+}
+
+// Enhanced share functionality with dynamic Open Graph tags
+function updateOpenGraphMetaTags(product) {
+    // Remove existing product meta tags first
+    const existingMetaTags = document.querySelectorAll('meta[property^="og:"], meta[property^="twitter:"]');
+    existingMetaTags.forEach(tag => {
+        if (!tag.hasAttribute('data-static')) {
+            tag.remove();
+        }
+    });
+
+    // Create or update Open Graph meta tags
+    const metaTags = [
+        { property: 'og:title', content: `${product.name} - Will's Tech Store` },
+        { property: 'og:description', content: product.description || 'Premium tech products in Uganda' },
+        { property: 'og:image', content: product.images && product.images.length > 0 ? product.images[0] : '/IMAGES/social-share.jpg' },
+        { property: 'og:url', content: window.location.href },
+        { property: 'og:type', content: 'product' },
+        { property: 'og:site_name', content: "Will's Tech Store" },
+        
+        // Twitter Card meta tags
+        { property: 'twitter:card', content: 'summary_large_image' },
+        { property: 'twitter:title', content: `${product.name} - Will's Tech Store` },
+        { property: 'twitter:description', content: product.description || 'Premium tech products in Uganda' },
+        { property: 'twitter:image', content: product.images && product.images.length > 0 ? product.images[0] : '/IMAGES/social-share.jpg' },
+        { property: 'twitter:site', content: '@willstech_store' }
+    ];
+
+    // Add meta tags to head
+    metaTags.forEach(tagInfo => {
+        let meta = document.querySelector(`meta[property="${tagInfo.property}"]`);
+        if (!meta) {
+            meta = document.createElement('meta');
+            meta.setAttribute('property', tagInfo.property);
+            document.head.appendChild(meta);
+        }
+        meta.setAttribute('content', tagInfo.content);
+    });
 }
 
 // Get current product data from quick view
@@ -4101,9 +4168,15 @@ function shareProduct(platform) {
     const product = window.currentSharedProduct;
     if (!product) return;
 
-    const text = `🚀 Check out "${product.title}" at Will's Tech Store! ${product.price} - ${product.description.substring(0, 100)}...`;
+    // Ensure Open Graph tags are updated
+    updateOpenGraphMetaTags(product);
+    
+    const productSlug = createProductSlug(product.name);
+    const productUrl = generateProductUrl(productSlug, product.id);
+    
+    const text = `🚀 Check out "${product.name}" at Will's Tech Store! UGX ${formatPrice(product.price)} - ${product.description.substring(0, 100)}...`;
     const encodedText = encodeURIComponent(text);
-    const encodedUrl = encodeURIComponent(product.url);
+    const encodedUrl = encodeURIComponent(productUrl);
 
     let shareUrl = '';
 
@@ -4113,7 +4186,7 @@ function shareProduct(platform) {
             break;
             
         case 'facebook':
-            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}&quote=${encodedText}`;
+            shareUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
             break;
             
         case 'twitter':
@@ -4125,11 +4198,13 @@ function shareProduct(platform) {
             break;
             
         case 'email':
-            shareUrl = `mailto:?subject=${encodeURIComponent(product.title)}&body=${encodedText}%0A%0A${encodedUrl}`;
+            shareUrl = `mailto:?subject=${encodeURIComponent(product.name)}&body=${encodedText}%0A%0A${encodedUrl}`;
             break;
             
         case 'copy':
-            copyToClipboard(product.url);
+            // Update URL to include product parameters
+            window.history.replaceState({}, document.title, productUrl);
+            copyToClipboard(productUrl);
             showShareSuccess('Product link copied to clipboard!');
             return;
             
@@ -4137,6 +4212,9 @@ function shareProduct(platform) {
             return;
     }
 
+    // Update browser URL for better sharing
+    window.history.replaceState({}, document.title, productUrl);
+    
     // Open share window
     if (platform !== 'email') {
         window.open(shareUrl, '_blank', 'width=600,height=400');

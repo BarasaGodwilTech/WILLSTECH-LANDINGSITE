@@ -2665,13 +2665,16 @@ function initQuickView() {
         const freshQuickViewBtns = document.querySelectorAll('.quick-view-btn');
         
         // In your initQuickView function, make sure the click handler stores the product
-freshQuickViewBtns.forEach(quickViewBtn => {
-    quickViewBtn.addEventListener('click', function(e) {
+// Use event delegation for quick view buttons
+document.addEventListener('click', function(e) {
+    if (e.target.closest('.quick-view-btn')) {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Quick view button clicked!');
+        console.log('🎯 Quick view button clicked via delegation');
         
-        const productCard = this.closest('.product-card');
+        const quickViewBtn = e.target.closest('.quick-view-btn');
+        const productCard = quickViewBtn.closest('.product-card');
+        
         if (!productCard) {
             console.error('Product card not found');
             return;
@@ -2684,9 +2687,7 @@ freshQuickViewBtns.forEach(quickViewBtn => {
         let product = null;
         if (window.siteData && window.siteData.products) {
             product = window.siteData.products.find(p => 
-                p.name === productName || 
-                p.name?.includes(productName) || 
-                productName.includes(p.name)
+                p.name === productName
             );
         }
         
@@ -2696,15 +2697,17 @@ freshQuickViewBtns.forEach(quickViewBtn => {
         }
         
         if (product) {
-            console.log('Opening quick view for:', product.name);
+            console.log('🎯 Opening quick view for:', product.name);
             // Store product globally for URL sharing
             window.currentProductData = product;
+            // UPDATE OPEN GRAPH TAGS IMMEDIATELY
+            updateOpenGraphMetaTags(product);
             openQuickViewModal(product);
         } else {
             console.error('Product data not found for:', productName);
             showNotification('Product information not available', 'error');
         }
-    });
+    }
 });
 
         // Close modal functionality
@@ -3992,30 +3995,41 @@ function updateSocialLinks(socialData) {
 
 // Initialize share functionality
 function initShareFunctionality() {
-    const shareProductBtn = document.getElementById('shareProductBtn');
-    const shareProductMainBtn = document.querySelector('.share-product-main-btn');
+    console.log('🔄 Initializing share functionality...');
+    
+    // Use event delegation instead of individual listeners
+    document.addEventListener('click', (e) => {
+        // Handle share option clicks
+        if (e.target.closest('.share-option')) {
+            const option = e.target.closest('.share-option');
+            const platform = option.dataset.platform;
+            console.log('Share option clicked:', platform);
+            shareProduct(platform);
+        }
+        
+        // Handle copy link button
+        if (e.target.closest('.copy-link-btn')) {
+            const shareableLink = document.getElementById('shareableLink');
+            if (shareableLink) {
+                copyToClipboard(shareableLink.value);
+                showShareSuccess('Product link copied to clipboard!');
+            }
+        }
+        
+        // Handle floating share button
+        if (e.target.closest('#shareProductBtn') || e.target.closest('.share-product-main-btn')) {
+            openShareModal();
+        }
+    });
+
+    // Close share modal functionality
     const shareModal = document.getElementById('shareModal');
     const shareModalClose = document.querySelector('.share-modal-close');
-    const shareOptions = document.querySelectorAll('.share-option');
-    const copyLinkBtn = document.querySelector('.copy-link-btn');
-    const shareableLink = document.getElementById('shareableLink');
-
-    // Floating share button
-    if (shareProductBtn) {
-        shareProductBtn.addEventListener('click', openShareModal);
-    }
-
-    // Main share button
-    if (shareProductMainBtn) {
-        shareProductMainBtn.addEventListener('click', openShareModal);
-    }
-
-    // Close share modal
+    
     if (shareModalClose) {
         shareModalClose.addEventListener('click', closeShareModal);
     }
 
-    // Close modal when clicking outside
     if (shareModal) {
         shareModal.addEventListener('click', (e) => {
             if (e.target === shareModal) {
@@ -4024,28 +4038,14 @@ function initShareFunctionality() {
         });
     }
 
-    // Share options
-    shareOptions.forEach(option => {
-        option.addEventListener('click', (e) => {
-            const platform = e.currentTarget.dataset.platform;
-            shareProduct(platform);
-        });
-    });
-
-    // Copy link button
-    if (copyLinkBtn && shareableLink) {
-        copyLinkBtn.addEventListener('click', () => {
-            copyToClipboard(shareableLink.value);
-            showShareSuccess('Product link copied to clipboard!');
-        });
-    }
-
     // Close with Escape key
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && shareModal.classList.contains('active')) {
+        if (e.key === 'Escape' && shareModal && shareModal.classList.contains('active')) {
             closeShareModal();
         }
     });
+
+    console.log('✅ Share functionality initialized');
 }
 
 // Create a URL-friendly slug from product title
@@ -4065,41 +4065,63 @@ function generateProductUrl(slug, productId) {
 
 // Enhanced share functionality with dynamic Open Graph tags
 function updateOpenGraphMetaTags(product) {
-    // Remove existing product meta tags first
-    const existingMetaTags = document.querySelectorAll('meta[property^="og:"], meta[property^="twitter:"]');
-    existingMetaTags.forEach(tag => {
-        if (!tag.hasAttribute('data-static')) {
-            tag.remove();
-        }
-    });
+    console.log('🔄 Updating Open Graph tags for:', product.name);
+    
+    if (!product) {
+        console.error('No product provided for Open Graph tags');
+        return;
+    }
 
-    // Create or update Open Graph meta tags
-    const metaTags = [
-        { property: 'og:title', content: `${product.name} - Will's Tech Store` },
-        { property: 'og:description', content: product.description || 'Premium tech products in Uganda' },
-        { property: 'og:image', content: product.images && product.images.length > 0 ? product.images[0] : '/IMAGES/social-share.jpg' },
-        { property: 'og:url', content: window.location.href },
-        { property: 'og:type', content: 'product' },
-        { property: 'og:site_name', content: "Will's Tech Store" },
+    // Get the main product image
+    const productImage = product.images && product.images.length > 0 ? 
+        product.images[0] : 
+        '/IMAGES/social-share.jpg';
+    
+    console.log('Using product image:', productImage);
+
+    // Meta tags to update
+    const metaTags = {
+        'og:title': `${product.name} - Will's Tech Store`,
+        'og:description': product.description ? product.description.substring(0, 200) + '...' : 'Premium tech products in Uganda',
+        'og:image': productImage,
+        'og:url': window.location.href.includes('?') ? window.location.href.split('?')[0] + `?product=${createProductSlug(product.name)}&id=${product.id}` : window.location.href,
+        'og:type': 'product',
         
-        // Twitter Card meta tags
-        { property: 'twitter:card', content: 'summary_large_image' },
-        { property: 'twitter:title', content: `${product.name} - Will's Tech Store` },
-        { property: 'twitter:description', content: product.description || 'Premium tech products in Uganda' },
-        { property: 'twitter:image', content: product.images && product.images.length > 0 ? product.images[0] : '/IMAGES/social-share.jpg' },
-        { property: 'twitter:site', content: '@willstech_store' }
-    ];
+        'twitter:card': 'summary_large_image',
+        'twitter:title': `${product.name} - Will's Tech Store`,
+        'twitter:description': product.description ? product.description.substring(0, 200) + '...' : 'Premium tech products in Uganda',
+        'twitter:image': productImage
+    };
 
-    // Add meta tags to head
-    metaTags.forEach(tagInfo => {
-        let meta = document.querySelector(`meta[property="${tagInfo.property}"]`);
+    // Update or create meta tags
+    Object.keys(metaTags).forEach(property => {
+        let meta = document.querySelector(`meta[property="${property}"]`) || 
+                   document.querySelector(`meta[name="${property}"]`);
+        
         if (!meta) {
             meta = document.createElement('meta');
-            meta.setAttribute('property', tagInfo.property);
+            if (property.startsWith('og:')) {
+                meta.setAttribute('property', property);
+            } else {
+                meta.setAttribute('name', property);
+            }
             document.head.appendChild(meta);
+            console.log('➕ Created new meta tag:', property);
         }
-        meta.setAttribute('content', tagInfo.content);
+        
+        const newContent = metaTags[property];
+        const oldContent = meta.getAttribute('content');
+        
+        if (oldContent !== newContent) {
+            meta.setAttribute('content', newContent);
+            console.log('✅ Updated meta tag:', property, '=', newContent);
+        }
     });
+
+    // Also update the page title for better context
+    document.title = `${product.name} - Will's Tech Store`;
+    
+    console.log('✅ Open Graph tags updated successfully');
 }
 
 // Get current product data from quick view
@@ -4247,15 +4269,31 @@ function trackShareEvent(platform, productTitle) {
 }
 
 // Open share modal
+// REPLACE the entire openShareModal function with this:
 function openShareModal() {
+    console.log('🎯 Opening share modal...');
+    
     const shareModal = document.getElementById('shareModal');
     const quickViewModal = document.getElementById('quickViewModal');
     const currentProduct = getCurrentProductData();
     
-    if (!currentProduct) return;
-    
-    // Update share modal content
+    if (!currentProduct) {
+        console.error('No current product data found for sharing');
+        showNotification('Product data not available for sharing', 'error');
+        return;
+    }
+
+    console.log('Sharing product:', currentProduct);
+
+    // Update share modal content FIRST
     updateShareModalContent(currentProduct);
+    
+    // UPDATE OPEN GRAPH TAGS BEFORE SHOWING MODAL
+    updateOpenGraphMetaTags(currentProduct);
+    
+    // Update URL to include product parameters for better sharing
+    const productUrl = generateProductUrl(currentProduct.slug, currentProduct.id);
+    window.history.replaceState({}, document.title, productUrl);
     
     // Show share modal
     shareModal.classList.add('active');
@@ -4265,6 +4303,8 @@ function openShareModal() {
     if (quickViewModal) {
         quickViewModal.style.visibility = 'hidden';
     }
+    
+    console.log('✅ Share modal opened with product:', currentProduct.name);
 }
 
 // Close share modal

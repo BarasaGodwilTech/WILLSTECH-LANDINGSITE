@@ -16,51 +16,42 @@ if (window.location.pathname.includes('admin.html') &&
 
 // statistics.js - Enhanced with proper tracking methods
 // statistics.js - UPDATED WITH REAL DATA TRACKING
+// SIMPLE WORKING STATISTICS - paste this into your script.js
 class WebsiteStatistics {
     constructor() {
+        this.binId = '67d3a9a2acd3cb34a92be26b'; // Use the ID from step 2
         this.apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
-        this.binId = '67d3a9a2acd3cb34a92be26b'; // I created this bin for you - use this exact ID
         this.statsData = null;
-        this.visitStartTime = Date.now();
         this.init();
     }
 
     async init() {
         await this.loadStats();
         this.trackPageView();
-        this.trackUserEngagement();
         this.trackWhatsAppClicks();
-        this.trackProductInteractions();
-        this.trackGeographicData();
-        this.trackDeviceInfo();
-        this.setupPeriodicSave();
-        
-        console.log('📊 Statistics initialized with real data tracking');
+        console.log('📊 Statistics ready');
     }
 
     async loadStats() {
         try {
             const response = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
-                headers: {
-                    'X-Master-Key': this.apiKey
-                }
+                headers: { 'X-Master-Key': this.apiKey }
             });
 
             if (response.ok) {
                 const data = await response.json();
                 this.statsData = data.record;
-                console.log('📊 Loaded existing stats:', this.statsData);
+                console.log('📊 Loaded stats:', this.statsData);
             } else {
-                // Initialize with empty stats if bin doesn't exist
-                this.initializeDefaultStats();
+                await this.createInitialStats();
             }
         } catch (error) {
-            console.error('Error loading stats:', error);
-            this.initializeDefaultStats();
+            console.log('First load failed, creating initial stats');
+            await this.createInitialStats();
         }
     }
 
-    initializeDefaultStats() {
+    async createInitialStats() {
         this.statsData = {
             pageViews: 0,
             uniqueVisitors: 0,
@@ -68,20 +59,9 @@ class WebsiteStatistics {
             productViews: 0,
             quickViewOpens: 0,
             timeOnSite: 0,
-            returningVisitors: 0,
-            conversionRate: 0,
-            geographicData: [],
-            deviceData: {
-                devices: {},
-                browsers: {},
-                screenSizes: {},
-                platforms: {}
-            },
-            popularProducts: {},
-            dailyVisitors: {},
             lastUpdated: new Date().toISOString()
         };
-        console.log('📊 Initialized new stats data');
+        await this.saveStats();
     }
 
     async saveStats() {
@@ -98,16 +78,13 @@ class WebsiteStatistics {
             });
 
             if (response.ok) {
-                console.log('💾 Statistics saved successfully');
-            } else {
-                console.error('Failed to save stats:', await response.text());
+                console.log('💾 Stats saved:', this.statsData);
             }
         } catch (error) {
-            console.error('Error saving statistics:', error);
+            console.error('Save failed:', error);
         }
     }
 
-    // REAL TRACKING METHODS
     trackPageView() {
         this.statsData.pageViews++;
         this.trackUniqueVisitor();
@@ -115,201 +92,28 @@ class WebsiteStatistics {
     }
 
     trackUniqueVisitor() {
-        const visitorId = this.getVisitorId();
-        const today = new Date().toISOString().split('T')[0];
-        
-        if (!this.statsData.dailyVisitors[today]) {
-            this.statsData.dailyVisitors[today] = [];
-        }
-        
-        if (!this.statsData.dailyVisitors[today].includes(visitorId)) {
-            this.statsData.dailyVisitors[today].push(visitorId);
-            this.statsData.uniqueVisitors = this.calculateTotalUniqueVisitors();
-        }
-    }
-
-    getVisitorId() {
         let visitorId = localStorage.getItem('willstech_visitor_id');
         if (!visitorId) {
-            visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+            visitorId = 'visitor_' + Date.now();
             localStorage.setItem('willstech_visitor_id', visitorId);
-            console.log('👤 New visitor:', visitorId);
+            this.statsData.uniqueVisitors++;
         }
-        return visitorId;
-    }
-
-    calculateTotalUniqueVisitors() {
-        const allVisitors = new Set();
-        Object.values(this.statsData.dailyVisitors).forEach(dailyVisitors => {
-            dailyVisitors.forEach(visitor => allVisitors.add(visitor));
-        });
-        return allVisitors.size;
-    }
-
-    trackUserEngagement() {
-        // Track time on site
-        window.addEventListener('beforeunload', () => {
-            const timeSpent = Date.now() - this.visitStartTime;
-            this.statsData.timeOnSite = Math.floor((this.statsData.timeOnSite + timeSpent / 1000) / 2); // Average
-            this.saveStats();
-        });
     }
 
     trackWhatsAppClicks() {
         document.addEventListener('click', (e) => {
-            if (e.target.closest('a[href*="wa.me"]') || e.target.closest('a[href*="whatsapp.com"]')) {
+            const whatsappBtn = e.target.closest('a[href*="wa.me"], a[href*="whatsapp.com"]');
+            if (whatsappBtn) {
                 this.statsData.whatsappLeads++;
-                this.updateConversionRate();
                 this.saveStats();
-                console.log('📞 WhatsApp lead tracked:', this.statsData.whatsappLeads);
+                console.log('📞 WhatsApp lead tracked! Total:', this.statsData.whatsappLeads);
             }
         });
-    }
-
-    updateConversionRate() {
-        if (this.statsData.uniqueVisitors > 0) {
-            this.statsData.conversionRate = parseFloat(
-                ((this.statsData.whatsappLeads / this.statsData.uniqueVisitors) * 100).toFixed(2)
-            );
-        }
-    }
-
-    trackProductInteractions() {
-        // Track product views
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting && entry.target.classList.contains('product-card')) {
-                    this.statsData.productViews++;
-                    
-                    const productName = entry.target.querySelector('h3')?.textContent;
-                    if (productName) {
-                        this.trackProductView(productName);
-                    }
-                    
-                    this.saveStats();
-                }
-            });
-        }, { threshold: 0.5 });
-
-        // Track quick views
-        document.addEventListener('click', (e) => {
-            if (e.target.closest('.quick-view-btn')) {
-                this.statsData.quickViewOpens++;
-                const productCard = e.target.closest('.product-card');
-                const productName = productCard?.querySelector('h3')?.textContent;
-                
-                if (productName) {
-                    this.trackProductView(productName);
-                }
-                
-                this.saveStats();
-            }
-        });
-
-        // Observe all product cards
-        setTimeout(() => {
-            document.querySelectorAll('.product-card').forEach(card => {
-                observer.observe(card);
-            });
-        }, 2000);
-    }
-
-    trackProductView(productName) {
-        if (!this.statsData.popularProducts) {
-            this.statsData.popularProducts = {};
-        }
-        this.statsData.popularProducts[productName] = 
-            (this.statsData.popularProducts[productName] || 0) + 1;
-    }
-
-    async trackGeographicData() {
-        try {
-            const response = await fetch('https://ipapi.co/json/');
-            if (response.ok) {
-                const geoData = await response.json();
-                
-                const locationData = {
-                    country: geoData.country_name,
-                    city: geoData.city,
-                    region: geoData.region,
-                    visits: 1,
-                    ip: geoData.ip
-                };
-
-                const existingIndex = this.statsData.geographicData.findIndex(
-                    item => item.country === locationData.country && item.city === locationData.city
-                );
-
-                if (existingIndex !== -1) {
-                    this.statsData.geographicData[existingIndex].visits++;
-                } else {
-                    this.statsData.geographicData.push(locationData);
-                }
-
-                this.saveStats();
-            }
-        } catch (error) {
-            console.log('Geographic tracking failed:', error);
-        }
-    }
-
-    trackDeviceInfo() {
-        const deviceInfo = this.getDeviceInfo();
-        
-        // Track device type
-        this.statsData.deviceData.devices[deviceInfo.deviceType] = 
-            (this.statsData.deviceData.devices[deviceInfo.deviceType] || 0) + 1;
-
-        // Track browser
-        this.statsData.deviceData.browsers[deviceInfo.browser] = 
-            (this.statsData.deviceData.browsers[deviceInfo.browser] || 0) + 1;
-
-        // Track screen size
-        this.statsData.deviceData.screenSizes[deviceInfo.screenSize] = 
-            (this.statsData.deviceData.screenSizes[deviceInfo.screenSize] || 0) + 1;
-
-        // Track platform
-        this.statsData.deviceData.platforms[deviceInfo.platform] = 
-            (this.statsData.deviceData.platforms[deviceInfo.platform] || 0) + 1;
-
-        this.saveStats();
-    }
-
-    getDeviceInfo() {
-        const ua = navigator.userAgent;
-        let deviceType = "desktop";
-        
-        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
-            deviceType = "tablet";
-        } else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
-            deviceType = "mobile";
-        }
-
-        let browser = "Other";
-        if (ua.includes('Chrome')) browser = 'Chrome';
-        else if (ua.includes('Firefox')) browser = 'Firefox';
-        else if (ua.includes('Safari')) browser = 'Safari';
-        else if (ua.includes('Edge')) browser = 'Edge';
-
-        return {
-            deviceType: deviceType,
-            browser: browser,
-            screenSize: `${screen.width}x${screen.height}`,
-            platform: navigator.platform
-        };
-    }
-
-    setupPeriodicSave() {
-        // Save every 30 seconds to ensure data persistence
-        setInterval(() => {
-            this.saveStats();
-        }, 30000);
     }
 }
 
-// Initialize statistics - MAKE SURE THIS IS CALLED
+// Initialize immediately
 window.websiteStats = new WebsiteStatistics();
-
 // ==== SITE IMPROVEMENT NOTIFICATION ====
 function showSiteImprovementNotification() {
     const hasSeenImprovementNotice = localStorage.getItem('willstech_site_improvement_seen');

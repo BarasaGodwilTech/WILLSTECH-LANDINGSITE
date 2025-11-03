@@ -56,21 +56,80 @@ class WillTechAdmin {
 
 async loadLiveStatistics() {
     try {
+        console.log('🔄 Loading REAL statistics...');
+        
         const stats = await this.fetchStatsFromAPI();
         
         if (stats) {
+            console.log('✅ Real stats loaded:', stats);
             this.updateStatsDisplay(stats);
-            this.updateAdvancedStats(stats); // ADD THIS LINE
+            this.updateAdvancedStats(stats);
         } else {
-            this.updateStatsDisplay(this.getDefaultStats());
+            console.log('❌ No real stats, showing defaults');
+            // Show defaults but mark them as estimates
+            const defaults = this.getDefaultStats();
+            this.showEstimateMode();
+            this.updateStatsDisplay(defaults);
         }
         
-        this.setupRealTimeUpdates();
-        
     } catch (error) {
-        console.error('Error loading statistics:', error);
-        this.showAlert('⚠️ Could not load live statistics', 'error');
+        console.error('Statistics error:', error);
+        this.showEstimateMode();
     }
+}
+
+showEstimateMode() {
+    const statsGrid = document.querySelector('.stats-grid');
+    if (statsGrid) {
+        statsGrid.innerHTML += `
+            <div style="grid-column: 1 / -1; background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 8px; text-align: center;">
+                <i class="fas fa-info-circle"></i> 
+                <strong>Demo Mode:</strong> Statistics tracking will show real data once visitors start using your website.
+                The numbers above are example data.
+            </div>
+        `;
+    }
+}
+
+async fetchStatsFromAPI() {
+    try {
+        const binId = '67d3a9a2acd3cb34a92be26b'; // MUST match your website's bin ID
+        const apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
+        
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+            headers: { 'X-Master-Key': apiKey }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.record;
+        }
+        return null;
+    } catch (error) {
+        console.error('Stats fetch failed:', error);
+        return null;
+    }
+}
+
+updateStatsDisplay(stats) {
+    // Update with REAL data
+    const elements = {
+        pageViews: document.getElementById('pageViews'),
+        productsCount: document.getElementById('productsCount'),
+        customersCount: document.getElementById('customersCount'),
+        whatsappLeads: document.getElementById('whatsappLeads')
+    };
+
+    // REAL products count
+    if (elements.productsCount) {
+        const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
+        elements.productsCount.textContent = activeProducts;
+    }
+    
+    // REAL statistics
+    if (elements.pageViews) elements.pageViews.textContent = this.formatNumber(stats.pageViews || 0);
+    if (elements.customersCount) elements.customersCount.textContent = this.formatNumber(stats.uniqueVisitors || 0) + '+';
+    if (elements.whatsappLeads) elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
 }
 
 // ADD THIS NEW METHOD
@@ -161,30 +220,32 @@ updatePopularProducts(popularProducts) {
 // In admin.js - Update this method
 async fetchStatsFromAPI() {
     try {
-        // Use the EXACT SAME bin ID as your main website
-        const binId = '67d3a9a2acd3cb34a92be26b';
+        console.log('🔄 Fetching stats from JSONBin...');
         
-        if (!binId) {
-            console.log('No stats bin ID configured');
-            return null;
-        }
-
+        // Use the correct bin ID and API key
+        const binId = '67d3a9a2acd3cb34a92be26b';
+        const apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
+        
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: {
-                'X-Master-Key': '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXXae'
+                'X-Master-Key': apiKey,
+                'Content-Type': 'application/json'
             }
         });
 
+        console.log('📊 Response status:', response.status);
+        
         if (response.ok) {
             const data = await response.json();
-            console.log('📊 Admin loaded real stats:', data.record);
+            console.log('✅ Stats loaded successfully:', data.record);
             return data.record;
         } else {
-            console.error('Failed to fetch stats:', response.status);
+            const errorText = await response.text();
+            console.error('❌ API Error:', response.status, errorText);
             return null;
         }
     } catch (error) {
-        console.error('API fetch failed:', error);
+        console.error('❌ Fetch failed:', error);
         return null;
     }
 }

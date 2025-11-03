@@ -191,7 +191,7 @@
     },
     {
       "id": 1762196578863,
-      "name": "Galaxy tab A9+",
+      "name": "Galaxy tab A9+ 5G",
       "sku": "0106",
       "category": "smartphones",
       "description": "Galaxy tab A9+ 8GB RAM / 128GB ROM",
@@ -219,7 +219,7 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-11-03T19:02:58.865Z",
-      "dateUpdated": "2025-11-03T19:09:58.578Z"
+      "dateUpdated": "2025-11-03T19:14:50.502Z"
     }
   ],
   "content": {
@@ -236,5 +236,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T19:09:58.579Z"
+  "lastUpdated": "2025-11-03T19:14:50.552Z"
 }

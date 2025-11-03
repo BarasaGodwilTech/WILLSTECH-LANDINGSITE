@@ -50,26 +50,7 @@ class WillTechAdmin {
 
     // Add these methods to your WillTechAdmin class
 
-async loadLiveStatistics() {
-    try {
-        // Try to load from JSONBin API first
-        const stats = await this.fetchStatsFromAPI();
-        
-        if (stats) {
-            this.updateStatsDisplay(stats);
-        } else {
-            // Fallback to local storage or default values
-            this.updateStatsDisplay(this.getDefaultStats());
-        }
-        
-        // Set up real-time updates
-        this.setupRealTimeUpdates();
-        
-    } catch (error) {
-        console.error('Error loading statistics:', error);
-        this.showAlert('⚠️ Could not load live statistics', 'error');
-    }
-}
+
 
 // Add these methods to your WillTechAdmin class, right after the loadLiveStatistics method
 

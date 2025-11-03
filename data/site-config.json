@@ -41,7 +41,7 @@
         "connectivity": "Bluetooth 5.0"
       },
       "featured": true,
-      "status": "hidden",
+      "status": "active",
       "dateAdded": "2025-10-28T16:07:37.767Z",
       "dateUpdated": "2025-10-28T16:34:23.019Z"
     },
@@ -236,5 +236,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T19:14:50.552Z"
+  "lastUpdated": "2025-11-03T19:57:24.152Z"
 }

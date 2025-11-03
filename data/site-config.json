@@ -227,10 +227,13 @@
       "sku": "0107",
       "category": "accessories",
       "description": "Capture incredibly smooth and professional looking video with the DJI RS 4 Mini, a lightweight and portable camera gimbal stabilizer. Designed for filmmakers and content creators, this compact gimbal offers superior stabilization technology, ensuring your footage remains steady and cinematic, even when you're on the move. Its user-friendly design and Automated Axis Locks make it quick and easy to set up, so you never miss a shot.",
-      "price": "2800000",
-      "originalPrice": "4000000",
+      "price": 2800000,
+      "originalPrice": 4000000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207010094.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207010094.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207192250.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207228081.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207272400.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -253,7 +256,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-11-03T21:58:10.559Z"
+      "dateAdded": "2025-11-03T21:58:10.559Z",
+      "dateUpdated": "2025-11-03T22:01:20.397Z"
     }
   ],
   "content": {
@@ -270,5 +274,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T21:58:10.592Z"
+  "lastUpdated": "2025-11-03T22:01:20.435Z"
 }

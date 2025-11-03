@@ -54,19 +54,25 @@ class WillTechAdmin {
 
 // Add these methods to your WillTechAdmin class, right after the loadLiveStatistics method
 
+// ============ STATISTICS METHODS - SINGLE CLEAN VERSION ============
+
 async loadLiveStatistics() {
     try {
-        console.log('🔄 Loading live statistics...');
+        console.log('🔄 Loading LIVE statistics from bin: 6908d0e7d0ea881f40d12d5d');
         
-        // USE THE SAME BIN ID AS YOUR WEBSITE
-        const binId = '6908d0e7d0ea881f40d12d5d'; // ← MUST match the website's bin ID
-        const stats = await this.fetchStatsFromAPI(binId);
+        const stats = await this.fetchStatsFromAPI();
         
-        if (stats) {
-            console.log('✅ Real stats loaded:', stats);
+        if (stats && stats.pageViews !== undefined) {
+            console.log('✅ REAL stats loaded:', {
+                pageViews: stats.pageViews,
+                uniqueVisitors: stats.uniqueVisitors,
+                whatsappLeads: stats.whatsappLeads
+            });
+            
             this.updateStatsDisplay(stats);
             this.updateAdvancedStats(stats);
-            this.showAlert('✅ Live statistics loaded successfully!', 'success');
+            this.setupRealTimeUpdates(); // ADD THIS LINE
+            this.showAlert('✅ Live statistics loaded! Real data is now tracking.', 'success');
         } else {
             console.log('⚠️ No real stats available yet');
             this.showEstimateMode();
@@ -78,9 +84,12 @@ async loadLiveStatistics() {
     }
 }
 
-async fetchStatsFromAPI(binId) {
+async fetchStatsFromAPI() {
     try {
+        const binId = '6908d0e7d0ea881f40d12d5d'; // YOUR NEW WORKING BIN ID
         const apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
+        
+        console.log('📊 Fetching from bin:', binId);
         
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: { 
@@ -112,255 +121,49 @@ updateStatsDisplay(stats) {
         whatsappLeads: document.getElementById('whatsappLeads')
     };
 
-    // REAL products count (this is already working)
+    // REAL products count
     if (elements.productsCount) {
         const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
         elements.productsCount.textContent = activeProducts;
+        // Remove the HTML append for now to avoid duplication
+        // elements.productsCount.innerHTML += '<br><small style="color: var(--success);">Active</small>';
     }
     
     // REAL statistics from JSONBin
     if (elements.pageViews) {
         elements.pageViews.textContent = this.formatNumber(stats.pageViews || 0);
-        elements.pageViews.innerHTML += '<br><small style="color: var(--success);">Live</small>';
+        // elements.pageViews.innerHTML += '<br><small style="color: var(--success); font-weight: bold;">LIVE</small>';
     }
     
     if (elements.customersCount) {
         elements.customersCount.textContent = this.formatNumber(stats.uniqueVisitors || 0) + '+';
-        elements.customersCount.innerHTML += '<br><small style="color: var(--success);">Real</small>';
+        // elements.customersCount.innerHTML += '<br><small style="color: var(--success); font-weight: bold;">REAL</small>';
     }
     
     if (elements.whatsappLeads) {
         elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
-        elements.whatsappLeads.innerHTML += '<br><small style="color: var(--success);">Actual</small>';
+        // elements.whatsappLeads.innerHTML += '<br><small style="color: var(--success); font-weight: bold;">ACTUAL</small>';
     }
 }
 
-showEstimateMode() {
-    this.showAlert('📊 Statistics will show real data when visitors use your website', 'info');
-    
-    // Show realistic estimates based on your products
-    const productCount = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
-    const estimates = {
-        pageViews: Math.max(1254, productCount * 50),
-        uniqueVisitors: Math.max(893, productCount * 35),
-        whatsappLeads: Math.max(156, productCount * 10)
-    };
-    
-    this.updateStatsDisplay(estimates);
-}
-
-showEstimateMode() {
-    const statsGrid = document.querySelector('.stats-grid');
-    if (statsGrid) {
-        statsGrid.innerHTML += `
-            <div style="grid-column: 1 / -1; background: #fff3cd; border: 1px solid #ffeaa7; padding: 1rem; border-radius: 8px; text-align: center;">
-                <i class="fas fa-info-circle"></i> 
-                <strong>Demo Mode:</strong> Statistics tracking will show real data once visitors start using your website.
-                The numbers above are example data.
-            </div>
-        `;
-    }
-}
-
-async fetchStatsFromAPI() {
-    try {
-        const binId = '67d3a9a2acd3cb34a92be26b'; // MUST match your website's bin ID
-        const apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
-        
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-            headers: { 'X-Master-Key': apiKey }
-        });
-
-        if (response.ok) {
-            const data = await response.json();
-            return data.record;
-        }
-        return null;
-    } catch (error) {
-        console.error('Stats fetch failed:', error);
-        return null;
-    }
-}
-
-updateStatsDisplay(stats) {
-    // Update with REAL data
-    const elements = {
-        pageViews: document.getElementById('pageViews'),
-        productsCount: document.getElementById('productsCount'),
-        customersCount: document.getElementById('customersCount'),
-        whatsappLeads: document.getElementById('whatsappLeads')
-    };
-
-    // REAL products count
-    if (elements.productsCount) {
-        const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
-        elements.productsCount.textContent = activeProducts;
-    }
-    
-    // REAL statistics
-    if (elements.pageViews) elements.pageViews.textContent = this.formatNumber(stats.pageViews || 0);
-    if (elements.customersCount) elements.customersCount.textContent = this.formatNumber(stats.uniqueVisitors || 0) + '+';
-    if (elements.whatsappLeads) elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
-}
-
-// ADD THIS NEW METHOD
 updateAdvancedStats(stats) {
     // Update geographic data
-    this.updateGeographicDisplay(stats.geographicData);
+    this.updateGeographicDisplay(stats.geographicData || []);
     
     // Update device data
-    this.updateDeviceDisplay(stats.deviceData);
+    this.updateDeviceDisplay(stats.deviceData || {});
     
     // Update conversion rate
-    this.updateConversionDisplay(stats.conversionRate);
+    this.updateConversionDisplay(stats.conversionRate || 0);
     
     // Update popular products
-    this.updatePopularProducts(stats.popularProducts);
-}
-
-// ADD THESE HELPER METHODS
-updateGeographicDisplay(geoData) {
-    const geoContainer = document.getElementById('geographicData');
-    if (!geoContainer || !geoData) return;
-
-    let html = '<h4>Top Locations</h4>';
-    const topLocations = geoData.slice(0, 5); // Show top 5
+    this.updatePopularProducts(stats.popularProducts || {});
     
-    topLocations.forEach(location => {
-        html += `
-            <div class="location-item">
-                <span class="country">${location.country}</span>
-                <span class="visits">${location.visits} visits</span>
-            </div>
-        `;
-    });
-    
-    geoContainer.innerHTML = html;
-}
-
-updateDeviceDisplay(deviceData) {
-    const deviceContainer = document.getElementById('deviceData');
-    if (!deviceContainer || !deviceData) return;
-
-    let html = '<h4>Device Distribution</h4>';
-    
-    // Devices
-    html += '<div class="device-category"><strong>Devices:</strong></div>';
-    Object.entries(deviceData.devices || {}).forEach(([device, count]) => {
-        html += `<div class="device-item">${device}: ${count}</div>`;
-    });
-    
-    // Browsers
-    html += '<div class="device-category"><strong>Browsers:</strong></div>';
-    Object.entries(deviceData.browsers || {}).forEach(([browser, count]) => {
-        html += `<div class="device-item">${browser}: ${count}</div>`;
-    });
-    
-    deviceContainer.innerHTML = html;
-}
-
-updateConversionDisplay(conversionRate) {
-    const conversionElement = document.getElementById('conversionRate');
-    if (conversionElement) {
-        conversionElement.textContent = `${conversionRate || 0}%`;
-    }
-}
-
-updatePopularProducts(popularProducts) {
-    const productsContainer = document.getElementById('popularProducts');
-    if (!productsContainer || !popularProducts) return;
-
-    let html = '<h4>Most Viewed Products</h4>';
-    const sortedProducts = Object.entries(popularProducts)
-        .sort(([,a], [,b]) => b - a)
-        .slice(0, 5); // Top 5 products
-    
-    sortedProducts.forEach(([product, views]) => {
-        html += `
-            <div class="product-item">
-                <span class="product-name">${product}</span>
-                <span class="product-views">${views} views</span>
-            </div>
-        `;
-    });
-    
-    productsContainer.innerHTML = html;
-}
-
-// In your admin.js, the fetchStatsFromAPI method needs fixing:
-// In admin.js - Update this method
-async fetchStatsFromAPI() {
-    try {
-        console.log('🔄 Fetching stats from JSONBin...');
-        
-        // Use the correct bin ID and API key
-        const binId = '67d3a9a2acd3cb34a92be26b';
-        const apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
-        
-        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
-            headers: {
-                'X-Master-Key': apiKey,
-                'Content-Type': 'application/json'
-            }
-        });
-
-        console.log('📊 Response status:', response.status);
-        
-        if (response.ok) {
-            const data = await response.json();
-            console.log('✅ Stats loaded successfully:', data.record);
-            return data.record;
-        } else {
-            const errorText = await response.text();
-            console.error('❌ API Error:', response.status, errorText);
-            return null;
-        }
-    } catch (error) {
-        console.error('❌ Fetch failed:', error);
-        return null;
-    }
-}
-
-// In admin.js, update the updateStatsDisplay method:
-updateStatsDisplay(stats) {
-    if (!stats) {
-        console.log('No stats available, using defaults');
-        stats = this.getDefaultStats();
-    }
-
-    const elements = {
-        pageViews: document.getElementById('pageViews'),
-        productsCount: document.getElementById('productsCount'),
-        customersCount: document.getElementById('customersCount'),
-        whatsappLeads: document.getElementById('whatsappLeads')
-    };
-
-    // REAL DATA DISPLAY
-    if (elements.pageViews) {
-        elements.pageViews.textContent = this.formatNumber(stats.pageViews || 0);
-    }
-    
-    if (elements.productsCount) {
-        // Count REAL products from your actual data
-        const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
-        const totalProducts = this.currentData.products?.length || 0;
-        elements.productsCount.textContent = `${activeProducts}`; // Show only active count
-    }
-    
-    if (elements.customersCount) {
-        elements.customersCount.textContent = `${this.formatNumber(stats.uniqueVisitors || 0)}+`;
-    }
-    
-    if (elements.whatsappLeads) {
-        elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
-    }
-
-    // Update advanced stats with REAL data
-    this.updateAdvancedStats(stats);
+    // Update additional stats
+    this.updateAdditionalStats(stats);
 }
 
 updateAdditionalStats(stats) {
-    // You can add more detailed stats here
     const additionalStats = {
         'product-views': stats.productViews || 0,
         'quick-views': stats.quickViewOpens || 0,
@@ -368,7 +171,6 @@ updateAdditionalStats(stats) {
         'returning-rate': this.calculateReturningRate(stats)
     };
 
-    // Update any additional stat elements you add to the dashboard
     Object.keys(additionalStats).forEach(key => {
         const element = document.getElementById(key);
         if (element) {
@@ -377,6 +179,24 @@ updateAdditionalStats(stats) {
     });
 }
 
+showEstimateMode() {
+    this.showAlert('📊 Statistics tracking started! Real data will appear as visitors use your site.', 'info');
+    
+    // Show zeros instead of estimates since we're starting fresh
+    const freshStats = {
+        pageViews: 0,
+        uniqueVisitors: 0,
+        whatsappLeads: 0,
+        productViews: 0,
+        quickViewOpens: 0,
+        timeOnSite: 0,
+        conversionRate: 0
+    };
+    
+    this.updateStatsDisplay(freshStats);
+}
+
+// Helper methods for statistics
 formatNumber(num) {
     if (num >= 1000000) {
         return (num / 1000000).toFixed(1) + 'M';
@@ -393,7 +213,7 @@ formatTime(seconds) {
 }
 
 calculateReturningRate(stats) {
-    if (!stats.uniqueVisitors) return '0%';
+    if (!stats.uniqueVisitors || !stats.returningVisitors) return '0%';
     const rate = (stats.returningVisitors / stats.uniqueVisitors) * 100;
     return `${Math.round(rate)}%`;
 }
@@ -412,35 +232,24 @@ setupRealTimeUpdates() {
     });
 }
 
-// Update the getDefaultStats method in your WillTechAdmin class
 getDefaultStats() {
     return {
-        pageViews: 1254,
-        uniqueVisitors: 893,
-        whatsappLeads: 156,
+        pageViews: 0,
+        uniqueVisitors: 0,
+        whatsappLeads: 0,
         productViews: 0,
         quickViewOpens: 0,
         timeOnSite: 0,
         returningVisitors: 0,
         conversionRate: 0,
-        geographicData: [
-            { country: 'Uganda', city: 'Kampala', region: 'Central', visits: 45 },
-            { country: 'Uganda', city: 'Mbale', region: 'Eastern', visits: 23 },
-            { country: 'Kenya', city: 'Nairobi', region: 'Nairobi', visits: 12 }
-        ],
+        geographicData: [],
         deviceData: {
-            devices: { mobile: 65, desktop: 30, tablet: 5 },
-            browsers: { Chrome: 70, Safari: 20, Firefox: 8, Other: 2 },
-            screenSizes: { '375x667': 45, '1920x1080': 25, '414x896': 20, 'Other': 10 },
-            platforms: { 'iPhone': 40, 'MacIntel': 25, 'Windows': 30, 'Linux': 5 }
+            devices: {},
+            browsers: {},
+            screenSizes: {},
+            platforms: {}
         },
-        popularProducts: {
-            'iPhone 15 Pro': 45,
-            'Samsung Galaxy S24': 38,
-            'MacBook Pro M3': 32,
-            'AirPods Pro': 28,
-            'iPad Air': 25
-        }
+        popularProducts: {}
     };
 }
 
@@ -3191,26 +3000,91 @@ clearEditFormMedia() {
         console.log('🛠️ MANUAL MEDIA INITIALIZATION');
         this.setupMediaManagement();
     }
-    async loadLiveStatistics() {
-    try {
-        console.log('🔄 Loading live statistics...');
-        
-        const stats = await this.fetchStatsFromAPI();
-        
-        console.log('📊 Raw stats received:', stats);
-        
-        if (stats) {
-            this.updateStatsDisplay(stats);
-            this.updateAdvancedStats(stats);
-        } else {
-            console.log('⚠️ No stats received, using defaults');
-            this.updateStatsDisplay(this.getDefaultStats());
-        }
-        
-    } catch (error) {
-        console.error('❌ Error loading statistics:', error);
-        this.showAlert('⚠️ Could not load live statistics', 'error');
+    // ADD THESE MISSING METHODS to your WillTechAdmin class:
+
+updateGeographicDisplay(geoData) {
+    const geoContainer = document.getElementById('geographicData');
+    if (!geoContainer || !geoData) return;
+
+    let html = '<h4>Top Locations</h4>';
+    const topLocations = geoData.slice(0, 5); // Show top 5
+    
+    if (topLocations.length === 0) {
+        html += '<div class="loading">No geographic data yet</div>';
+    } else {
+        topLocations.forEach(location => {
+            html += `
+                <div class="location-item">
+                    <span class="country">${location.country || 'Unknown'}</span>
+                    <span class="visits">${location.visits || 0} visits</span>
+                </div>
+            `;
+        });
     }
+    
+    geoContainer.innerHTML = html;
+}
+
+updateDeviceDisplay(deviceData) {
+    const deviceContainer = document.getElementById('deviceData');
+    if (!deviceContainer || !deviceData) return;
+
+    let html = '<h4>Device Distribution</h4>';
+    
+    // Devices
+    if (deviceData.devices && Object.keys(deviceData.devices).length > 0) {
+        html += '<div class="device-category"><strong>Devices:</strong></div>';
+        Object.entries(deviceData.devices).forEach(([device, count]) => {
+            html += `<div class="device-item">${device}: ${count}</div>`;
+        });
+    }
+    
+    // Browsers
+    if (deviceData.browsers && Object.keys(deviceData.browsers).length > 0) {
+        html += '<div class="device-category"><strong>Browsers:</strong></div>';
+        Object.entries(deviceData.browsers).forEach(([browser, count]) => {
+            html += `<div class="device-item">${browser}: ${count}</div>`;
+        });
+    }
+    
+    if (!deviceData.devices && !deviceData.browsers) {
+        html += '<div class="loading">No device data yet</div>';
+    }
+    
+    deviceContainer.innerHTML = html;
+}
+
+updateConversionDisplay(conversionRate) {
+    const conversionElement = document.getElementById('conversionRate');
+    if (conversionElement) {
+        conversionElement.textContent = `${conversionRate || 0}%`;
+    }
+}
+
+updatePopularProducts(popularProducts) {
+    const productsContainer = document.getElementById('popularProducts');
+    if (!productsContainer || !popularProducts) return;
+
+    let html = '<h4>Most Viewed Products</h4>';
+    
+    if (Object.keys(popularProducts).length === 0) {
+        html += '<div class="loading">No product views yet</div>';
+    } else {
+        const sortedProducts = Object.entries(popularProducts)
+            .sort(([,a], [,b]) => b - a)
+            .slice(0, 5); // Top 5 products
+        
+        sortedProducts.forEach(([product, views]) => {
+            html += `
+                <div class="product-item">
+                    <span class="product-name">${product}</span>
+                    <span class="product-views">${views} views</span>
+                </div>
+            `;
+        });
+    }
+    
+    productsContainer.innerHTML = html;
 }
 
 } // <-- This is the closing brace of the WillTechAdmin class

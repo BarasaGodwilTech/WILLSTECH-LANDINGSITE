@@ -19,21 +19,25 @@ if (window.location.pathname.includes('admin.html') &&
 // SIMPLE WORKING STATISTICS - paste this into your script.js
 
 // SIMPLE WORKING STATISTICS - paste this into your script.js
+// WORKING STATISTICS CLASS - paste this into script.js
 class WebsiteStatistics {
     constructor() {
-        // USE THE NEW BIN ID FROM ABOVE
-        this.binId = '6908d0e7d0ea881f40d12d5d'; // ← Replace with the ID from createNewStatsBin()
+        // USE YOUR NEW BIN ID
+        this.binId = '6908d0e7d0ea881f40d12d5d';
         this.apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
         this.statsData = null;
+        this.visitStartTime = Date.now();
         this.init();
     }
 
     async init() {
-        console.log('📊 Initializing statistics...');
+        console.log('📊 Initializing statistics with bin:', this.binId);
         await this.loadStats();
         this.trackPageView();
         this.trackWhatsAppClicks();
         this.trackProductViews();
+        this.trackDeviceInfo();
+        this.setupPeriodicSave();
         console.log('✅ Statistics ready!');
     }
 
@@ -51,8 +55,9 @@ class WebsiteStatistics {
                 this.statsData = data.record;
                 console.log('📊 Loaded existing stats:', this.statsData);
             } else {
-                console.log('❌ No stats found, will create on first save');
+                console.log('📝 Creating initial stats structure');
                 this.statsData = this.getDefaultStats();
+                await this.saveStats(); // Save initial structure
             }
         } catch (error) {
             console.error('❌ Load failed:', error);
@@ -85,6 +90,8 @@ class WebsiteStatistics {
 
     async saveStats() {
         try {
+            if (!this.statsData) return;
+            
             this.statsData.lastUpdated = new Date().toISOString();
             
             const response = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}`, {
@@ -97,11 +104,7 @@ class WebsiteStatistics {
             });
 
             if (response.ok) {
-                console.log('💾 Stats saved:', {
-                    pageViews: this.statsData.pageViews,
-                    uniqueVisitors: this.statsData.uniqueVisitors,
-                    whatsappLeads: this.statsData.whatsappLeads
-                });
+                console.log('💾 Stats saved successfully');
             } else {
                 console.error('❌ Save failed:', await response.text());
             }
@@ -119,16 +122,17 @@ class WebsiteStatistics {
     trackUniqueVisitor() {
         let visitorId = localStorage.getItem('willstech_visitor_id');
         if (!visitorId) {
-            visitorId = 'visitor_' + Date.now();
+            visitorId = 'visitor_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             localStorage.setItem('willstech_visitor_id', visitorId);
             this.statsData.uniqueVisitors++;
-            console.log('👤 New visitor:', visitorId);
+            console.log('👤 New visitor tracked:', visitorId);
         }
     }
 
     trackWhatsAppClicks() {
         document.addEventListener('click', (e) => {
-            if (e.target.closest('a[href*="wa.me"], a[href*="whatsapp.com"]')) {
+            const whatsappBtn = e.target.closest('a[href*="wa.me"], a[href*="whatsapp.com"]');
+            if (whatsappBtn) {
                 this.statsData.whatsappLeads++;
                 this.updateConversionRate();
                 this.saveStats();
@@ -138,12 +142,46 @@ class WebsiteStatistics {
     }
 
     trackProductViews() {
-        // Simple product view tracking
+        // Track when products come into view
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.target.classList.contains('product-card')) {
+                    this.statsData.productViews++;
+                    this.saveStats();
+                }
+            });
+        }, { threshold: 0.3 });
+
+        // Observe product cards after they load
         setTimeout(() => {
-            const productCards = document.querySelectorAll('.product-card');
-            this.statsData.productViews += productCards.length;
-            this.saveStats();
-        }, 2000);
+            document.querySelectorAll('.product-card').forEach(card => {
+                observer.observe(card);
+            });
+        }, 3000);
+    }
+
+    trackDeviceInfo() {
+        const ua = navigator.userAgent;
+        let deviceType = "desktop";
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+            deviceType = "tablet";
+        } else if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+            deviceType = "mobile";
+        }
+
+        let browser = "Other";
+        if (ua.includes('Chrome')) browser = 'Chrome';
+        else if (ua.includes('Firefox')) browser = 'Firefox';
+        else if (ua.includes('Safari')) browser = 'Safari';
+        else if (ua.includes('Edge')) browser = 'Edge';
+
+        // Track device and browser
+        this.statsData.deviceData.devices[deviceType] = 
+            (this.statsData.deviceData.devices[deviceType] || 0) + 1;
+        this.statsData.deviceData.browsers[browser] = 
+            (this.statsData.deviceData.browsers[browser] || 0) + 1;
+
+        this.saveStats();
     }
 
     updateConversionRate() {
@@ -152,6 +190,13 @@ class WebsiteStatistics {
                 ((this.statsData.whatsappLeads / this.statsData.uniqueVisitors) * 100).toFixed(2)
             );
         }
+    }
+
+    setupPeriodicSave() {
+        // Save every 30 seconds
+        setInterval(() => {
+            this.saveStats();
+        }, 30000);
     }
 }
 

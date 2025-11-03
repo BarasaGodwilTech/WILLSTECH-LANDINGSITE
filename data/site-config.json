@@ -194,11 +194,12 @@
       "name": "Galaxy tab A9+",
       "sku": "0106",
       "category": "smartphones",
-      "description": "Galaxy tab A9+",
-      "price": "00",
-      "originalPrice": "00",
+      "description": "Galaxy tab A9+ 8GB RAM / 128GB ROM",
+      "price": 780000,
+      "originalPrice": 900000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762196536105.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762196536105.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762196966183.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -208,7 +209,7 @@
         "new"
       ],
       "features": [
-        "Wide"
+        "8GB RAM / 128GB ROM"
       ],
       "specifications": {
         "battery": "Up to 6 hours",
@@ -217,7 +218,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-11-03T19:02:58.865Z"
+      "dateAdded": "2025-11-03T19:02:58.865Z",
+      "dateUpdated": "2025-11-03T19:09:58.578Z"
     }
   ],
   "content": {
@@ -234,5 +236,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T19:02:58.909Z"
+  "lastUpdated": "2025-11-03T19:09:58.579Z"
 }

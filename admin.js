@@ -157,16 +157,20 @@ updatePopularProducts(popularProducts) {
     productsContainer.innerHTML = html;
 }
 
+// In your admin.js, the fetchStatsFromAPI method needs fixing:
+// In admin.js - Update this method
 async fetchStatsFromAPI() {
     try {
-        // You'll need to store the bin ID somewhere accessible
         const binId = localStorage.getItem('willstech_stats_bin_id');
         
-        if (!binId) return null;
+        if (!binId) {
+            console.log('No stats bin ID found, using default stats');
+            return this.getDefaultStats();
+        }
 
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: {
-                'X-Master-Key': this.githubToken // Using GitHub token as API key
+                'X-Master-Key': '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae'
             }
         });
 
@@ -174,13 +178,14 @@ async fetchStatsFromAPI() {
             const data = await response.json();
             return data.record;
         }
-        return null;
+        return this.getDefaultStats();
     } catch (error) {
         console.error('API fetch failed:', error);
-        return null;
+        return this.getDefaultStats();
     }
 }
 
+// In admin.js, update the updateStatsDisplay method:
 updateStatsDisplay(stats) {
     const elements = {
         pageViews: document.getElementById('pageViews'),
@@ -194,8 +199,10 @@ updateStatsDisplay(stats) {
     }
     
     if (elements.productsCount) {
+        // Count only active products
         const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
-        elements.productsCount.textContent = activeProducts;
+        const totalProducts = this.currentData.products?.length || 0;
+        elements.productsCount.textContent = `${activeProducts} / ${totalProducts}`;
     }
     
     if (elements.customersCount) {
@@ -206,7 +213,7 @@ updateStatsDisplay(stats) {
         elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
     }
 
-    // Update additional stats if you add more cards
+    // Update additional stats
     this.updateAdditionalStats(stats);
 }
 

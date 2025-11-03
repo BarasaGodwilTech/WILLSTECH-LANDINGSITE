@@ -54,7 +54,10 @@
       "price": 1023000,
       "originalPrice": 1039000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207985981.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762208019576.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762208037137.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -78,7 +81,7 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-10-28T16:48:13.698Z",
-      "dateUpdated": "2025-10-28T18:11:16.079Z"
+      "dateUpdated": "2025-11-03T22:14:06.748Z"
     },
     {
       "id": 1761671191331,
@@ -274,5 +277,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T22:01:20.435Z"
+  "lastUpdated": "2025-11-03T22:14:06.888Z"
 }

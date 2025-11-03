@@ -30,6 +30,69 @@
             display: flex;
             min-height: 100vh;
         }
+
+        /* Add to your admin panel CSS */
+.stat-card {
+    position: relative;
+}
+
+.stat-card small {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 0.7rem;
+    color: var(--success);
+    background: rgba(16, 185, 129, 0.1);
+    padding: 2px 6px;
+    border-radius: 10px;
+}
+
+.activity-feed {
+    max-height: 400px;
+    overflow-y: auto;
+}
+
+.activity-item {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem;
+    border-bottom: 1px solid #eee;
+    transition: background-color 0.3s;
+}
+
+.activity-item:hover {
+    background-color: #f8f9fa;
+}
+
+.activity-item:last-child {
+    border-bottom: none;
+}
+
+.activity-content p {
+    margin: 0;
+    font-weight: 500;
+}
+
+.activity-content small {
+    color: #666;
+    font-size: 0.8rem;
+}
+
+.live-badge {
+    background: var(--success);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% { opacity: 1; }
+    50% { opacity: 0.7; }
+    100% { opacity: 1; }
+}
         
         /* Sidebar */
         .sidebar {
@@ -649,28 +712,82 @@
                     <p>Welcome to Will's Tech Store Admin Panel</p>
                 </div>
 
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <i class="fas fa-eye"></i>
-                        <h3 id="pageViews">1,254</h3>
-                        <p>Page Views</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-shopping-cart"></i>
-                        <h3 id="productsCount">24</h3>
-                        <p>Products</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-users"></i>
-                        <h3 id="customersCount">1,000+</h3>
-                        <p>Customers</p>
-                    </div>
-                    <div class="stat-card">
-                        <i class="fas fa-comments"></i>
-                        <h3 id="whatsappLeads">156</h3>
-                        <p>WhatsApp Leads</p>
-                    </div>
-                </div>
+                <!-- Update your stats-grid in admin.html -->
+<div class="stats-grid">
+    <div class="stat-card">
+        <i class="fas fa-eye"></i>
+        <h3 id="pageViews">1,254</h3>
+        <p>Page Views</p>
+        <small>Live</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-shopping-cart"></i>
+        <h3 id="productsCount">24</h3>
+        <p>Active Products</p>
+        <small>From inventory</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-users"></i>
+        <h3 id="customersCount">1,000+</h3>
+        <p>Unique Visitors</p>
+        <small>Total customers</small>
+    </div>
+    <div class="stat-card">
+        <i class="fas fa-comments"></i>
+        <h3 id="whatsappLeads">156</h3>
+        <p>WhatsApp Leads</p>
+        <small>Conversations started</small>
+    </div>
+</div>
+
+<!-- Add more detailed statistics section -->
+<div class="form-section">
+    <h2>Detailed Analytics</h2>
+    <div class="stats-grid">
+        <div class="stat-card">
+            <i class="fas fa-image"></i>
+            <h3 id="product-views">0</h3>
+            <p>Product Views</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-search"></i>
+            <h3 id="quick-views">0</h3>
+            <p>Quick Views</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-clock"></i>
+            <h3 id="avg-time-on-site">0s</h3>
+            <p>Avg. Time on Site</p>
+        </div>
+        <div class="stat-card">
+            <i class="fas fa-redo"></i>
+            <h3 id="returning-rate">0%</h3>
+            <p>Returning Rate</p>
+        </div>
+    </div>
+</div>
+
+<!-- Add real-time activity feed -->
+<div class="form-section">
+    <h2>Recent Activity</h2>
+    <div id="activityFeed" class="activity-feed">
+        <div class="activity-item">
+            <i class="fas fa-eye text-primary"></i>
+            <div class="activity-content">
+                <p>Page view from Kampala, Uganda</p>
+                <small>2 minutes ago</small>
+            </div>
+        </div>
+        <div class="activity-item">
+            <i class="fab fa-whatsapp text-success"></i>
+            <div class="activity-content">
+                <p>WhatsApp inquiry for iPhone 15 Pro</p>
+                <small>5 minutes ago</small>
+            </div>
+        </div>
+        <!-- Activities will be populated dynamically -->
+    </div>
+</div>
 
                 <div class="form-section">
                     <h2>Quick Actions</h2>

@@ -29,6 +29,9 @@ class WillTechAdmin {
         
         // Then load current data from GitHub
         await this.syncWithGitHub();
+
+        // Load live statistics
+        await this.loadLiveStatistics();
         
         this.setupEventListeners();
         this.setupEditFormListener(); // ADD THIS LINE
@@ -44,6 +47,147 @@ class WillTechAdmin {
 
         console.log('Admin panel fully initialized');
     }
+
+    // Add these methods to your WillTechAdmin class
+
+async loadLiveStatistics() {
+    try {
+        // Try to load from JSONBin API first
+        const stats = await this.fetchStatsFromAPI();
+        
+        if (stats) {
+            this.updateStatsDisplay(stats);
+        } else {
+            // Fallback to local storage or default values
+            this.updateStatsDisplay(this.getDefaultStats());
+        }
+        
+        // Set up real-time updates
+        this.setupRealTimeUpdates();
+        
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        this.showAlert('⚠️ Could not load live statistics', 'error');
+    }
+}
+
+async fetchStatsFromAPI() {
+    try {
+        // You'll need to store the bin ID somewhere accessible
+        const binId = localStorage.getItem('willstech_stats_bin_id');
+        
+        if (!binId) return null;
+
+        const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+            headers: {
+                'X-Master-Key': this.githubToken // Using GitHub token as API key
+            }
+        });
+
+        if (response.ok) {
+            const data = await response.json();
+            return data.record;
+        }
+        return null;
+    } catch (error) {
+        console.error('API fetch failed:', error);
+        return null;
+    }
+}
+
+updateStatsDisplay(stats) {
+    const elements = {
+        pageViews: document.getElementById('pageViews'),
+        productsCount: document.getElementById('productsCount'),
+        customersCount: document.getElementById('customersCount'),
+        whatsappLeads: document.getElementById('whatsappLeads')
+    };
+
+    if (elements.pageViews) {
+        elements.pageViews.textContent = this.formatNumber(stats.pageViews || 0);
+    }
+    
+    if (elements.productsCount) {
+        const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
+        elements.productsCount.textContent = activeProducts;
+    }
+    
+    if (elements.customersCount) {
+        elements.customersCount.textContent = `${this.formatNumber(stats.uniqueVisitors || 0)}+`;
+    }
+    
+    if (elements.whatsappLeads) {
+        elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
+    }
+
+    // Update additional stats if you add more cards
+    this.updateAdditionalStats(stats);
+}
+
+updateAdditionalStats(stats) {
+    // You can add more detailed stats here
+    const additionalStats = {
+        'product-views': stats.productViews || 0,
+        'quick-views': stats.quickViewOpens || 0,
+        'avg-time-on-site': this.formatTime(stats.timeOnSite || 0),
+        'returning-rate': this.calculateReturningRate(stats)
+    };
+
+    // Update any additional stat elements you add to the dashboard
+    Object.keys(additionalStats).forEach(key => {
+        const element = document.getElementById(key);
+        if (element) {
+            element.textContent = additionalStats[key];
+        }
+    });
+}
+
+formatNumber(num) {
+    if (num >= 1000000) {
+        return (num / 1000000).toFixed(1) + 'M';
+    } else if (num >= 1000) {
+        return (num / 1000).toFixed(1) + 'K';
+    }
+    return num.toString();
+}
+
+formatTime(seconds) {
+    if (seconds < 60) return `${seconds}s`;
+    const minutes = Math.floor(seconds / 60);
+    return `${minutes}m ${seconds % 60}s`;
+}
+
+calculateReturningRate(stats) {
+    if (!stats.uniqueVisitors) return '0%';
+    const rate = (stats.returningVisitors / stats.uniqueVisitors) * 100;
+    return `${Math.round(rate)}%`;
+}
+
+setupRealTimeUpdates() {
+    // Refresh stats every 30 seconds
+    setInterval(() => {
+        this.loadLiveStatistics();
+    }, 30000);
+
+    // Also refresh when tab becomes visible
+    document.addEventListener('visibilitychange', () => {
+        if (!document.hidden) {
+            this.loadLiveStatistics();
+        }
+    });
+}
+
+getDefaultStats() {
+    return {
+        pageViews: 1254,
+        uniqueVisitors: 893,
+        whatsappLeads: 156,
+        productViews: 0,
+        quickViewOpens: 0,
+        timeOnSite: 0,
+        returningVisitors: 0
+    };
+}
 
     async loadSettings() {
         // Load GitHub token and repo config from localStorage

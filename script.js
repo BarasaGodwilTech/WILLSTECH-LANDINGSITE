@@ -11,6 +11,233 @@ if (window.location.pathname.includes('admin.html') &&
 // ==== ENHANCED ONBOARDING WITH SITE IMPROVEMENT NOTIFICATION ====
 // ==== PROFESSIONAL ONBOARDING GUIDE ====
 
+// statistics.js - Add this to your main website
+class WebsiteStatistics {
+    constructor() {
+        this.apiUrl = 'https://api.jsonbin.io/v3/b'; // Free JSON storage API
+        this.apiKey = 'your-jsonbin-api-key'; // Get free API key from jsonbin.io
+        this.binId = null;
+        this.statsData = {
+            pageViews: 0,
+            uniqueVisitors: 0,
+            whatsappLeads: 0,
+            productViews: 0,
+            quickViewOpens: 0,
+            timeOnSite: 0,
+            returningVisitors: 0,
+            lastUpdated: new Date().toISOString()
+        };
+        this.visitStartTime = Date.now();
+        this.init();
+    }
+
+    async init() {
+        await this.loadStats();
+        this.trackPageView();
+        this.trackUserEngagement();
+        this.trackWhatsAppClicks();
+        this.trackProductInteractions();
+        this.setupPeriodicSave();
+    }
+
+    async loadStats() {
+        try {
+            // Try to load existing stats
+            const response = await fetch(`${this.apiUrl}/${this.binId}`, {
+                headers: {
+                    'X-Master-Key': this.apiKey
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                this.statsData = { ...this.statsData, ...data.record };
+            } else {
+                // Create new bin if doesn't exist
+                await this.createStatsBin();
+            }
+        } catch (error) {
+            console.log('Could not load stats, using local storage');
+            this.loadFromLocalStorage();
+        }
+    }
+
+    async createStatsBin() {
+        try {
+            const response = await fetch(this.apiUrl, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-Master-Key': this.apiKey
+                },
+                body: JSON.stringify(this.statsData)
+            });
+            
+            const data = await response.json();
+            this.binId = data.metadata.id;
+            localStorage.setItem('willstech_stats_bin_id', this.binId);
+        } catch (error) {
+            console.error('Failed to create stats bin:', error);
+        }
+    }
+
+    async saveStats() {
+        this.statsData.lastUpdated = new Date().toISOString();
+        
+        try {
+            if (this.binId) {
+                await fetch(`${this.apiUrl}/${this.binId}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-Master-Key': this.apiKey
+                    },
+                    body: JSON.stringify(this.statsData)
+                });
+            }
+            
+            // Also save to local storage as backup
+            this.saveToLocalStorage();
+        } catch (error) {
+            console.error('Failed to save stats:', error);
+            this.saveToLocalStorage();
+        }
+    }
+
+    saveToLocalStorage() {
+        localStorage.setItem('willstech_stats', JSON.stringify(this.statsData));
+    }
+
+    loadFromLocalStorage() {
+        const saved = localStorage.getItem('willstech_stats');
+        if (saved) {
+            this.statsData = { ...this.statsData, ...JSON.parse(saved) };
+        }
+    }
+
+    trackPageView() {
+        // Check if this is a new session
+        const lastVisit = localStorage.getItem('willstech_last_visit');
+        const now = Date.now();
+        
+        this.statsData.pageViews++;
+        
+        if (!lastVisit || (now - parseInt(lastVisit)) > 30 * 60 * 1000) { // 30 minutes
+            this.statsData.uniqueVisitors++;
+            
+            // Check if returning visitor
+            if (lastVisit) {
+                this.statsData.returningVisitors++;
+            }
+        }
+        
+        localStorage.setItem('willstech_last_visit', now.toString());
+        this.saveStats();
+    }
+
+    trackUserEngagement() {
+        // Track time on site
+        window.addEventListener('beforeunload', () => {
+            const timeSpent = Date.now() - this.visitStartTime;
+            this.statsData.timeOnSite += Math.round(timeSpent / 1000); // in seconds
+            this.saveStats();
+        });
+
+        // Track scroll depth
+        let maxScroll = 0;
+        window.addEventListener('scroll', () => {
+            const scrollDepth = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
+            maxScroll = Math.max(maxScroll, scrollDepth);
+        });
+
+        // Save scroll depth on exit
+        window.addEventListener('beforeunload', () => {
+            if (maxScroll > 50) { // Only count if user scrolled more than 50%
+                // You could track this as engagement metric
+            }
+        });
+    }
+
+    trackWhatsAppClicks() {
+        document.addEventListener('click', (e) => {
+            const whatsappBtn = e.target.closest('a[href*="wa.me"], a[href*="whatsapp"]');
+            if (whatsappBtn) {
+                this.statsData.whatsappLeads++;
+                this.saveStats();
+                
+                // Track which WhatsApp button was clicked
+                const buttonType = this.getWhatsAppButtonType(whatsappBtn);
+                this.trackEvent('whatsapp_click', buttonType);
+            }
+        });
+    }
+
+    getWhatsAppButtonType(button) {
+        if (button.classList.contains('btn-primary')) return 'primary_cta';
+        if (button.classList.contains('whatsapp-order')) return 'product_order';
+        if (button.closest('.hero')) return 'hero_section';
+        if (button.closest('.whatsapp-cta')) return 'dedicated_cta';
+        return 'other';
+    }
+
+    trackProductInteractions() {
+        // Track product views (when product comes into viewport)
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting && entry.target.classList.contains('product-card')) {
+                    this.statsData.productViews++;
+                    this.saveStats();
+                }
+            });
+        }, { threshold: 0.5 });
+
+        // Observe all product cards
+        document.querySelectorAll('.product-card').forEach(card => {
+            observer.observe(card);
+        });
+
+        // Track quick view opens
+        document.addEventListener('click', (e) => {
+            if (e.target.closest('.quick-view-btn')) {
+                this.statsData.quickViewOpens++;
+                this.saveStats();
+                this.trackEvent('quick_view', 'product');
+            }
+        });
+    }
+
+    trackEvent(eventName, eventLabel) {
+        // For more detailed event tracking
+        const eventData = {
+            event: eventName,
+            label: eventLabel,
+            timestamp: new Date().toISOString(),
+            page: window.location.pathname
+        };
+        
+        // Save events to local storage
+        const events = JSON.parse(localStorage.getItem('willstech_events') || '[]');
+        events.push(eventData);
+        localStorage.setItem('willstech_events', JSON.stringify(events.slice(-100))); // Keep last 100 events
+    }
+
+    setupPeriodicSave() {
+        // Save stats every 30 seconds
+        setInterval(() => {
+            this.saveStats();
+        }, 30000);
+    }
+
+    // Method to get current stats (for admin panel)
+    async getStats() {
+        await this.loadStats();
+        return this.statsData;
+    }
+}
+
+// Initialize statistics tracking
+window.websiteStats = new WebsiteStatistics();
+
 // ==== SITE IMPROVEMENT NOTIFICATION ====
 function showSiteImprovementNotification() {
     const hasSeenImprovementNotice = localStorage.getItem('willstech_site_improvement_seen');

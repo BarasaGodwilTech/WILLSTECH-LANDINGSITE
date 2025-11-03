@@ -161,32 +161,41 @@ updatePopularProducts(popularProducts) {
 // In admin.js - Update this method
 async fetchStatsFromAPI() {
     try {
-        const binId = localStorage.getItem('willstech_stats_bin_id');
+        // Use the EXACT SAME bin ID as your main website
+        const binId = '67d3a9a2acd3cb34a92be26b';
         
         if (!binId) {
-            console.log('No stats bin ID found, using default stats');
-            return this.getDefaultStats();
+            console.log('No stats bin ID configured');
+            return null;
         }
 
         const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
             headers: {
-                'X-Master-Key': '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae'
+                'X-Master-Key': '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXXae'
             }
         });
 
         if (response.ok) {
             const data = await response.json();
+            console.log('📊 Admin loaded real stats:', data.record);
             return data.record;
+        } else {
+            console.error('Failed to fetch stats:', response.status);
+            return null;
         }
-        return this.getDefaultStats();
     } catch (error) {
         console.error('API fetch failed:', error);
-        return this.getDefaultStats();
+        return null;
     }
 }
 
 // In admin.js, update the updateStatsDisplay method:
 updateStatsDisplay(stats) {
+    if (!stats) {
+        console.log('No stats available, using defaults');
+        stats = this.getDefaultStats();
+    }
+
     const elements = {
         pageViews: document.getElementById('pageViews'),
         productsCount: document.getElementById('productsCount'),
@@ -194,15 +203,16 @@ updateStatsDisplay(stats) {
         whatsappLeads: document.getElementById('whatsappLeads')
     };
 
+    // REAL DATA DISPLAY
     if (elements.pageViews) {
         elements.pageViews.textContent = this.formatNumber(stats.pageViews || 0);
     }
     
     if (elements.productsCount) {
-        // Count only active products
+        // Count REAL products from your actual data
         const activeProducts = this.currentData.products?.filter(p => p.status !== 'hidden').length || 0;
         const totalProducts = this.currentData.products?.length || 0;
-        elements.productsCount.textContent = `${activeProducts} / ${totalProducts}`;
+        elements.productsCount.textContent = `${activeProducts}`; // Show only active count
     }
     
     if (elements.customersCount) {
@@ -213,8 +223,8 @@ updateStatsDisplay(stats) {
         elements.whatsappLeads.textContent = this.formatNumber(stats.whatsappLeads || 0);
     }
 
-    // Update additional stats
-    this.updateAdditionalStats(stats);
+    // Update advanced stats with REAL data
+    this.updateAdvancedStats(stats);
 }
 
 updateAdditionalStats(stats) {
@@ -3049,6 +3059,27 @@ clearEditFormMedia() {
         console.log('🛠️ MANUAL MEDIA INITIALIZATION');
         this.setupMediaManagement();
     }
+    async loadLiveStatistics() {
+    try {
+        console.log('🔄 Loading live statistics...');
+        
+        const stats = await this.fetchStatsFromAPI();
+        
+        console.log('📊 Raw stats received:', stats);
+        
+        if (stats) {
+            this.updateStatsDisplay(stats);
+            this.updateAdvancedStats(stats);
+        } else {
+            console.log('⚠️ No stats received, using defaults');
+            this.updateStatsDisplay(this.getDefaultStats());
+        }
+        
+    } catch (error) {
+        console.error('❌ Error loading statistics:', error);
+        this.showAlert('⚠️ Could not load live statistics', 'error');
+    }
+}
 
 } // <-- This is the closing brace of the WillTechAdmin class
 // Make it globally available

@@ -17,51 +17,70 @@ if (window.location.pathname.includes('admin.html') &&
 // statistics.js - Enhanced with proper tracking methods
 // statistics.js - UPDATED WITH REAL DATA TRACKING
 // SIMPLE WORKING STATISTICS - paste this into your script.js
+
+// SIMPLE WORKING STATISTICS - paste this into your script.js
 class WebsiteStatistics {
     constructor() {
-        this.binId = '67d3a9a2acd3cb34a92be26b'; // Use the ID from step 2
+        // USE THE NEW BIN ID FROM ABOVE
+        this.binId = '6908d0e7d0ea881f40d12d5d'; // ← Replace with the ID from createNewStatsBin()
         this.apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae';
         this.statsData = null;
         this.init();
     }
 
     async init() {
+        console.log('📊 Initializing statistics...');
         await this.loadStats();
         this.trackPageView();
         this.trackWhatsAppClicks();
-        console.log('📊 Statistics ready');
+        this.trackProductViews();
+        console.log('✅ Statistics ready!');
     }
 
     async loadStats() {
         try {
             const response = await fetch(`https://api.jsonbin.io/v3/b/${this.binId}/latest`, {
-                headers: { 'X-Master-Key': this.apiKey }
+                headers: { 
+                    'X-Master-Key': this.apiKey,
+                    'Content-Type': 'application/json'
+                }
             });
 
             if (response.ok) {
                 const data = await response.json();
                 this.statsData = data.record;
-                console.log('📊 Loaded stats:', this.statsData);
+                console.log('📊 Loaded existing stats:', this.statsData);
             } else {
-                await this.createInitialStats();
+                console.log('❌ No stats found, will create on first save');
+                this.statsData = this.getDefaultStats();
             }
         } catch (error) {
-            console.log('First load failed, creating initial stats');
-            await this.createInitialStats();
+            console.error('❌ Load failed:', error);
+            this.statsData = this.getDefaultStats();
         }
     }
 
-    async createInitialStats() {
-        this.statsData = {
+    getDefaultStats() {
+        return {
             pageViews: 0,
             uniqueVisitors: 0,
             whatsappLeads: 0,
             productViews: 0,
             quickViewOpens: 0,
             timeOnSite: 0,
+            returningVisitors: 0,
+            conversionRate: 0,
+            geographicData: [],
+            deviceData: {
+                devices: { mobile: 0, desktop: 0, tablet: 0 },
+                browsers: { Chrome: 0, Firefox: 0, Safari: 0, Edge: 0, Other: 0 },
+                screenSizes: {},
+                platforms: {}
+            },
+            popularProducts: {},
+            dailyVisitors: {},
             lastUpdated: new Date().toISOString()
         };
-        await this.saveStats();
     }
 
     async saveStats() {
@@ -78,10 +97,16 @@ class WebsiteStatistics {
             });
 
             if (response.ok) {
-                console.log('💾 Stats saved:', this.statsData);
+                console.log('💾 Stats saved:', {
+                    pageViews: this.statsData.pageViews,
+                    uniqueVisitors: this.statsData.uniqueVisitors,
+                    whatsappLeads: this.statsData.whatsappLeads
+                });
+            } else {
+                console.error('❌ Save failed:', await response.text());
             }
         } catch (error) {
-            console.error('Save failed:', error);
+            console.error('❌ Save error:', error);
         }
     }
 
@@ -97,23 +122,43 @@ class WebsiteStatistics {
             visitorId = 'visitor_' + Date.now();
             localStorage.setItem('willstech_visitor_id', visitorId);
             this.statsData.uniqueVisitors++;
+            console.log('👤 New visitor:', visitorId);
         }
     }
 
     trackWhatsAppClicks() {
         document.addEventListener('click', (e) => {
-            const whatsappBtn = e.target.closest('a[href*="wa.me"], a[href*="whatsapp.com"]');
-            if (whatsappBtn) {
+            if (e.target.closest('a[href*="wa.me"], a[href*="whatsapp.com"]')) {
                 this.statsData.whatsappLeads++;
+                this.updateConversionRate();
                 this.saveStats();
                 console.log('📞 WhatsApp lead tracked! Total:', this.statsData.whatsappLeads);
             }
         });
     }
+
+    trackProductViews() {
+        // Simple product view tracking
+        setTimeout(() => {
+            const productCards = document.querySelectorAll('.product-card');
+            this.statsData.productViews += productCards.length;
+            this.saveStats();
+        }, 2000);
+    }
+
+    updateConversionRate() {
+        if (this.statsData.uniqueVisitors > 0) {
+            this.statsData.conversionRate = parseFloat(
+                ((this.statsData.whatsappLeads / this.statsData.uniqueVisitors) * 100).toFixed(2)
+            );
+        }
+    }
 }
 
-// Initialize immediately
+// Initialize statistics
 window.websiteStats = new WebsiteStatistics();
+
+
 // ==== SITE IMPROVEMENT NOTIFICATION ====
 function showSiteImprovementNotification() {
     const hasSeenImprovementNotice = localStorage.getItem('willstech_site_improvement_seen');

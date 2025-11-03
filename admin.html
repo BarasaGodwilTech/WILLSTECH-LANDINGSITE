@@ -32,6 +32,73 @@
         }
 
         /* Add to your admin panel CSS */
+.analytics-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+
+.analytics-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    border-left: 4px solid var(--primary);
+}
+
+.analytics-card h4 {
+    margin-bottom: 1rem;
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.analytics-content {
+    max-height: 200px;
+    overflow-y: auto;
+}
+
+.location-item, .device-item, .product-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.location-item:last-child, .device-item:last-child, .product-item:last-child {
+    border-bottom: none;
+}
+
+.device-category {
+    margin-top: 0.75rem;
+    padding-bottom: 0.25rem;
+    border-bottom: 1px dashed #ddd;
+}
+
+.country, .product-name {
+    font-weight: 500;
+}
+
+.visits, .product-views {
+    color: var(--success);
+    font-weight: 600;
+    background: rgba(16, 185, 129, 0.1);
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.loading {
+    text-align: center;
+    color: #666;
+    font-style: italic;
+    padding: 1rem;
+}
+
+        /* Add to your admin panel CSS */
 .stat-card {
     position: relative;
 }
@@ -786,6 +853,45 @@
             </div>
         </div>
         <!-- Activities will be populated dynamically -->
+    </div>
+</div>
+
+<!-- Add this after the existing stats grid -->
+<div class="form-section">
+    <h2>Advanced Analytics</h2>
+    
+    <div class="analytics-grid">
+        <!-- Conversion Rate -->
+        <div class="stat-card">
+            <i class="fas fa-chart-line"></i>
+            <h3 id="conversionRate">0%</h3>
+            <p>Conversion Rate</p>
+            <small>Leads per visitor</small>
+        </div>
+
+        <!-- Geographic Data -->
+        <div class="analytics-card">
+            <h4><i class="fas fa-globe-africa"></i> Geographic Data</h4>
+            <div id="geographicData" class="analytics-content">
+                <div class="loading">Loading geographic data...</div>
+            </div>
+        </div>
+
+        <!-- Device Data -->
+        <div class="analytics-card">
+            <h4><i class="fas fa-laptop"></i> Device & Browser Data</h4>
+            <div id="deviceData" class="analytics-content">
+                <div class="loading">Loading device data...</div>
+            </div>
+        </div>
+
+        <!-- Popular Products -->
+        <div class="analytics-card">
+            <h4><i class="fas fa-star"></i> Popular Products</h4>
+            <div id="popularProducts" class="analytics-content">
+                <div class="loading">Loading product data...</div>
+            </div>
+        </div>
     </div>
 </div>
 

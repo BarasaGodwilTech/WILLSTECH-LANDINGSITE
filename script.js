@@ -12,11 +12,12 @@ if (window.location.pathname.includes('admin.html') &&
 // ==== PROFESSIONAL ONBOARDING GUIDE ====
 
 // statistics.js - Add this to your main website
+// statistics.js - Updated with all additional tracking features
 class WebsiteStatistics {
     constructor() {
-        this.apiUrl = 'https://api.jsonbin.io/v3/b'; // Free JSON storage API
-        this.apiKey = 'your-jsonbin-api-key'; // Get free API key from jsonbin.io
-        this.binId = null;
+        this.apiUrl = 'https://api.jsonbin.io/v3/b';
+        this.apiKey = '$2a$10$xTRsJCYlQWWWw5iZY2nF8.juBSRT8E.WPJe9g0na5aNGy630jfXae'; // Replace with your actual JSONBin API key
+        this.binId = localStorage.getItem('willstech_stats_bin_id');
         this.statsData = {
             pageViews: 0,
             uniqueVisitors: 0,
@@ -25,6 +26,10 @@ class WebsiteStatistics {
             quickViewOpens: 0,
             timeOnSite: 0,
             returningVisitors: 0,
+            geographicData: [],
+            deviceData: {},
+            conversionRate: 0,
+            popularProducts: {},
             lastUpdated: new Date().toISOString()
         };
         this.visitStartTime = Date.now();
@@ -37,201 +42,194 @@ class WebsiteStatistics {
         this.trackUserEngagement();
         this.trackWhatsAppClicks();
         this.trackProductInteractions();
+        this.trackGeographicData();        // ADD THIS LINE
+        this.trackDeviceInfo();            // ADD THIS LINE
         this.setupPeriodicSave();
     }
 
-    async loadStats() {
+    // ... (keep all your existing methods like loadStats, saveStats, etc.)
+
+    // ADD THESE NEW METHODS RIGHT AFTER THE trackProductInteractions METHOD:
+
+    async trackGeographicData() {
         try {
-            // Try to load existing stats
-            const response = await fetch(`${this.apiUrl}/${this.binId}`, {
-                headers: {
-                    'X-Master-Key': this.apiKey
+            const geoData = await this.getGeographicData();
+            if (geoData) {
+                if (!this.statsData.geographicData) {
+                    this.statsData.geographicData = [];
                 }
-            });
-            
+                
+                // Check if we already have data for this country
+                const existingIndex = this.statsData.geographicData.findIndex(
+                    item => item.country === geoData.country
+                );
+                
+                if (existingIndex !== -1) {
+                    this.statsData.geographicData[existingIndex].visits++;
+                } else {
+                    this.statsData.geographicData.push({
+                        country: geoData.country,
+                        city: geoData.city,
+                        region: geoData.region,
+                        visits: 1
+                    });
+                }
+                
+                this.saveStats();
+            }
+        } catch (error) {
+            console.log('Geographic tracking failed:', error);
+        }
+    }
+
+    async getGeographicData() {
+        try {
+            const response = await fetch('https://ipapi.co/json/');
             if (response.ok) {
                 const data = await response.json();
-                this.statsData = { ...this.statsData, ...data.record };
-            } else {
-                // Create new bin if doesn't exist
-                await this.createStatsBin();
+                return {
+                    country: data.country_name,
+                    city: data.city,
+                    region: data.region,
+                    ip: data.ip
+                };
             }
         } catch (error) {
-            console.log('Could not load stats, using local storage');
-            this.loadFromLocalStorage();
-        }
-    }
-
-    async createStatsBin() {
-        try {
-            const response = await fetch(this.apiUrl, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                    'X-Master-Key': this.apiKey
-                },
-                body: JSON.stringify(this.statsData)
-            });
-            
-            const data = await response.json();
-            this.binId = data.metadata.id;
-            localStorage.setItem('willstech_stats_bin_id', this.binId);
-        } catch (error) {
-            console.error('Failed to create stats bin:', error);
-        }
-    }
-
-    async saveStats() {
-        this.statsData.lastUpdated = new Date().toISOString();
-        
-        try {
-            if (this.binId) {
-                await fetch(`${this.apiUrl}/${this.binId}`, {
-                    method: 'PUT',
-                    headers: {
-                        'Content-Type': 'application/json',
-                        'X-Master-Key': this.apiKey
-                    },
-                    body: JSON.stringify(this.statsData)
-                });
-            }
-            
-            // Also save to local storage as backup
-            this.saveToLocalStorage();
-        } catch (error) {
-            console.error('Failed to save stats:', error);
-            this.saveToLocalStorage();
-        }
-    }
-
-    saveToLocalStorage() {
-        localStorage.setItem('willstech_stats', JSON.stringify(this.statsData));
-    }
-
-    loadFromLocalStorage() {
-        const saved = localStorage.getItem('willstech_stats');
-        if (saved) {
-            this.statsData = { ...this.statsData, ...JSON.parse(saved) };
-        }
-    }
-
-    trackPageView() {
-        // Check if this is a new session
-        const lastVisit = localStorage.getItem('willstech_last_visit');
-        const now = Date.now();
-        
-        this.statsData.pageViews++;
-        
-        if (!lastVisit || (now - parseInt(lastVisit)) > 30 * 60 * 1000) { // 30 minutes
-            this.statsData.uniqueVisitors++;
-            
-            // Check if returning visitor
-            if (lastVisit) {
-                this.statsData.returningVisitors++;
+            // Fallback to a free API if first one fails
+            try {
+                const response = await fetch('https://api.ipgeolocation.io/ipgeo?apiKey=YOUR_FALLBACK_API_KEY');
+                if (response.ok) {
+                    const data = await response.json();
+                    return {
+                        country: data.country_name,
+                        city: data.city,
+                        region: data.state_prov,
+                        ip: data.ip
+                    };
+                }
+            } catch (fallbackError) {
+                console.log('All geographic APIs failed');
             }
         }
+        return null;
+    }
+
+    trackDeviceInfo() {
+        const deviceInfo = this.getDeviceInfo();
         
-        localStorage.setItem('willstech_last_visit', now.toString());
+        // Initialize deviceData if it doesn't exist
+        if (!this.statsData.deviceData) {
+            this.statsData.deviceData = {
+                devices: {},
+                browsers: {},
+                screenSizes: {},
+                platforms: {}
+            };
+        }
+
+        // Track device type
+        this.statsData.deviceData.devices[deviceInfo.deviceType] = 
+            (this.statsData.deviceData.devices[deviceInfo.deviceType] || 0) + 1;
+
+        // Track browser
+        this.statsData.deviceData.browsers[deviceInfo.browser] = 
+            (this.statsData.deviceData.browsers[deviceInfo.browser] || 0) + 1;
+
+        // Track screen size
+        this.statsData.deviceData.screenSizes[deviceInfo.screenSize] = 
+            (this.statsData.deviceData.screenSizes[deviceInfo.screenSize] || 0) + 1;
+
+        // Track platform
+        this.statsData.deviceData.platforms[deviceInfo.platform] = 
+            (this.statsData.deviceData.platforms[deviceInfo.platform] || 0) + 1;
+
         this.saveStats();
     }
 
-    trackUserEngagement() {
-        // Track time on site
-        window.addEventListener('beforeunload', () => {
-            const timeSpent = Date.now() - this.visitStartTime;
-            this.statsData.timeOnSite += Math.round(timeSpent / 1000); // in seconds
-            this.saveStats();
-        });
-
-        // Track scroll depth
-        let maxScroll = 0;
-        window.addEventListener('scroll', () => {
-            const scrollDepth = (window.scrollY / (document.body.scrollHeight - window.innerHeight)) * 100;
-            maxScroll = Math.max(maxScroll, scrollDepth);
-        });
-
-        // Save scroll depth on exit
-        window.addEventListener('beforeunload', () => {
-            if (maxScroll > 50) { // Only count if user scrolled more than 50%
-                // You could track this as engagement metric
-            }
-        });
+    getDeviceInfo() {
+        return {
+            deviceType: this.getDeviceType(),
+            browser: this.getBrowserInfo(),
+            screenSize: `${screen.width}x${screen.height}`,
+            platform: navigator.platform
+        };
     }
 
-    trackWhatsAppClicks() {
-        document.addEventListener('click', (e) => {
-            const whatsappBtn = e.target.closest('a[href*="wa.me"], a[href*="whatsapp"]');
-            if (whatsappBtn) {
-                this.statsData.whatsappLeads++;
-                this.saveStats();
-                
-                // Track which WhatsApp button was clicked
-                const buttonType = this.getWhatsAppButtonType(whatsappBtn);
-                this.trackEvent('whatsapp_click', buttonType);
-            }
-        });
+    getDeviceType() {
+        const ua = navigator.userAgent;
+        if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+            return "tablet";
+        }
+        if (/Mobile|Android|iP(hone|od)|IEMobile|BlackBerry|Kindle|Silk-Accelerated|(hpw|web)OS|Opera M(obi|ini)/.test(ua)) {
+            return "mobile";
+        }
+        return "desktop";
     }
 
-    getWhatsAppButtonType(button) {
-        if (button.classList.contains('btn-primary')) return 'primary_cta';
-        if (button.classList.contains('whatsapp-order')) return 'product_order';
-        if (button.closest('.hero')) return 'hero_section';
-        if (button.closest('.whatsapp-cta')) return 'dedicated_cta';
-        return 'other';
+    getBrowserInfo() {
+        const ua = navigator.userAgent;
+        if (ua.includes('Chrome')) return 'Chrome';
+        if (ua.includes('Firefox')) return 'Firefox';
+        if (ua.includes('Safari')) return 'Safari';
+        if (ua.includes('Edge')) return 'Edge';
+        return 'Other';
     }
 
+    // Add this method to track popular products
+    trackProductView(productName) {
+        if (!this.statsData.popularProducts) {
+            this.statsData.popularProducts = {};
+        }
+
+        this.statsData.popularProducts[productName] = 
+            (this.statsData.popularProducts[productName] || 0) + 1;
+
+        // Update conversion rate
+        this.updateConversionRate();
+    }
+
+    updateConversionRate() {
+        const whatsappLeads = this.statsData.whatsappLeads || 0;
+        const uniqueVisitors = this.statsData.uniqueVisitors || 1;
+        this.statsData.conversionRate = parseFloat(((whatsappLeads / uniqueVisitors) * 100).toFixed(2));
+    }
+
+    // Update the existing trackProductInteractions method to include product name tracking
     trackProductInteractions() {
-        // Track product views (when product comes into viewport)
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
                 if (entry.isIntersecting && entry.target.classList.contains('product-card')) {
                     this.statsData.productViews++;
+                    
+                    // Track specific product view
+                    const productName = entry.target.querySelector('h3')?.textContent;
+                    if (productName) {
+                        this.trackProductView(productName);
+                    }
+                    
                     this.saveStats();
                 }
             });
         }, { threshold: 0.5 });
 
-        // Observe all product cards
         document.querySelectorAll('.product-card').forEach(card => {
             observer.observe(card);
         });
 
-        // Track quick view opens
+        // Track quick view opens with product name
         document.addEventListener('click', (e) => {
             if (e.target.closest('.quick-view-btn')) {
                 this.statsData.quickViewOpens++;
+                const productCard = e.target.closest('.product-card');
+                const productName = productCard?.querySelector('h3')?.textContent;
+                
+                if (productName) {
+                    this.trackEvent('quick_view', productName);
+                }
+                
                 this.saveStats();
-                this.trackEvent('quick_view', 'product');
             }
         });
-    }
-
-    trackEvent(eventName, eventLabel) {
-        // For more detailed event tracking
-        const eventData = {
-            event: eventName,
-            label: eventLabel,
-            timestamp: new Date().toISOString(),
-            page: window.location.pathname
-        };
-        
-        // Save events to local storage
-        const events = JSON.parse(localStorage.getItem('willstech_events') || '[]');
-        events.push(eventData);
-        localStorage.setItem('willstech_events', JSON.stringify(events.slice(-100))); // Keep last 100 events
-    }
-
-    setupPeriodicSave() {
-        // Save stats every 30 seconds
-        setInterval(() => {
-            this.saveStats();
-        }, 30000);
-    }
-
-    // Method to get current stats (for admin panel)
-    async getStats() {
-        await this.loadStats();
-        return this.statsData;
     }
 }
 

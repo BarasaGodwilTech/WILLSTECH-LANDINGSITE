@@ -71,6 +71,111 @@ async loadLiveStatistics() {
     }
 }
 
+// Add these methods to your WillTechAdmin class, right after the loadLiveStatistics method
+
+async loadLiveStatistics() {
+    try {
+        const stats = await this.fetchStatsFromAPI();
+        
+        if (stats) {
+            this.updateStatsDisplay(stats);
+            this.updateAdvancedStats(stats); // ADD THIS LINE
+        } else {
+            this.updateStatsDisplay(this.getDefaultStats());
+        }
+        
+        this.setupRealTimeUpdates();
+        
+    } catch (error) {
+        console.error('Error loading statistics:', error);
+        this.showAlert('⚠️ Could not load live statistics', 'error');
+    }
+}
+
+// ADD THIS NEW METHOD
+updateAdvancedStats(stats) {
+    // Update geographic data
+    this.updateGeographicDisplay(stats.geographicData);
+    
+    // Update device data
+    this.updateDeviceDisplay(stats.deviceData);
+    
+    // Update conversion rate
+    this.updateConversionDisplay(stats.conversionRate);
+    
+    // Update popular products
+    this.updatePopularProducts(stats.popularProducts);
+}
+
+// ADD THESE HELPER METHODS
+updateGeographicDisplay(geoData) {
+    const geoContainer = document.getElementById('geographicData');
+    if (!geoContainer || !geoData) return;
+
+    let html = '<h4>Top Locations</h4>';
+    const topLocations = geoData.slice(0, 5); // Show top 5
+    
+    topLocations.forEach(location => {
+        html += `
+            <div class="location-item">
+                <span class="country">${location.country}</span>
+                <span class="visits">${location.visits} visits</span>
+            </div>
+        `;
+    });
+    
+    geoContainer.innerHTML = html;
+}
+
+updateDeviceDisplay(deviceData) {
+    const deviceContainer = document.getElementById('deviceData');
+    if (!deviceContainer || !deviceData) return;
+
+    let html = '<h4>Device Distribution</h4>';
+    
+    // Devices
+    html += '<div class="device-category"><strong>Devices:</strong></div>';
+    Object.entries(deviceData.devices || {}).forEach(([device, count]) => {
+        html += `<div class="device-item">${device}: ${count}</div>`;
+    });
+    
+    // Browsers
+    html += '<div class="device-category"><strong>Browsers:</strong></div>';
+    Object.entries(deviceData.browsers || {}).forEach(([browser, count]) => {
+        html += `<div class="device-item">${browser}: ${count}</div>`;
+    });
+    
+    deviceContainer.innerHTML = html;
+}
+
+updateConversionDisplay(conversionRate) {
+    const conversionElement = document.getElementById('conversionRate');
+    if (conversionElement) {
+        conversionElement.textContent = `${conversionRate || 0}%`;
+    }
+}
+
+updatePopularProducts(popularProducts) {
+    const productsContainer = document.getElementById('popularProducts');
+    if (!productsContainer || !popularProducts) return;
+
+    let html = '<h4>Most Viewed Products</h4>';
+    const sortedProducts = Object.entries(popularProducts)
+        .sort(([,a], [,b]) => b - a)
+        .slice(0, 5); // Top 5 products
+    
+    sortedProducts.forEach(([product, views]) => {
+        html += `
+            <div class="product-item">
+                <span class="product-name">${product}</span>
+                <span class="product-views">${views} views</span>
+            </div>
+        `;
+    });
+    
+    productsContainer.innerHTML = html;
+}
+
 async fetchStatsFromAPI() {
     try {
         // You'll need to store the bin ID somewhere accessible
@@ -177,6 +282,7 @@ setupRealTimeUpdates() {
     });
 }
 
+// Update the getDefaultStats method in your WillTechAdmin class
 getDefaultStats() {
     return {
         pageViews: 1254,
@@ -185,7 +291,26 @@ getDefaultStats() {
         productViews: 0,
         quickViewOpens: 0,
         timeOnSite: 0,
-        returningVisitors: 0
+        returningVisitors: 0,
+        conversionRate: 0,
+        geographicData: [
+            { country: 'Uganda', city: 'Kampala', region: 'Central', visits: 45 },
+            { country: 'Uganda', city: 'Mbale', region: 'Eastern', visits: 23 },
+            { country: 'Kenya', city: 'Nairobi', region: 'Nairobi', visits: 12 }
+        ],
+        deviceData: {
+            devices: { mobile: 65, desktop: 30, tablet: 5 },
+            browsers: { Chrome: 70, Safari: 20, Firefox: 8, Other: 2 },
+            screenSizes: { '375x667': 45, '1920x1080': 25, '414x896': 20, 'Other': 10 },
+            platforms: { 'iPhone': 40, 'MacIntel': 25, 'Windows': 30, 'Linux': 5 }
+        },
+        popularProducts: {
+            'iPhone 15 Pro': 45,
+            'Samsung Galaxy S24': 38,
+            'MacBook Pro M3': 32,
+            'AirPods Pro': 28,
+            'iPad Air': 25
+        }
     };
 }
 

@@ -188,6 +188,36 @@
       "status": "active",
       "dateAdded": "2025-10-29T14:22:05.876Z",
       "dateUpdated": "2025-10-29T14:37:54.974Z"
+    },
+    {
+      "id": 1762196578863,
+      "name": "Galaxy tab A9+",
+      "sku": "0106",
+      "category": "smartphones",
+      "description": "Galaxy tab A9+",
+      "price": "00",
+      "originalPrice": "00",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762196536105.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 3.6,
+      "reviewCount": 69,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Wide"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-03T19:02:58.865Z"
     }
   ],
   "content": {
@@ -204,5 +234,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T17:27:34.159Z"
+  "lastUpdated": "2025-11-03T19:02:58.909Z"
 }

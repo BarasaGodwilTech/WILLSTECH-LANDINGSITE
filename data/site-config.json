@@ -275,7 +275,7 @@
       "videos": [],
       "stock": "pre-order",
       "rating": 4.5,
-      "reviewCount": 0,
+      "reviewCount": 103,
       "badges": [
         "new"
       ],
@@ -293,7 +293,7 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-11-04T06:52:00.138Z",
-      "dateUpdated": "2025-11-04T06:55:28.075Z"
+      "dateUpdated": "2025-11-04T07:03:56.841Z"
     }
   ],
   "content": {
@@ -310,5 +310,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-04T06:55:28.079Z"
+  "lastUpdated": "2025-11-04T07:03:56.843Z"
 }

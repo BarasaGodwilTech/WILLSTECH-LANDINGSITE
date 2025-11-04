@@ -265,10 +265,12 @@
       "sku": "0108",
       "category": "accessories",
       "description": "Brand+ KZ EDX Pro 10mm Dual Magnetic Circuit Dynamic Drive in ear monitor 2Pin Cable HIFI Bass Earphones Stereo Noise Cancelling",
-      "price": "150000",
-      "originalPrice": "290000",
+      "price": 150000,
+      "originalPrice": 290000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239004262.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239004262.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239269686.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239321177.jpg"
       ],
       "videos": [],
       "stock": "pre-order",
@@ -290,7 +292,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-11-04T06:52:00.138Z"
+      "dateAdded": "2025-11-04T06:52:00.138Z",
+      "dateUpdated": "2025-11-04T06:55:28.075Z"
     }
   ],
   "content": {
@@ -307,5 +310,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-04T06:52:00.161Z"
+  "lastUpdated": "2025-11-04T06:55:28.079Z"
 }

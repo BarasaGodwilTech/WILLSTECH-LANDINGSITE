@@ -300,8 +300,8 @@
       "name": "DJI Mic Mini",
       "sku": "0109",
       "category": "accessories",
-      "description": "DJI Mic Mini ",
-      "price": "950000",
+      "description": "DJI Mic Mini, a wireless microphone that packs powerful performance into an ultralight body. It ensures stable transmission of high-quality audio, boasts extended battery life, and features direct connection with products in the DJI OsmoAudio ecosystem. Experience detail-rich sound recording that elevates your content creation experience. With a simple flip of the case, you are ready to add high-quality audio to any project.",
+      "price": 950000,
       "originalPrice": null,
       "images": [
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762276861884.jpg"
@@ -313,7 +313,12 @@
       "badges": [
         "new"
       ],
-      "features": [],
+      "features": [
+        "Small but Mighty - The DJI Mic Mini Transmitter is small and ultralight, weighing only 10 g, [1] making it comfortable to wear, discreet, and aesthetically pleasing on-camera.",
+        "Detail-Rich Sound - Mic Mini delivers high-quality audio. A 400m max transmission range [2] ensures stable recording, even in bustling outdoor environments like a busy street.",
+        "Extended Battery, More Recording Time - Mic Mini with Charging Case offers up to 48 hours of battery life, [3] ideal for long trips, interviews, livestreaming and other intensive usage scenarios.",
+        "DJI Ecosystem Direct Connection - With DJI OsmoAudio, a transmitter can connect to Osmo Action 5 Pro, Osmo Action 4, or Osmo Pocket 3 without a receiver, delivering premium audio."
+      ],
       "specifications": {
         "battery": "Up to 6 hours",
         "charging": "Wireless charging case",
@@ -321,7 +326,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-11-04T17:24:11.281Z"
+      "dateAdded": "2025-11-04T17:24:11.281Z",
+      "dateUpdated": "2025-11-04T17:26:55.946Z"
     }
   ],
   "content": {
@@ -338,5 +344,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-04T17:24:11.281Z"
+  "lastUpdated": "2025-11-04T17:26:55.946Z"
 }

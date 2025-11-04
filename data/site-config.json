@@ -54,10 +54,7 @@
       "price": 1023000,
       "originalPrice": 1039000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207985981.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762208019576.jpg",
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762208037137.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1761670060464.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -81,7 +78,7 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-10-28T16:48:13.698Z",
-      "dateUpdated": "2025-11-03T22:14:06.748Z"
+      "dateUpdated": "2025-10-28T18:11:16.079Z"
     },
     {
       "id": 1761671191331,
@@ -261,6 +258,39 @@
       "status": "active",
       "dateAdded": "2025-11-03T21:58:10.559Z",
       "dateUpdated": "2025-11-03T22:01:20.397Z"
+    },
+    {
+      "id": 1762239120138,
+      "name": "KZ EDX Pro In Ear monitor",
+      "sku": "0108",
+      "category": "accessories",
+      "description": "Brand+ KZ EDX Pro 10mm Dual Magnetic Circuit Dynamic Drive in ear monitor 2Pin Cable HIFI Bass Earphones Stereo Noise Cancelling",
+      "price": "150000",
+      "originalPrice": "290000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239004262.jpg"
+      ],
+      "videos": [],
+      "stock": "pre-order",
+      "rating": 4.5,
+      "reviewCount": 0,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Brand+ KZ EDX Pro ",
+        "10mm Dual Magnetic",
+        "Circuit Dynamic Drive Earphone 2Pin Cable",
+        "HIFI Bass Earphones Stereo Noise Cancelling"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-04T06:52:00.138Z"
     }
   ],
   "content": {
@@ -277,5 +307,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T22:17:01.873Z"
+  "lastUpdated": "2025-11-04T06:52:00.161Z"
 }

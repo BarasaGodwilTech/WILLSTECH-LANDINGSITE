@@ -1304,6 +1304,64 @@ function trackFormInteraction(action) {
     }
 }
 
+// ===== SMART PRODUCT SORTING =====
+function getProductSortScore(product) {
+    let score = 0;
+    
+    // Prioritize products with badges
+    if (product.badges && product.badges.length > 0) {
+        score += product.badges.length * 20;
+        
+        // Extra points for specific badges
+        if (product.badges.includes('bestseller')) score += 30;
+        if (product.badges.includes('sale')) score += 25;
+        if (product.badges.includes('new')) score += 20;
+        if (product.badges.includes('limited')) score += 15;
+        if (product.badges.includes('premium-used')) score += 10;
+    }
+    
+    // Prioritize products with discount (higher discount = more points)
+    if (product.originalPrice && product.originalPrice > product.price) {
+        const discountPercent = Math.round((1 - product.price / product.originalPrice) * 100);
+        score += discountPercent * 2; // 50% discount = 100 points
+    }
+    
+    // Prioritize products with high ratings
+    if (product.rating) {
+        score += product.rating * 10; // 5 stars = 50 points
+    }
+    
+    // Prioritize products with more reviews
+    if (product.reviewCount) {
+        score += Math.min(product.reviewCount * 0.5, 50); // Cap at 50 points
+    }
+    
+    // Prioritize products with multiple images
+    if (product.images && product.images.length > 1) {
+        score += (product.images.length - 1) * 5; // 5 extra images = 25 points
+    }
+    
+    // Prioritize products with videos
+    if (product.videos && product.videos.length > 0) {
+        score += product.videos.length * 15; // Each video = 15 points
+    }
+    
+    // Add some randomness (0-25 points) to keep it mixed
+    score += Math.random() * 25;
+    
+    return score;
+}
+
+function smartSortProducts(products) {
+    return [...products]
+        .filter(product => product.status !== 'hidden')
+        .sort((a, b) => {
+            const scoreA = getProductSortScore(a);
+            const scoreB = getProductSortScore(b);
+            return scoreB - scoreA; // Descending order (highest scores first)
+        });
+}
+
 // YouTube API Initialization
 // Enhanced YouTube API Configuration
 // Enhanced YouTube API Configuration
@@ -4003,7 +4061,7 @@ function updateProductsSection(productsData) {
     const productsGrid = document.querySelector('.products-grid');
     if (!productsGrid) return;
     
-    console.log('Updating products section with:', productsData.length, 'products');
+    console.log('Updating products section with smart sorting:', productsData.length, 'products');
     
     // Store products globally for URL access
     window.siteData = window.siteData || {};
@@ -4014,21 +4072,131 @@ function updateProductsSection(productsData) {
     console.log('Removing existing product cards:', existingProductCards.length);
     existingProductCards.forEach(card => card.remove());
     
-    // Add products from site-config.json
-    productsData.forEach(product => {
-        if (product.status !== 'hidden') {
-            const productCard = createProductCard(product);
-            productsGrid.appendChild(productCard);
-        }
+    // Smart sort products before displaying
+    const sortedProducts = smartSortProducts(productsData);
+    
+    console.log('Products sorted by engagement score. Top products:');
+    sortedProducts.slice(0, 3).forEach((product, index) => {
+        const score = getProductSortScore(product);
+        console.log(`${index + 1}. ${product.name} - Score: ${score.toFixed(1)}`);
     });
     
-    console.log('Products section updated. Total cards:', productsGrid.querySelectorAll('.product-card').length);
+    // Add sorted products to the grid
+    sortedProducts.forEach((product, index) => {
+        const productCard = createProductCard(product);
+        
+        // Add staggered animation delay based on position
+        productCard.style.animationDelay = `${index * 0.1}s`;
+        
+        productsGrid.appendChild(productCard);
+    });
+    
+    console.log('Products section updated with smart sorting. Total cards:', productsGrid.querySelectorAll('.product-card').length);
     
     // Re-initialize quick view after products are loaded
     setTimeout(() => {
         initQuickView();
+        initProductFilters(); // Re-init filters for the new products
     }, 1000);
 }
+// Debug function to see product scores (call in console: window.debugProductScores())
+window.debugProductScores = function() {
+    if (!window.siteData || !window.siteData.products) {
+        console.log('No products loaded yet');
+        return;
+    }
+    
+    const scoredProducts = window.siteData.products.map(product => ({
+        name: product.name,
+        score: getProductSortScore(product),
+        rating: product.rating || 0,
+        reviewCount: product.reviewCount || 0,
+        badges: product.badges || [],
+        discount: product.originalPrice ? Math.round((1 - product.price / product.originalPrice) * 100) : 0,
+        images: product.images ? product.images.length : 0,
+        videos: product.videos ? product.videos.length : 0
+    })).sort((a, b) => b.score - a.score);
+    
+    console.table(scoredProducts);
+};
+// Add this CSS to your existing styles
+const smartSortingCSS = `
+/* Enhanced product card styling for smart sorting */
+.products-grid {
+    display: grid;
+    gap: 1.5rem;
+}
+
+.product-card {
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.6s ease forwards;
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+.product-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Highlight high-score products with subtle indicators */
+.product-card[data-score="high"] {
+    border-left: 4px solid var(--accent);
+}
+
+.product-badge.badge-bestseller {
+    background: linear-gradient(135deg, #FFD700, #FFA500);
+    color: #000;
+    font-weight: bold;
+}
+
+.product-badge.badge-sale {
+    background: linear-gradient(135deg, #EF4444, #DC2626);
+    color: white;
+    font-weight: bold;
+}
+
+.product-badge.badge-new {
+    background: linear-gradient(135deg, #10B981, #059669);
+    color: white;
+    font-weight: bold;
+}
+
+/* Staggered animation for product grid */
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Engagement score indicators (optional visual cues) */
+.engagement-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(0,0,0,0.7);
+    color: white;
+    padding: 4px 8px;
+    border-radius: 12px;
+    font-size: 0.7rem;
+    font-weight: bold;
+    z-index: 2;
+}
+
+/* Enhanced product overlay for better CTAs */
+.product-overlay {
+    background: linear-gradient(transparent 40%, rgba(0,0,0,0.8));
+}
+`;
+
+// Inject the CSS
+const smartSortingStyle = document.createElement('style');
+smartSortingStyle.textContent = smartSortingCSS;
+document.head.appendChild(smartSortingStyle);
 
 function createProductCard(product) {
     const productCard = document.createElement('article');

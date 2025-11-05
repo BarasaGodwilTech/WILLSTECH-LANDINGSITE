@@ -331,12 +331,12 @@
     },
     {
       "id": 1762358999120,
-      "name": "Samsung Galaxy A07 4GB / 128GB",
+      "name": "Galaxy A07 4GB / 128GB",
       "sku": "0110",
       "category": "smartphones",
-      "description": "The Samsung Galaxy A07 4GB / 128GBslim and light design increases one handed portability, and the 6.7” large display provides you with an immersive viewing experience. With the upgraded AP, it delivers faster performance",
-      "price": "520000",
-      "originalPrice": "780000",
+      "description": "The Samsung Galaxy A07 4GB / 128GBslim and light design increases one handed portability, and the 6.7â large display provides you with an immersive viewing experience. With the upgraded AP, it delivers faster performance",
+      "price": 520000,
+      "originalPrice": 780000,
       "images": [
         "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762358967708.jpg"
       ],
@@ -367,7 +367,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-11-05T16:09:59.120Z"
+      "dateAdded": "2025-11-05T16:09:59.120Z",
+      "dateUpdated": "2025-11-05T16:23:00.212Z"
     }
   ],
   "content": {
@@ -384,5 +385,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-05T16:09:59.121Z"
+  "lastUpdated": "2025-11-05T16:23:00.241Z"
 }

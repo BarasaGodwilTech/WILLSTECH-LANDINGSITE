@@ -328,6 +328,46 @@
       "status": "active",
       "dateAdded": "2025-11-04T17:24:11.281Z",
       "dateUpdated": "2025-11-04T17:26:55.946Z"
+    },
+    {
+      "id": 1762358999120,
+      "name": "Samsung Galaxy A07 4GB / 128GB",
+      "sku": "0110",
+      "category": "smartphones",
+      "description": "The Samsung Galaxy A07 4GB / 128GBslim and light design increases one handed portability, and the 6.7” large display provides you with an immersive viewing experience. With the upgraded AP, it delivers faster performance",
+      "price": "520000",
+      "originalPrice": "780000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762358967708.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 5,
+      "reviewCount": 203,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Screen: 6.7 HD+ ",
+        "Rear Camera: Wide 50 MP + Depth 2 MP",
+        "Front Camera: 8 MP",
+        "Processor: 6 nm, Helio G99, 2.2 Ghz",
+        "Memory: 4 + 64 GB, microSD card (Up to 2.0 TB)",
+        "Battery: 5,000mAh",
+        "Water Splash Resistance: IP54",
+        "Warranty: 24 months",
+        "7.6 mm Slimmer Design ",
+        "6x OS/6years Security Update ",
+        "GFRP, 2 step tempering glass "
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-05T16:09:59.120Z"
     }
   ],
   "content": {
@@ -344,5 +384,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-04T17:26:55.946Z"
+  "lastUpdated": "2025-11-05T16:09:59.121Z"
 }

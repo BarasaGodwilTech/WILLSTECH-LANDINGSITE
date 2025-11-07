@@ -369,38 +369,6 @@
       "status": "active",
       "dateAdded": "2025-11-05T16:09:59.120Z",
       "dateUpdated": "2025-11-05T16:23:00.212Z"
-    },
-    {
-      "id": 1762520464442,
-      "name": "DJI Mic Mini",
-      "sku": "0100",
-      "category": "accessories",
-      "description": "ggfggfg",
-      "price": "200000",
-      "originalPrice": "3000000",
-      "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762520377342.jpg"
-      ],
-      "videos": [],
-      "stock": "in-stock",
-      "rating": 3.5,
-      "reviewCount": 90,
-      "badges": [
-        "bestseller"
-      ],
-      "features": [
-        "tgfjk",
-        "dgujgdfcgj",
-        "hgkivg"
-      ],
-      "specifications": {
-        "battery": "Up to 6 hours",
-        "charging": "Wireless charging case",
-        "connectivity": "Bluetooth 5.0"
-      },
-      "featured": true,
-      "status": "active",
-      "dateAdded": "2025-11-07T13:01:04.442Z"
     }
   ],
   "content": {
@@ -417,5 +385,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-07T13:01:04.442Z"
+  "lastUpdated": "2025-11-07T13:03:40.322Z"
 }

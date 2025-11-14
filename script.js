@@ -3087,7 +3087,7 @@ function closeQuickViewModal() {
                         
                         <button class="share-option" data-platform="twitter">
                             <div class="share-icon twitter">
-                                <i class="fab fa-twitter"></i>
+                                <i class="fa-brands fa-square-x-twitter"></i>
                             </div>
                             <span>Twitter</span>
                         </button>

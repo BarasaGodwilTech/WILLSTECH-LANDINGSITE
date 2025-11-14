@@ -1,6 +1,6 @@
 {
   "hero": {
-    "title": "Your Ultimate Online Tech Store Is Coming Soon!",
+    "title": "Your Ultimate Online Tech Experience Is Coming Soon!",
     "description": "We're working hard to bring you the ultimate tech shopping experience, delivering authentic and top-notch technologies and innovation to your doorstep without lifting a foot. Uganda, are you ready? Join our WhatsApp channel for exclusive early-bird deals!",
     "whatsappLink": "https://wa.me/256751924844?text=Hi%20Will's%20Tech!%20I%20want%20to%20join%20your%20channel.%20Thanks."
   },
@@ -41,7 +41,7 @@
         "connectivity": "Bluetooth 5.0"
       },
       "featured": true,
-      "status": "hidden",
+      "status": "active",
       "dateAdded": "2025-10-28T16:07:37.767Z",
       "dateUpdated": "2025-10-28T16:34:23.019Z"
     },
@@ -156,7 +156,7 @@
     },
     {
       "id": 1761747725876,
-      "name": "Samsung Galaxy A17 5G -4GB RAM/ 128GB ROM Android 15 - Black",
+      "name": "Galaxy A17 5G -4GB RAM/ 128GB ROM Android 15 - Black",
       "sku": "0105",
       "category": "smartphones",
       "description": "Samsung Galaxy A17 5G\n\n6.7 FHD+ Super AMOLED display with a 90Hz refresh rate and 800 nits peak brightness for crisp outdoor viewing; 5,000mAh battery with 25W fast charging that replenishes half capacity in minutes; and a camera system with a 50MP main sensor with optical image stabilization (OIS) for capturing sharp images even on the move.",
@@ -185,9 +185,190 @@
         "connectivity": "Bluetooth 5.0"
       },
       "featured": true,
-      "status": "hidden",
+      "status": "active",
       "dateAdded": "2025-10-29T14:22:05.876Z",
-      "dateUpdated": "2025-10-29T14:37:54.974Z"
+      "dateUpdated": "2025-11-05T16:29:28.531Z"
+    },
+    {
+      "id": 1762196578863,
+      "name": "Galaxy tab A9+ 5G",
+      "sku": "0106",
+      "category": "smartphones",
+      "description": "Galaxy tab A9+ 8GB RAM / 128GB ROM",
+      "price": 780000,
+      "originalPrice": 900000,
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762196536105.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762196966183.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 3.6,
+      "reviewCount": 69,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "8GB RAM / 128GB ROM"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-03T19:02:58.865Z",
+      "dateUpdated": "2025-11-03T19:14:50.502Z"
+    },
+    {
+      "id": 1762207090559,
+      "name": "Dji RS 4 Mini, Gimbal Stabilizer for Cameras Sony/Panasonic/Nikon/Fujifilm",
+      "sku": "0107",
+      "category": "accessories",
+      "description": "Capture incredibly smooth and professional looking video with the DJI RS 4 Mini, a lightweight and portable camera gimbal stabilizer. Designed for filmmakers and content creators, this compact gimbal offers superior stabilization technology, ensuring your footage remains steady and cinematic, even when you're on the move. Its user-friendly design and Automated Axis Locks make it quick and easy to set up, so you never miss a shot.",
+      "price": 2800000,
+      "originalPrice": 4000000,
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207010094.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207192250.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207228081.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762207272400.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 5,
+      "reviewCount": 99,
+      "badges": [
+        "bestseller"
+      ],
+      "features": [
+        "Professional Stabilization: Utilizes DJI's advanced stabilization algorithms to eliminate camera shake and vibrations, producing fluid and professional-grade video.",
+        "Compact and Lightweight: The \"Mini\" form factor makes it easy to carry and handle, reducing fatigue during long shooting sessions and making it ideal for travel.",
+        "Automated Axis Locks: Features automated locks for quick setup and breakdown, allowing you to power on, start shooting, and pack away with ease and speed.",
+        "Versatile Compatibility: Designed to support a wide range of mirrorless cameras and lens combinations, giving you the flexibility to use your preferred gear.",
+        "Ergonomic Design: The intuitive controls and comfortable grip make it simple to operate, even for new users."
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-03T21:58:10.559Z",
+      "dateUpdated": "2025-11-03T22:01:20.397Z"
+    },
+    {
+      "id": 1762239120138,
+      "name": "KZ EDX Pro In Ear monitor",
+      "sku": "0108",
+      "category": "accessories",
+      "description": "Brand+ KZ EDX Pro 10mm Dual Magnetic Circuit Dynamic Drive in ear monitor 2Pin Cable HIFI Bass Earphones Stereo Noise Cancelling",
+      "price": 150000,
+      "originalPrice": 290000,
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239004262.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239269686.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762239321177.jpg"
+      ],
+      "videos": [],
+      "stock": "pre-order",
+      "rating": 4.5,
+      "reviewCount": 103,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Brand+ KZ EDX Pro ",
+        "10mm Dual Magnetic",
+        "Circuit Dynamic Drive Earphone 2Pin Cable",
+        "HIFI Bass Earphones Stereo Noise Cancelling"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-04T06:52:00.138Z",
+      "dateUpdated": "2025-11-04T07:03:56.841Z"
+    },
+    {
+      "id": 1762277051281,
+      "name": "DJI Mic Mini",
+      "sku": "0109",
+      "category": "accessories",
+      "description": "DJI Mic Mini, a wireless microphone that packs powerful performance into an ultralight body. It ensures stable transmission of high-quality audio, boasts extended battery life, and features direct connection with products in the DJI OsmoAudio ecosystem. Experience detail-rich sound recording that elevates your content creation experience. With a simple flip of the case, you are ready to add high-quality audio to any project.",
+      "price": 950000,
+      "originalPrice": null,
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762276861884.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 4,
+      "reviewCount": 107,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Small but Mighty - The DJI Mic Mini Transmitter is small and ultralight, weighing only 10 g, [1] making it comfortable to wear, discreet, and aesthetically pleasing on-camera.",
+        "Detail-Rich Sound - Mic Mini delivers high-quality audio. A 400m max transmission range [2] ensures stable recording, even in bustling outdoor environments like a busy street.",
+        "Extended Battery, More Recording Time - Mic Mini with Charging Case offers up to 48 hours of battery life, [3] ideal for long trips, interviews, livestreaming and other intensive usage scenarios.",
+        "DJI Ecosystem Direct Connection - With DJI OsmoAudio, a transmitter can connect to Osmo Action 5 Pro, Osmo Action 4, or Osmo Pocket 3 without a receiver, delivering premium audio."
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-04T17:24:11.281Z",
+      "dateUpdated": "2025-11-04T17:26:55.946Z"
+    },
+    {
+      "id": 1762358999120,
+      "name": "Galaxy A07 4GB / 128GB",
+      "sku": "0110",
+      "category": "smartphones",
+      "description": "The Samsung Galaxy A07 4GB / 128GB features a slim and light design that increases one-handed portability, and the 6.7-inch large display provides you with an immersive viewing experience. With the upgraded AP, it delivers faster performance.",
+      "price": 520000,
+      "originalPrice": 780000,
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1762358967708.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 5,
+      "reviewCount": 203,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "Screen: 6.7 HD+ ",
+        "Rear Camera: Wide 50 MP + Depth 2 MP",
+        "Front Camera: 8 MP",
+        "Processor: 6 nm, Helio G99, 2.2 Ghz",
+        "Memory: 4 + 64 GB, microSD card (Up to 2.0 TB)",
+        "Battery: 5,000mAh",
+        "Water Splash Resistance: IP54",
+        "Warranty: 24 months",
+        "7.6 mm Slimmer Design ",
+        "6x OS/6years Security Update ",
+        "GFRP, 2 step tempering glass "
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-05T16:09:59.120Z",
+      "dateUpdated": "2025-11-13T18:03:59.005Z"
     }
   ],
   "content": {
@@ -204,5 +385,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-03T14:05:42.524Z"
+  "lastUpdated": "2025-11-13T18:03:59.005Z"
 }

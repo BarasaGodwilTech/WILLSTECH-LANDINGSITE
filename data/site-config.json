@@ -369,6 +369,43 @@
       "status": "active",
       "dateAdded": "2025-11-05T16:09:59.120Z",
       "dateUpdated": "2025-11-13T18:03:59.005Z"
+    },
+    {
+      "id": 1763448705783,
+      "name": "Oraimo Traveler 12 Power Bank",
+      "sku": "0111",
+      "category": "accessories",
+      "description": "Massive 20000mAh Capacity: Fully charges your phone up to 4 times – ideal for travel, work, or emergencies.*\nType-C Two-Way Charging: Both input and output via Type-C for faster recharging and wider compatibility.\nTriple Output Charging: Charge 3 devices simultaneously (USB-A x2 + Type-C).\n12W Fast Recharge: Type-C input supports fast recharging in just 8 hours.*\nLED Torch: Provides up to 100 hours of light – perfect for night use or power outages.*\nUniversal Compatibility: Works with iPhones, Samsung, Pixel, OnePlus, Xiaomi, tablets, speakers, and more (1000+ devices).\n9-Layer Safety Protection: Includes overcharge, short-circuit, temperature, and voltage protections for reliable use.\nSmart Power Display: Keep track of remaining power at a glance.",
+      "price": "100000",
+      "originalPrice": "210000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448669723.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 5,
+      "reviewCount": 240,
+      "badges": [
+        "bestseller"
+      ],
+      "features": [
+        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times – ideal for travel, work, or emergencies.*",
+        "Type-C Two-Way Charging: Both input and output via Type-C for faster recharging and wider compatibility.",
+        "Triple Output Charging: Charge 3 devices simultaneously (USB-A x2 + Type-C).",
+        "12W Fast Recharge: Type-C input supports fast recharging in just 8 hours.*",
+        "LED Torch: Provides up to 100 hours of light – perfect for night use or power outages.*",
+        "Universal Compatibility: Works with iPhones, Samsung, Pixel, OnePlus, Xiaomi, tablets, speakers, and more (1000+ devices).",
+        "9-Layer Safety Protection: Includes overcharge, short-circuit, temperature, and voltage protections for reliable use.",
+        "Smart Power Display: Keep track of remaining power at a glance."
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-11-18T06:51:45.783Z"
     }
   ],
   "content": {
@@ -385,5 +422,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-13T18:03:59.005Z"
+  "lastUpdated": "2025-11-18T06:51:45.788Z"
 }

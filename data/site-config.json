@@ -375,11 +375,18 @@
       "name": "Oraimo Traveler 12 Power Bank",
       "sku": "0111",
       "category": "accessories",
-      "description": "Massive 20000mAh Capacity: Fully charges your phone up to 4 times – ideal for travel, work, or emergencies.*\nType-C Two-Way Charging: Both input and output via Type-C for faster recharging and wider compatibility.\nTriple Output Charging: Charge 3 devices simultaneously (USB-A x2 + Type-C).\n12W Fast Recharge: Type-C input supports fast recharging in just 8 hours.*\nLED Torch: Provides up to 100 hours of light – perfect for night use or power outages.*\nUniversal Compatibility: Works with iPhones, Samsung, Pixel, OnePlus, Xiaomi, tablets, speakers, and more (1000+ devices).\n9-Layer Safety Protection: Includes overcharge, short-circuit, temperature, and voltage protections for reliable use.\nSmart Power Display: Keep track of remaining power at a glance.",
-      "price": "100000",
-      "originalPrice": "210000",
+      "description": "Stay powered all week with the Oraimo Traveler 12 Power Bank. Its massive 20000mAh capacity can fully charge your smartphone up to 4 times. Featuring Type-C two-way fast charging, triple outputs to charge 3 devices at once, and a bright LED torch for emergencies or outdoor use. Built with 9 safety protection layers, it's compatible with over 1000+ devices including smartphones, tablets, smartwatches, and more.",
+      "price": 100000,
+      "originalPrice": 210000,
       "images": [
-        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448669723.jpg"
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448669723.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448910998.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448939308.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448963297.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763448986338.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763449013262.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763449036115.jpg",
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1763449055657.jpg"
       ],
       "videos": [],
       "stock": "in-stock",
@@ -389,11 +396,11 @@
         "bestseller"
       ],
       "features": [
-        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times – ideal for travel, work, or emergencies.*",
+        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times â ideal for travel, work, or emergencies.*",
         "Type-C Two-Way Charging: Both input and output via Type-C for faster recharging and wider compatibility.",
         "Triple Output Charging: Charge 3 devices simultaneously (USB-A x2 + Type-C).",
         "12W Fast Recharge: Type-C input supports fast recharging in just 8 hours.*",
-        "LED Torch: Provides up to 100 hours of light – perfect for night use or power outages.*",
+        "LED Torch: Provides up to 100 hours of light â perfect for night use or power outages.*",
         "Universal Compatibility: Works with iPhones, Samsung, Pixel, OnePlus, Xiaomi, tablets, speakers, and more (1000+ devices).",
         "9-Layer Safety Protection: Includes overcharge, short-circuit, temperature, and voltage protections for reliable use.",
         "Smart Power Display: Keep track of remaining power at a glance."
@@ -405,7 +412,8 @@
       },
       "featured": true,
       "status": "active",
-      "dateAdded": "2025-11-18T06:51:45.783Z"
+      "dateAdded": "2025-11-18T06:51:45.783Z",
+      "dateUpdated": "2025-11-18T06:57:41.972Z"
     }
   ],
   "content": {
@@ -422,5 +430,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-18T06:51:45.788Z"
+  "lastUpdated": "2025-11-18T06:57:42.015Z"
 }

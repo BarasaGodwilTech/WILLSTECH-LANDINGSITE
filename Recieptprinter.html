@@ -1,0 +1,1241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🛒 Will's Tech Store - Receipt System</title>
+    <style>
+        :root {
+            --primary-blue: #2563eb;
+            --secondary-blue: #1d4ed8;
+            --light-blue: #dbeafe;
+            --accent-blue: #3b82f6;
+            --dark-blue: #1e40af;
+            --success-green: #10b981;
+            --warning-orange: #f59e0b;
+            --danger-red: #ef4444;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-700: #374151;
+            --gray-900: #111827;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+            color: var(--gray-900);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        /* Header */
+        .header {
+            grid-column: 1 / -1;
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--dark-blue) 100%);
+            color: white;
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 25px rgba(37, 99, 235, 0.2);
+            margin-bottom: 30px;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" preserveAspectRatio="none" opacity="0.1"><path d="M0,0 L100,0 L100,100 Z" fill="white"/></svg>');
+            background-size: cover;
+        }
+        
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 800;
+            margin-bottom: 10px;
+            position: relative;
+        }
+        
+        .header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            position: relative;
+        }
+        
+        /* Cards */
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        }
+        
+        .card-title {
+            color: var(--dark-blue);
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--light-blue);
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card-title i {
+            color: var(--primary-blue);
+        }
+        
+        /* Form Elements */
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        .form-label {
+            display: block;
+            color: var(--gray-700);
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 0.95rem;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 14px;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            background: var(--gray-100);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--primary-blue);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* Logo Upload */
+        .logo-upload-area {
+            border: 3px dashed var(--gray-300);
+            border-radius: 12px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: var(--gray-100);
+        }
+        
+        .logo-upload-area:hover {
+            border-color: var(--primary-blue);
+            background: var(--light-blue);
+        }
+        
+        .logo-preview {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 20px auto;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Items Table */
+        .items-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 20px 0;
+        }
+        
+        .items-table th {
+            background: var(--light-blue);
+            color: var(--dark-blue);
+            padding: 15px;
+            text-align: left;
+            font-weight: 600;
+            border-bottom: 2px solid var(--primary-blue);
+        }
+        
+        .items-table td {
+            padding: 15px;
+            border-bottom: 1px solid var(--gray-200);
+        }
+        
+        .item-row {
+            transition: background-color 0.3s ease;
+        }
+        
+        .item-row:hover {
+            background-color: var(--gray-100);
+        }
+        
+        /* Buttons */
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary-blue) 0%, var(--secondary-blue) 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+        
+        .btn-success {
+            background: linear-gradient(135deg, var(--success-green) 0%, #059669 100%);
+            color: white;
+        }
+        
+        .btn-warning {
+            background: linear-gradient(135deg, var(--warning-orange) 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(135deg, var(--danger-red) 0%, #dc2626 100%);
+            color: white;
+        }
+        
+        .btn-group {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        /* Bluetooth Status */
+        .bluetooth-status {
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .bluetooth-status.connected {
+            background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%);
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        
+        .bluetooth-status.disconnected {
+            background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%);
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+        
+        .bluetooth-status.searching {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            color: #92400e;
+            border: 2px solid #f59e0b;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { opacity: 1; }
+            50% { opacity: 0.7; }
+            100% { opacity: 1; }
+        }
+        
+        /* Printer Info */
+        .printer-info {
+            background: var(--light-blue);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+            border-left: 4px solid var(--primary-blue);
+        }
+        
+        .printer-info h4 {
+            color: var(--dark-blue);
+            margin-bottom: 10px;
+        }
+        
+        /* Receipt Preview */
+        .receipt-preview-container {
+            grid-column: 1 / -1;
+            background: white;
+            border-radius: 16px;
+            padding: 30px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        }
+        
+        .receipt-paper {
+            width: 280px; /* 58mm paper width */
+            background: white;
+            border: 1px solid var(--gray-300);
+            padding: 20px;
+            margin: 0 auto;
+            font-family: 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.4;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        .receipt-paper::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: repeating-linear-gradient(
+                90deg,
+                var(--primary-blue),
+                var(--primary-blue) 10px,
+                transparent 10px,
+                transparent 20px
+            );
+        }
+        
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+            border-bottom: 2px dashed var(--gray-300);
+            padding-bottom: 15px;
+        }
+        
+        .receipt-logo {
+            max-width: 120px;
+            margin-bottom: 10px;
+        }
+        
+        .receipt-store {
+            font-weight: bold;
+            font-size: 16px;
+            margin: 5px 0;
+            color: var(--dark-blue);
+        }
+        
+        .receipt-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .receipt-items th {
+            border-bottom: 1px dashed var(--gray-700);
+            padding: 8px 0;
+            text-align: left;
+        }
+        
+        .receipt-items td {
+            padding: 6px 0;
+            border-bottom: 1px dotted var(--gray-300);
+        }
+        
+        .receipt-totals {
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 2px solid var(--gray-700);
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px dashed var(--gray-300);
+            font-size: 12px;
+            color: var(--gray-700);
+        }
+        
+        /* Currency Display */
+        .currency {
+            font-family: 'Courier New', monospace;
+            font-weight: bold;
+        }
+        
+        .ugx {
+            color: var(--dark-blue);
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            width: 24px;
+            height: 24px;
+            border: 3px solid var(--gray-300);
+            border-top-color: var(--primary-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toast Notifications */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 16px 24px;
+            border-radius: 10px;
+            color: white;
+            font-weight: 600;
+            z-index: 1000;
+            transform: translateX(120%);
+            transition: transform 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toast.show {
+            transform: translateX(0);
+        }
+        
+        .toast.success {
+            background: var(--success-green);
+        }
+        
+        .toast.error {
+            background: var(--danger-red);
+        }
+        
+        .toast.info {
+            background: var(--primary-blue);
+        }
+        
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .header h1 {
+                font-size: 2rem;
+            }
+            
+            .card {
+                padding: 20px;
+            }
+            
+            .btn-group {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <div class="header">
+            <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
+            <p>Professional Receipt System with Xprinter XP-P503A Support • Uganda Shillings (UGX)</p>
+        </div>
+        
+        <!-- Store Details Card -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-store-alt"></i> Store Information</h2>
+            
+            <div class="form-group">
+                <label class="form-label">Store Logo</label>
+                <div class="logo-upload-area" id="logoUploadArea">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 2rem; color: var(--primary-blue); margin-bottom: 10px;"></i>
+                    <p>Click to upload your store logo<br>
+                    <small>Recommended: 200x80px PNG/JPG</small></p>
+                    <input type="file" id="logoUpload" accept="image/*" style="display: none;">
+                    <div id="logoPreview"></div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Store Name</label>
+                <input type="text" id="storeName" class="form-control" value="Will's Tech Store" placeholder="Enter store name">
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Store Address</label>
+                <textarea id="storeAddress" class="form-control" rows="2" placeholder="Enter store address">Kampala Road, Kampala, Uganda</textarea>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label class="form-label">Phone Number</label>
+                        <input type="text" id="storePhone" class="form-control" value="+256 700 123 456">
+                    </div>
+                    <div>
+                        <label class="form-label">VAT Number</label>
+                        <input type="text" id="vatNumber" class="form-control" value="VAT-UG-00123456" placeholder="Enter VAT number">
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Receipt Details Card -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-receipt"></i> Receipt Details</h2>
+            
+            <div class="form-group">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label class="form-label">Receipt Number</label>
+                        <input type="text" id="receiptNumber" class="form-control" value="RCT-UG-001">
+                    </div>
+                    <div>
+                        <label class="form-label">Date & Time</label>
+                        <input type="datetime-local" id="receiptDate" class="form-control">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                    <div>
+                        <label class="form-label">Customer Name</label>
+                        <input type="text" id="customerName" class="form-control" placeholder="Customer name">
+                    </div>
+                    <div>
+                        <label class="form-label">Customer Phone</label>
+                        <input type="text" id="customerPhone" class="form-control" placeholder="Customer phone">
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label class="form-label">Payment Method</label>
+                <select id="paymentMethod" class="form-control">
+                    <option value="Cash">Cash (UGX)</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+            </div>
+            
+            <!-- Printer Connection -->
+            <div class="printer-info">
+                <h4><i class="fas fa-print"></i> Xprinter XP-P503A (58mm)</h4>
+                <p style="font-size: 0.9rem; color: var(--gray-700);">
+                    Make sure your printer is:<br>
+                    1. Turned ON and paper loaded<br>
+                    2. Bluetooth enabled (pairing mode)<br>
+                    3. Within 10 meters range
+                </p>
+            </div>
+            
+            <div id="bluetoothStatus" class="bluetooth-status disconnected">
+                <i class="fas fa-bluetooth"></i>
+                <span>Bluetooth Printer: Not Connected</span>
+            </div>
+            
+            <div class="btn-group">
+                <button id="connectBluetooth" class="btn btn-primary">
+                    <i class="fas fa-link"></i> Connect Printer
+                </button>
+                <button id="disconnectBluetooth" class="btn btn-danger">
+                    <i class="fas fa-unlink"></i> Disconnect
+                </button>
+            </div>
+        </div>
+        
+        <!-- Items Management Card -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-shopping-cart"></i> Items & Pricing (UGX)</h2>
+            
+            <table class="items-table">
+                <thead>
+                    <tr>
+                        <th>Item Description</th>
+                        <th width="100">Qty</th>
+                        <th width="150">Price (UGX)</th>
+                        <th width="150">Total (UGX)</th>
+                        <th width="60"></th>
+                    </tr>
+                </thead>
+                <tbody id="itemsContainer">
+                    <tr class="item-row">
+                        <td><input type="text" class="form-control item-name" value="Smartphone" placeholder="Item name"></td>
+                        <td><input type="number" class="form-control item-qty" value="1" min="1"></td>
+                        <td><input type="number" class="form-control item-price" value="800000" step="1000"></td>
+                        <td><input type="text" class="form-control item-total currency ugx" value="800,000" readonly></td>
+                        <td><button class="btn btn-danger remove-item" style="padding: 8px;"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                    <tr class="item-row">
+                        <td><input type="text" class="form-control item-name" value="Laptop" placeholder="Item name"></td>
+                        <td><input type="number" class="form-control item-qty" value="1" min="1"></td>
+                        <td><input type="number" class="form-control item-price" value="2500000" step="1000"></td>
+                        <td><input type="text" class="form-control item-total currency ugx" value="2,500,000" readonly></td>
+                        <td><button class="btn btn-danger remove-item" style="padding: 8px;"><i class="fas fa-trash"></i></button></td>
+                    </tr>
+                </tbody>
+            </table>
+            
+            <div class="btn-group">
+                <button id="addItem" class="btn btn-primary">
+                    <i class="fas fa-plus"></i> Add Item
+                </button>
+                <button id="clearItems" class="btn btn-warning">
+                    <i class="fas fa-broom"></i> Clear All
+                </button>
+            </div>
+            
+            <!-- Summary -->
+            <div style="margin-top: 30px; padding: 20px; background: var(--light-blue); border-radius: 10px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>Subtotal:</span>
+                    <span class="currency ugx" id="subtotalDisplay">3,300,000</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 10px;">
+                    <span>VAT (18%):</span>
+                    <span class="currency ugx" id="vatDisplay">594,000</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; font-size: 1.2rem; font-weight: bold; padding-top: 10px; border-top: 2px solid var(--primary-blue);">
+                    <span>GRAND TOTAL:</span>
+                    <span class="currency ugx" id="grandTotalDisplay">3,894,000</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Actions & Printing Card -->
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-cogs"></i> Actions</h2>
+            
+            <div class="btn-group" style="justify-content: center;">
+                <button id="generatePreview" class="btn btn-primary">
+                    <i class="fas fa-sync-alt"></i> Update Preview
+                </button>
+                <button id="printReceipt" class="btn btn-success">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <button id="downloadReceipt" class="btn btn-primary">
+                    <i class="fas fa-download"></i> Save Receipt
+                </button>
+                <button id="newReceipt" class="btn btn-warning">
+                    <i class="fas fa-file-invoice"></i> New Receipt
+                </button>
+            </div>
+            
+            <div style="margin-top: 30px; text-align: center;">
+                <p style="color: var(--gray-700); font-size: 0.9rem;">
+                    <i class="fas fa-info-circle"></i> Receipts are formatted for Xprinter XP-P503A (58mm thermal paper)
+                </p>
+            </div>
+        </div>
+        
+        <!-- Receipt Preview -->
+        <div class="receipt-preview-container">
+            <h2 class="card-title"><i class="fas fa-eye"></i> Receipt Preview</h2>
+            <div id="receiptPreview" class="receipt-paper"></div>
+        </div>
+    </div>
+    
+    <!-- Toast Container -->
+    <div id="toastContainer"></div>
+
+    <script>
+        // Toast Notification System
+        function showToast(message, type = 'info', duration = 3000) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle'}"></i>
+                ${message}
+            `;
+            document.getElementById('toastContainer').appendChild(toast);
+            
+            setTimeout(() => toast.classList.add('show'), 100);
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, duration);
+        }
+        
+        // Format UGX currency
+        function formatUGX(amount) {
+            return new Intl.NumberFormat('en-UG', {
+                style: 'currency',
+                currency: 'UGX',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(amount).replace('UGX', 'UGX ');
+        }
+        
+        // Format number with commas
+        function formatNumber(num) {
+            return num.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Set current date and time
+            const now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            document.getElementById('receiptDate').value = now.toISOString().slice(0, 16);
+            
+            // Generate receipt number
+            generateReceiptNumber();
+            
+            // Initialize calculations
+            calculateAllTotals();
+            updateReceiptPreview();
+        });
+        
+        // Generate receipt number
+        function generateReceiptNumber() {
+            const date = new Date();
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            document.getElementById('receiptNumber').value = `RCT-UG-${year}${month}${day}-${random}`;
+        }
+        
+        // Logo Upload
+        document.getElementById('logoUploadArea').addEventListener('click', function() {
+            document.getElementById('logoUpload').click();
+        });
+        
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                if (!file.type.match('image.*')) {
+                    showToast('Please upload an image file', 'error');
+                    return;
+                }
+                
+                if (file.size > 2 * 1024 * 1024) {
+                    showToast('Image size should be less than 2MB', 'error');
+                    return;
+                }
+                
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const logoPreview = document.getElementById('logoPreview');
+                    logoPreview.innerHTML = `
+                        <img src="${e.target.result}" class="logo-preview" alt="Store Logo">
+                        <p style="margin-top: 10px; color: var(--success-green);">
+                            <i class="fas fa-check-circle"></i> Logo uploaded successfully
+                        </p>
+                    `;
+                    updateReceiptPreview();
+                    showToast('Logo uploaded successfully', 'success');
+                };
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Item Management
+        let itemCounter = 2;
+        
+        document.getElementById('addItem').addEventListener('click', function() {
+            const tbody = document.getElementById('itemsContainer');
+            const newRow = document.createElement('tr');
+            newRow.className = 'item-row';
+            newRow.innerHTML = `
+                <td><input type="text" class="form-control item-name" placeholder="Item name"></td>
+                <td><input type="number" class="form-control item-qty" value="1" min="1"></td>
+                <td><input type="number" class="form-control item-price" value="0" step="1000"></td>
+                <td><input type="text" class="form-control item-total currency ugx" value="0" readonly></td>
+                <td><button class="btn btn-danger remove-item" style="padding: 8px;"><i class="fas fa-trash"></i></button></td>
+            `;
+            tbody.appendChild(newRow);
+            
+            // Add event listeners
+            const inputs = newRow.querySelectorAll('.item-name, .item-qty, .item-price');
+            inputs.forEach(input => {
+                input.addEventListener('input', calculateAllTotals);
+            });
+            
+            newRow.querySelector('.remove-item').addEventListener('click', function() {
+                tbody.removeChild(newRow);
+                calculateAllTotals();
+                updateReceiptPreview();
+                showToast('Item removed', 'info');
+            });
+            
+            showToast('New item added', 'success');
+        });
+        
+        document.getElementById('clearItems').addEventListener('click', function() {
+            if (confirm('Clear all items from the receipt?')) {
+                const tbody = document.getElementById('itemsContainer');
+                tbody.innerHTML = '';
+                itemCounter = 0;
+                calculateAllTotals();
+                updateReceiptPreview();
+                showToast('All items cleared', 'info');
+            }
+        });
+        
+        // Calculate totals
+        function calculateAllTotals() {
+            let subtotal = 0;
+            
+            document.querySelectorAll('.item-row').forEach(row => {
+                const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const total = qty * price;
+                
+                row.querySelector('.item-total').value = formatNumber(total);
+                subtotal += total;
+            });
+            
+            const vat = subtotal * 0.18; // 18% VAT for Uganda
+            const grandTotal = subtotal + vat;
+            
+            // Update displays
+            document.getElementById('subtotalDisplay').textContent = formatNumber(subtotal);
+            document.getElementById('vatDisplay').textContent = formatNumber(vat);
+            document.getElementById('grandTotalDisplay').textContent = formatNumber(grandTotal);
+            
+            // Update preview
+            updateReceiptPreview();
+        }
+        
+        // Add event listeners to existing items
+        document.querySelectorAll('.item-name, .item-qty, .item-price').forEach(input => {
+            input.addEventListener('input', calculateAllTotals);
+        });
+        
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+                const row = this.closest('.item-row');
+                row.remove();
+                calculateAllTotals();
+                updateReceiptPreview();
+                showToast('Item removed', 'info');
+            });
+        });
+        
+        // Bluetooth Printer Connection
+        let bluetoothDevice = null;
+        let bluetoothCharacteristic = null;
+        const printerServiceUUID = '000018f0-0000-1000-8000-00805f9b34fb';
+        const printerCharacteristicUUID = '00002af1-0000-1000-8000-00805f9b34fb';
+        
+        document.getElementById('connectBluetooth').addEventListener('click', async function() {
+            const statusDiv = document.getElementById('bluetoothStatus');
+            const connectBtn = document.getElementById('connectBluetooth');
+            const originalText = connectBtn.innerHTML;
+            
+            try {
+                // Update UI
+                statusDiv.className = 'bluetooth-status searching';
+                statusDiv.innerHTML = `
+                    <div class="spinner"></div>
+                    <span>Searching for Xprinter XP-P503A...</span>
+                `;
+                connectBtn.innerHTML = '<div class="spinner"></div> Connecting...';
+                connectBtn.disabled = true;
+                
+                // Request Bluetooth device
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [
+                        { name: 'XP-P503A' }, // Xprinter specific name
+                        { name: 'Xprinter' },
+                        { namePrefix: 'XP-' }
+                    ],
+                    optionalServices: [printerServiceUUID]
+                });
+                
+                // Connect to device
+                const server = await bluetoothDevice.gatt.connect();
+                showToast('Connected to device, finding printer service...', 'info');
+                
+                // Get printer service
+                const service = await server.getPrimaryService(printerServiceUUID);
+                
+                // Get characteristic
+                bluetoothCharacteristic = await service.getCharacteristic(printerCharacteristicUUID);
+                
+                // Update UI
+                statusDiv.className = 'bluetooth-status connected';
+                statusDiv.innerHTML = `
+                    <i class="fas fa-check-circle"></i>
+                    <span>Connected to: ${bluetoothDevice.name || 'Xprinter'}</span>
+                `;
+                
+                connectBtn.innerHTML = '<i class="fas fa-link"></i> Connected';
+                connectBtn.disabled = true;
+                
+                showToast('Printer connected successfully!', 'success');
+                
+                // Monitor disconnection
+                bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+                    statusDiv.className = 'bluetooth-status disconnected';
+                    statusDiv.innerHTML = `
+                        <i class="fas fa-times-circle"></i>
+                        <span>Bluetooth Printer: Disconnected</span>
+                    `;
+                    connectBtn.innerHTML = '<i class="fas fa-link"></i> Connect Printer';
+                    connectBtn.disabled = false;
+                    showToast('Printer disconnected', 'error');
+                });
+                
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                
+                statusDiv.className = 'bluetooth-status disconnected';
+                statusDiv.innerHTML = `
+                    <i class="fas fa-times-circle"></i>
+                    <span>Connection failed: ${error.message}</span>
+                `;
+                
+                connectBtn.innerHTML = originalText;
+                connectBtn.disabled = false;
+                
+                if (error.name === 'NotFoundError') {
+                    showToast('No Xprinter found. Make sure it\'s turned on and in pairing mode.', 'error');
+                } else {
+                    showToast('Connection failed: ' + error.message, 'error');
+                }
+            }
+        });
+        
+        document.getElementById('disconnectBluetooth').addEventListener('click', function() {
+            if (bluetoothDevice && bluetoothDevice.gatt.connected) {
+                bluetoothDevice.gatt.disconnect();
+                showToast('Printer disconnected', 'info');
+            }
+        });
+        
+        // Generate ESC/POS commands for Xprinter
+        function generatePrintData() {
+            const commands = [];
+            
+            // Initialize printer
+            commands.push(new Uint8Array([0x1B, 0x40]));
+            
+            // Set alignment center
+            commands.push(new Uint8Array([0x1B, 0x61, 0x01]));
+            
+            // Store name
+            const storeName = document.getElementById('storeName').value || "Will's Tech Store";
+            commands.push(new TextEncoder().encode(storeName + '\n'));
+            
+            // Store address
+            const address = document.getElementById('storeAddress').value;
+            if (address) {
+                commands.push(new TextEncoder().encode(address + '\n'));
+            }
+            
+            // Set alignment left
+            commands.push(new Uint8Array([0x1B, 0x61, 0x00]));
+            
+            // Receipt info
+            commands.push(new TextEncoder().encode('\n'));
+            commands.push(new TextEncoder().encode('Receipt: ' + (document.getElementById('receiptNumber').value) + '\n'));
+            commands.push(new TextEncoder().encode('Date: ' + new Date(document.getElementById('receiptDate').value).toLocaleString('en-UG') + '\n'));
+            commands.push(new TextEncoder().encode('Customer: ' + (document.getElementById('customerName').value || 'Walk-in') + '\n'));
+            
+            if (document.getElementById('customerPhone').value) {
+                commands.push(new TextEncoder().encode('Phone: ' + document.getElementById('customerPhone').value + '\n'));
+            }
+            
+            commands.push(new TextEncoder().encode('--------------------------------\n'));
+            
+            // Items header
+            commands.push(new TextEncoder().encode('ITEM                QTY   AMOUNT\n'));
+            commands.push(new TextEncoder().encode('--------------------------------\n'));
+            
+            // Items
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = (row.querySelector('.item-name').value || '').substring(0, 18);
+                const qty = row.querySelector('.item-qty').value || '0';
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const total = qty * price;
+                
+                if (name) {
+                    const line = name.padEnd(18) + qty.padStart(3) + '  UGX' + formatNumber(total).padStart(10) + '\n';
+                    commands.push(new TextEncoder().encode(line));
+                }
+            });
+            
+            commands.push(new TextEncoder().encode('--------------------------------\n'));
+            
+            // Totals
+            const subtotal = parseFloat(document.getElementById('subtotalDisplay').textContent.replace(/,/g, '')) || 0;
+            const vat = subtotal * 0.18;
+            const grandTotal = subtotal + vat;
+            
+            commands.push(new TextEncoder().encode('Subtotal:   UGX' + formatNumber(subtotal).padStart(10) + '\n'));
+            commands.push(new TextEncoder().encode('VAT (18%):  UGX' + formatNumber(vat).padStart(10) + '\n'));
+            commands.push(new TextEncoder().encode('Total:      UGX' + formatNumber(grandTotal).padStart(10) + '\n'));
+            commands.push(new TextEncoder().encode('================================\n'));
+            
+            // Payment method
+            commands.push(new TextEncoder().encode('Payment: ' + (document.getElementById('paymentMethod').value || 'Cash') + '\n\n'));
+            
+            // Footer
+            commands.push(new Uint8Array([0x1B, 0x61, 0x01])); // Center align
+            commands.push(new TextEncoder().encode('THANK YOU!\n'));
+            commands.push(new TextEncoder().encode('Will\'s Tech Store\n'));
+            commands.push(new TextEncoder().encode('Tel: ' + (document.getElementById('storePhone').value || '+256 700 123 456') + '\n'));
+            
+            // VAT info if available
+            const vatNumber = document.getElementById('vatNumber').value;
+            if (vatNumber) {
+                commands.push(new TextEncoder().encode('VAT: ' + vatNumber + '\n'));
+            }
+            
+            commands.push(new TextEncoder().encode('\n'));
+            commands.push(new TextEncoder().encode('Goods sold are not returnable\n'));
+            commands.push(new TextEncoder().encode('unless defective.\n'));
+            
+            // Cut paper (partial cut for Xprinter)
+            commands.push(new Uint8Array([0x1D, 0x56, 0x42, 0x00]));
+            
+            return commands;
+        }
+        
+        // Print Receipt
+        document.getElementById('printReceipt').addEventListener('click', async function() {
+            if (!bluetoothCharacteristic) {
+                showToast('Please connect to a printer first', 'error');
+                return;
+            }
+            
+            const printBtn = document.getElementById('printReceipt');
+            const originalText = printBtn.innerHTML;
+            
+            try {
+                printBtn.innerHTML = '<div class="spinner"></div> Printing...';
+                printBtn.disabled = true;
+                
+                const printData = generatePrintData();
+                
+                // Send data in chunks
+                for (let i = 0; i < printData.length; i++) {
+                    await bluetoothCharacteristic.writeValue(printData[i]);
+                    await new Promise(resolve => setTimeout(resolve, 30)); // Small delay
+                }
+                
+                showToast('Receipt printed successfully!', 'success');
+                
+            } catch (error) {
+                console.error('Print error:', error);
+                showToast('Printing failed: ' + error.message, 'error');
+            } finally {
+                printBtn.innerHTML = originalText;
+                printBtn.disabled = false;
+            }
+        });
+        
+        // Update Receipt Preview
+        function updateReceiptPreview() {
+            const preview = document.getElementById('receiptPreview');
+            const logoImg = document.getElementById('logoPreview')?.querySelector('img');
+            
+            let itemsHTML = '';
+            let subtotal = 0;
+            
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value || '';
+                const qty = row.querySelector('.item-qty').value || '0';
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const total = qty * price;
+                subtotal += total;
+                
+                if (name) {
+                    itemsHTML += `
+                        <tr>
+                            <td>${name.substring(0, 18)}</td>
+                            <td>${qty}</td>
+                            <td>UGX ${formatNumber(total)}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            const vat = subtotal * 0.18;
+            const grandTotal = subtotal + vat;
+            
+            preview.innerHTML = `
+                <div class="receipt-header">
+                    ${logoImg ? `<img src="${logoImg.src}" class="receipt-logo" alt="Store Logo">` : ''}
+                    <div class="receipt-store">${document.getElementById('storeName').value || "Will's Tech Store"}</div>
+                    <div style="font-size: 12px;">${document.getElementById('storeAddress').value || "Kampala Road, Kampala"}</div>
+                    <div style="font-size: 12px;">${document.getElementById('storePhone').value || "+256 700 123 456"}</div>
+                </div>
+                
+                <div style="text-align: center; margin: 15px 0;">
+                    <div style="font-size: 12px;">--------------------------------</div>
+                </div>
+                
+                <div style="margin-bottom: 15px;">
+                    <div><strong>Receipt:</strong> ${document.getElementById('receiptNumber').value}</div>
+                    <div><strong>Date:</strong> ${new Date(document.getElementById('receiptDate').value).toLocaleString('en-UG')}</div>
+                    <div><strong>Customer:</strong> ${document.getElementById('customerName').value || 'Walk-in Customer'}</div>
+                    ${document.getElementById('customerPhone').value ? `<div><strong>Phone:</strong> ${document.getElementById('customerPhone').value}</div>` : ''}
+                </div>
+                
+                <div style="text-align: center; margin: 15px 0;">
+                    <div style="font-size: 12px;">--------------------------------</div>
+                </div>
+                
+                <table class="receipt-items" style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th>ITEM</th>
+                            <th>QTY</th>
+                            <th>AMOUNT</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHTML}
+                    </tbody>
+                </table>
+                
+                <div style="text-align: center; margin: 15px 0;">
+                    <div style="font-size: 12px;">--------------------------------</div>
+                </div>
+                
+                <div class="receipt-totals">
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>Subtotal:</span>
+                        <span class="currency ugx">UGX ${formatNumber(subtotal)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between;">
+                        <span>VAT (18%):</span>
+                        <span class="currency ugx">UGX ${formatNumber(vat)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; font-weight: bold; margin-top: 10px; padding-top: 10px; border-top: 2px solid #000;">
+                        <span>TOTAL:</span>
+                        <span class="currency ugx">UGX ${formatNumber(grandTotal)}</span>
+                    </div>
+                </div>
+                
+                <div class="receipt-footer">
+                    <div>Payment: ${document.getElementById('paymentMethod').value || 'Cash'}</div>
+                    <div style="margin: 10px 0; font-weight: bold;">THANK YOU!</div>
+                    <div>Will's Tech Store</div>
+                    <div>Tel: ${document.getElementById('storePhone').value || '+256 700 123 456'}</div>
+                    ${document.getElementById('vatNumber').value ? `<div>VAT: ${document.getElementById('vatNumber').value}</div>` : ''}
+                    <div style="margin-top: 10px; font-size: 10px;">
+                        Goods sold are not returnable<br>
+                        unless defective.
+                    </div>
+                </div>
+            `;
+        }
+        
+        // Other buttons
+        document.getElementById('generatePreview').addEventListener('click', function() {
+            updateReceiptPreview();
+            showToast('Preview updated', 'success');
+        });
+        
+        document.getElementById('newReceipt').addEventListener('click', function() {
+            if (confirm('Start a new receipt? This will clear current items.')) {
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerPhone').value = '';
+                document.getElementById('paymentMethod').value = 'Cash';
+                
+                const itemsContainer = document.getElementById('itemsContainer');
+                itemsContainer.innerHTML = '';
+                itemCounter = 0;
+                
+                generateReceiptNumber();
+                calculateAllTotals();
+                updateReceiptPreview();
+                
+                showToast('New receipt created', 'success');
+            }
+        });
+        
+        document.getElementById('downloadReceipt').addEventListener('click', function() {
+            const receiptContent = document.getElementById('receiptPreview').innerHTML;
+            const storeName = document.getElementById('storeName').value.replace(/\s+/g, '_');
+            const receiptNum = document.getElementById('receiptNumber').value.replace(/\s+/g, '_');
+            
+            const blob = new Blob([`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>${receiptNum} - Will's Tech Store</title>
+                    <style>
+                        body { font-family: 'Courier New', monospace; padding: 40px; background: #f5f5f5; }
+                        .receipt-paper { 
+                            width: 280px; 
+                            background: white; 
+                            padding: 20px; 
+                            margin: 0 auto; 
+                            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+                            border: 1px solid #ccc;
+                        }
+                        @media print { 
+                            body { padding: 0; background: white; }
+                            .receipt-paper { box-shadow: none; border: none; }
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-paper">${receiptContent}</div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `], { type: 'text/html' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `WillTechStore_${receiptNum}.html`;
+            link.click();
+            
+            showToast('Receipt saved as HTML file', 'success');
+        });
+        
+        // Auto-update on input changes
+        const updateInputs = ['storeName', 'storeAddress', 'storePhone', 'vatNumber', 
+                             'receiptNumber', 'customerName', 'customerPhone', 'paymentMethod'];
+        
+        updateInputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', updateReceiptPreview);
+        });
+        
+        document.getElementById('receiptDate').addEventListener('change', updateReceiptPreview);
+    </script>
+</body>
+</html>

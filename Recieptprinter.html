@@ -1,0 +1,662 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will's Tech Store - Receipt Generator</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', monospace;
+        }
+        
+        body {
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+        }
+        
+        .header {
+            grid-column: 1 / -1;
+            text-align: center;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .logo-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        .receipt-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        
+        .preview-section {
+            background: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            grid-column: 1 / -1;
+        }
+        
+        h2 {
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #667eea;
+        }
+        
+        h3 {
+            color: #555;
+            margin: 15px 0 10px 0;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 12px;
+            margin: 8px 0 20px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        
+        button {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 14px 28px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: transform 0.2s;
+            margin: 5px;
+        }
+        
+        button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        
+        .item-row {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr 1fr auto;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        
+        #logoPreview {
+            max-width: 200px;
+            max-height: 100px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            padding: 10px;
+            border-radius: 5px;
+        }
+        
+        #receiptPreview {
+            background: white;
+            border: 1px solid #333;
+            padding: 30px;
+            width: 300px;
+            margin: 20px auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.6;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        
+        .receipt-logo {
+            max-width: 150px;
+            max-height: 80px;
+            margin-bottom: 10px;
+        }
+        
+        .receipt-items {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        
+        .receipt-items th {
+            border-bottom: 1px dashed #333;
+            padding: 5px 0;
+            text-align: left;
+        }
+        
+        .receipt-items td {
+            padding: 4px 0;
+            border-bottom: 1px dotted #ddd;
+        }
+        
+        .receipt-items .total-row {
+            border-top: 2px solid #333;
+            font-weight: bold;
+        }
+        
+        .receipt-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 10px;
+            border-top: 1px dashed #333;
+            font-size: 12px;
+        }
+        
+        .bluetooth-status {
+            padding: 10px;
+            border-radius: 5px;
+            margin: 10px 0;
+            text-align: center;
+            font-weight: bold;
+        }
+        
+        .connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🛒 Will's Tech Store - Receipt Generator</h1>
+            <p>Create professional receipts and print via Bluetooth thermal printer</p>
+        </div>
+        
+        <div class="logo-section">
+            <h2>Store Logo & Details</h2>
+            
+            <div>
+                <label>Upload Store Logo:</label>
+                <input type="file" id="logoUpload" accept="image/*">
+                <div id="logoPreview"></div>
+            </div>
+            
+            <div>
+                <label>Store Name:</label>
+                <input type="text" id="storeName" value="Will's Tech Store" placeholder="Enter store name">
+            </div>
+            
+            <div>
+                <label>Store Address:</label>
+                <textarea id="storeAddress" rows="3" placeholder="Enter store address">123 Tech Street, Silicon Valley, CA 94000</textarea>
+            </div>
+            
+            <div>
+                <label>Store Phone:</label>
+                <input type="text" id="storePhone" value="(555) 123-4567" placeholder="Enter phone number">
+            </div>
+            
+            <div>
+                <label>Store Website:</label>
+                <input type="text" id="storeWebsite" value="www.willstechstore.com" placeholder="Enter website">
+            </div>
+        </div>
+        
+        <div class="receipt-section">
+            <h2>Receipt Details</h2>
+            
+            <div>
+                <label>Receipt Number:</label>
+                <input type="text" id="receiptNumber" value="RCT-2024-001">
+            </div>
+            
+            <div>
+                <label>Date:</label>
+                <input type="datetime-local" id="receiptDate">
+            </div>
+            
+            <div>
+                <label>Customer Name:</label>
+                <input type="text" id="customerName" placeholder="Enter customer name">
+            </div>
+            
+            <div>
+                <label>Customer Email:</label>
+                <input type="email" id="customerEmail" placeholder="Enter customer email">
+            </div>
+            
+            <div>
+                <label>Payment Method:</label>
+                <select id="paymentMethod">
+                    <option value="Cash">Cash</option>
+                    <option value="Credit Card">Credit Card</option>
+                    <option value="Debit Card">Debit Card</option>
+                    <option value="Mobile Payment">Mobile Payment</option>
+                    <option value="Bank Transfer">Bank Transfer</option>
+                </select>
+            </div>
+            
+            <h3>Items</h3>
+            <div id="itemsContainer">
+                <div class="item-row">
+                    <input type="text" class="item-name" placeholder="Item name" value="Gaming Laptop">
+                    <input type="number" class="item-qty" placeholder="Qty" value="1" min="1">
+                    <input type="number" class="item-price" placeholder="Price" value="1299.99" step="0.01">
+                    <input type="number" class="item-total" placeholder="Total" value="1299.99" readonly>
+                    <button type="button" class="remove-item">×</button>
+                </div>
+                <div class="item-row">
+                    <input type="text" class="item-name" placeholder="Item name" value="Wireless Mouse">
+                    <input type="number" class="item-qty" placeholder="Qty" value="2" min="1">
+                    <input type="number" class="item-price" placeholder="Price" value="49.99" step="0.01">
+                    <input type="number" class="item-total" placeholder="Total" value="99.98" readonly>
+                    <button type="button" class="remove-item">×</button>
+                </div>
+            </div>
+            
+            <div class="button-group">
+                <button type="button" id="addItem">➕ Add Item</button>
+                <button type="button" id="calculateTotal">🔄 Calculate Total</button>
+            </div>
+            
+            <h3>Bluetooth Printing</h3>
+            <div id="bluetoothStatus" class="bluetooth-status disconnected">
+                ⚡ Bluetooth: Not Connected
+            </div>
+            
+            <div class="button-group">
+                <button type="button" id="connectBluetooth">🔗 Connect Printer</button>
+                <button type="button" id="printReceipt">🖨️ Print Receipt</button>
+                <button type="button" id="downloadReceipt">📥 Download Receipt</button>
+                <button type="button" id="clearForm">🗑️ Clear Form</button>
+            </div>
+        </div>
+        
+        <div class="preview-section">
+            <h2>Receipt Preview</h2>
+            <div id="receiptPreview"></div>
+        </div>
+    </div>
+
+    <script>
+        // Generate current date and time
+        document.getElementById('receiptDate').value = new Date().toISOString().slice(0, 16);
+        
+        // Logo upload handler
+        document.getElementById('logoUpload').addEventListener('change', function(e) {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const logoPreview = document.getElementById('logoPreview');
+                    logoPreview.innerHTML = `<img src="${e.target.result}" class="receipt-logo" alt="Store Logo">`;
+                    updateReceiptPreview();
+                }
+                reader.readAsDataURL(file);
+            }
+        });
+        
+        // Add new item row
+        document.getElementById('addItem').addEventListener('click', function() {
+            const container = document.getElementById('itemsContainer');
+            const newRow = document.createElement('div');
+            newRow.className = 'item-row';
+            newRow.innerHTML = `
+                <input type="text" class="item-name" placeholder="Item name">
+                <input type="number" class="item-qty" placeholder="Qty" value="1" min="1">
+                <input type="number" class="item-price" placeholder="Price" step="0.01">
+                <input type="number" class="item-total" placeholder="Total" readonly>
+                <button type="button" class="remove-item">×</button>
+            `;
+            container.appendChild(newRow);
+            
+            // Add event listeners to new inputs
+            const inputs = newRow.querySelectorAll('input');
+            inputs.forEach(input => {
+                if (!input.classList.contains('item-total')) {
+                    input.addEventListener('input', calculateItemTotal);
+                }
+            });
+            
+            newRow.querySelector('.remove-item').addEventListener('click', function() {
+                container.removeChild(newRow);
+                calculateTotal();
+                updateReceiptPreview();
+            });
+        });
+        
+        // Calculate item total
+        function calculateItemTotal() {
+            const row = this.closest('.item-row');
+            const qty = parseFloat(row.querySelector('.item-qty').value) || 0;
+            const price = parseFloat(row.querySelector('.item-price').value) || 0;
+            const total = qty * price;
+            row.querySelector('.item-total').value = total.toFixed(2);
+            calculateTotal();
+            updateReceiptPreview();
+        }
+        
+        // Calculate grand total
+        function calculateTotal() {
+            let subtotal = 0;
+            document.querySelectorAll('.item-total').forEach(input => {
+                subtotal += parseFloat(input.value) || 0;
+            });
+            const tax = subtotal * 0.08; // 8% tax
+            const total = subtotal + tax;
+            
+            document.getElementById('receiptPreview').querySelector('.subtotal').textContent = subtotal.toFixed(2);
+            document.getElementById('receiptPreview').querySelector('.tax').textContent = tax.toFixed(2);
+            document.getElementById('receiptPreview').querySelector('.grand-total').textContent = total.toFixed(2);
+        }
+        
+        // Initialize item calculation listeners
+        document.querySelectorAll('.item-qty, .item-price').forEach(input => {
+            input.addEventListener('input', calculateItemTotal);
+        });
+        
+        document.querySelectorAll('.remove-item').forEach(button => {
+            button.addEventListener('click', function() {
+                this.closest('.item-row').remove();
+                calculateTotal();
+                updateReceiptPreview();
+            });
+        });
+        
+        // Update receipt preview
+        function updateReceiptPreview() {
+            const preview = document.getElementById('receiptPreview');
+            const logoImg = document.getElementById('logoPreview').querySelector('img');
+            const logo = logoImg ? logoImg.outerHTML : '';
+            
+            let itemsHTML = '';
+            document.querySelectorAll('.item-row').forEach(row => {
+                const name = row.querySelector('.item-name').value || '';
+                const qty = row.querySelector('.item-qty').value || '0';
+                const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                const total = parseFloat(row.querySelector('.item-total').value) || 0;
+                
+                if (name) {
+                    itemsHTML += `
+                        <tr>
+                            <td>${name}</td>
+                            <td>${qty}</td>
+                            <td>$${price.toFixed(2)}</td>
+                            <td>$${total.toFixed(2)}</td>
+                        </tr>
+                    `;
+                }
+            });
+            
+            const subtotal = parseFloat(document.getElementById('receiptPreview').querySelector('.subtotal')?.textContent) || 0;
+            const tax = subtotal * 0.08;
+            const grandTotal = subtotal + tax;
+            
+            preview.innerHTML = `
+                <div class="receipt-header">
+                    ${logo}
+                    <h2>${document.getElementById('storeName').value || "Will's Tech Store"}</h2>
+                    <p>${document.getElementById('storeAddress').value || "123 Tech Street"}</p>
+                    <p>Tel: ${document.getElementById('storePhone').value || "(555) 123-4567"}</p>
+                </div>
+                
+                <div class="receipt-info">
+                    <p><strong>Receipt:</strong> ${document.getElementById('receiptNumber').value || 'RCT-2024-001'}</p>
+                    <p><strong>Date:</strong> ${new Date(document.getElementById('receiptDate').value).toLocaleString()}</p>
+                    <p><strong>Customer:</strong> ${document.getElementById('customerName').value || 'Walk-in Customer'}</p>
+                </div>
+                
+                <table class="receipt-items">
+                    <thead>
+                        <tr>
+                            <th>Item</th>
+                            <th>Qty</th>
+                            <th>Price</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${itemsHTML}
+                    </tbody>
+                </table>
+                
+                <div class="receipt-totals">
+                    <p>Subtotal: $<span class="subtotal">${subtotal.toFixed(2)}</span></p>
+                    <p>Tax (8%): $<span class="tax">${tax.toFixed(2)}</span></p>
+                    <p><strong>Grand Total: $<span class="grand-total">${grandTotal.toFixed(2)}</span></strong></p>
+                </div>
+                
+                <div class="receipt-footer">
+                    <p>Payment Method: ${document.getElementById('paymentMethod').value || 'Cash'}</p>
+                    <p>Thank you for shopping at Will's Tech Store!</p>
+                    <p>${document.getElementById('storeWebsite').value || 'www.willstechstore.com'}</p>
+                    <p>📧 ${document.getElementById('customerEmail').value || 'receipt@willstechstore.com'}</p>
+                </div>
+            `;
+        }
+        
+        // Bluetooth connection
+        let bluetoothDevice = null;
+        let bluetoothCharacteristic = null;
+        
+        document.getElementById('connectBluetooth').addEventListener('click', async function() {
+            try {
+                // Request Bluetooth device
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    filters: [{ services: ['000018f0-0000-1000-8000-00805f9b34fb'] }], // Common thermal printer service
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+                
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                bluetoothCharacteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                
+                const statusDiv = document.getElementById('bluetoothStatus');
+                statusDiv.className = 'bluetooth-status connected';
+                statusDiv.innerHTML = `✅ Connected to: ${bluetoothDevice.name || 'Thermal Printer'}`;
+                
+                // Monitor disconnection
+                bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+                    statusDiv.className = 'bluetooth-status disconnected';
+                    statusDiv.innerHTML = '⚠️ Bluetooth: Disconnected';
+                });
+                
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                alert('Bluetooth connection failed. Make sure your printer is on and in pairing mode.');
+            }
+        });
+        
+        // Print receipt via Bluetooth
+        document.getElementById('printReceipt').addEventListener('click', async function() {
+            if (!bluetoothCharacteristic) {
+                alert('Please connect to a Bluetooth printer first.');
+                return;
+            }
+            
+            try {
+                // Create ESC/POS commands for thermal printer
+                let printData = [];
+                
+                // Initialize printer
+                printData.push(new Uint8Array([0x1B, 0x40])); // Initialize
+                
+                // Center alignment
+                printData.push(new Uint8Array([0x1B, 0x61, 0x01]));
+                
+                // Store name
+                const storeName = document.getElementById('storeName').value || "Will's Tech Store";
+                printData.push(new TextEncoder().encode(storeName + '\n'));
+                
+                // Store address
+                const address = document.getElementById('storeAddress').value;
+                if (address) {
+                    printData.push(new TextEncoder().encode(address + '\n'));
+                }
+                
+                // Receipt info
+                printData.push(new TextEncoder().encode('\n'));
+                printData.push(new TextEncoder().encode('Receipt: ' + (document.getElementById('receiptNumber').value || 'RCT-2024-001') + '\n'));
+                printData.push(new TextEncoder().encode('Date: ' + new Date().toLocaleString() + '\n'));
+                printData.push(new TextEncoder().encode('Customer: ' + (document.getElementById('customerName').value || 'Walk-in') + '\n'));
+                printData.push(new TextEncoder().encode('--------------------------------\n'));
+                
+                // Items
+                printData.push(new TextEncoder().encode('Item              Qty  Price  Total\n'));
+                printData.push(new TextEncoder().encode('--------------------------------\n'));
+                
+                document.querySelectorAll('.item-row').forEach(row => {
+                    const name = (row.querySelector('.item-name').value || '').substring(0, 16);
+                    const qty = row.querySelector('.item-qty').value || '0';
+                    const price = parseFloat(row.querySelector('.item-price').value) || 0;
+                    const total = parseFloat(row.querySelector('.item-total').value) || 0;
+                    
+                    if (name) {
+                        const line = `${name.padEnd(16)} ${qty.padStart(3)} $${price.toFixed(2).padStart(6)} $${total.toFixed(2).padStart(6)}\n`;
+                        printData.push(new TextEncoder().encode(line));
+                    }
+                });
+                
+                printData.push(new TextEncoder().encode('--------------------------------\n'));
+                
+                // Totals
+                const subtotal = parseFloat(document.getElementById('receiptPreview').querySelector('.subtotal')?.textContent) || 0;
+                const tax = subtotal * 0.08;
+                const total = subtotal + tax;
+                
+                printData.push(new TextEncoder().encode(`Subtotal: $${subtotal.toFixed(2).padStart(8)}\n`));
+                printData.push(new TextEncoder().encode(`Tax (8%): $${tax.toFixed(2).padStart(8)}\n`));
+                printData.push(new TextEncoder().encode(`Total:    $${total.toFixed(2).padStart(8)}\n`));
+                printData.push(new TextEncoder().encode('================================\n'));
+                
+                // Payment method
+                printData.push(new TextEncoder().encode('Payment: ' + (document.getElementById('paymentMethod').value || 'Cash') + '\n\n'));
+                
+                // Footer
+                printData.push(new TextEncoder().encode('Thank you for shopping at\n'));
+                printData.push(new TextEncoder().encode("Will's Tech Store!\n\n"));
+                printData.push(new TextEncoder().encode((document.getElementById('storeWebsite').value || 'www.willstechstore.com') + '\n'));
+                
+                // Cut paper (partial cut)
+                printData.push(new Uint8Array([0x1D, 0x56, 0x41, 0x10]));
+                
+                // Send data to printer
+                for (const data of printData) {
+                    await bluetoothCharacteristic.writeValue(data);
+                    await new Promise(resolve => setTimeout(resolve, 50)); // Small delay
+                }
+                
+                alert('Receipt sent to printer!');
+                
+            } catch (error) {
+                console.error('Print error:', error);
+                alert('Printing failed. Please check printer connection.');
+            }
+        });
+        
+        // Download receipt as HTML
+        document.getElementById('downloadReceipt').addEventListener('click', function() {
+            const receiptContent = document.getElementById('receiptPreview').innerHTML;
+            const storeName = document.getElementById('storeName').value.replace(/\s+/g, '_');
+            const receiptNum = document.getElementById('receiptNumber').value.replace(/\s+/g, '_');
+            
+            const blob = new Blob([`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Receipt - ${receiptNum}</title>
+                    <style>
+                        body { font-family: 'Courier New', monospace; padding: 20px; }
+                        .receipt { width: 300px; margin: 0 auto; }
+                        @media print { body { margin: 0; padding: 0; } }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt">${receiptContent}</div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 1000);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `], { type: 'text/html' });
+            
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = `Receipt_${storeName}_${receiptNum}.html`;
+            link.click();
+        });
+        
+        // Clear form
+        document.getElementById('clearForm').addEventListener('click', function() {
+            if (confirm('Clear all form data?')) {
+                document.getElementById('customerName').value = '';
+                document.getElementById('customerEmail').value = '';
+                document.getElementById('receiptNumber').value = 'RCT-' + new Date().getFullYear() + '-' + 
+                    Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+                document.getElementById('itemsContainer').innerHTML = '';
+                document.getElementById('addItem').click(); // Add one empty item
+                updateReceiptPreview();
+            }
+        });
+        
+        // Auto-update preview on any input change
+        const inputs = document.querySelectorAll('input, select, textarea');
+        inputs.forEach(input => {
+            if (input.id !== 'logoUpload') {
+                input.addEventListener('input', updateReceiptPreview);
+            }
+        });
+        
+        // Initial preview
+        updateReceiptPreview();
+        calculateTotal();
+        
+        // Generate initial receipt number
+        document.getElementById('receiptNumber').value = 'RCT-' + 
+            new Date().getFullYear() + '-' + 
+            Math.floor(Math.random() * 1000).toString().padStart(3, '0');
+    </script>
+</body>
+</html>

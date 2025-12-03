@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Will's Tech Store - Receipt Printer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 10px;
+            max-width: 100%;
+            overflow-x: hidden;
+        }
+        
+        .container {
+            max-width: 100%;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.5rem;
+            margin-bottom: 5px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 15px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .card-title {
+            color: #2563eb;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #e5e7eb;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #374151;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .btn {
+            padding: 12px 20px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+            margin-bottom: 10px;
+            justify-content: center;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .printer-status {
+            padding: 12px;
+            border-radius: 5px;
+            margin: 15px 0;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .status-connected {
+            background: #d1fae5;
+            color: #065f46;
+            border: 2px solid #10b981;
+        }
+        
+        .status-disconnected {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 2px solid #ef4444;
+        }
+        
+        .receipt-paper {
+            width: 100%;
+            max-width: 280px;
+            background: white;
+            border: 1px solid #d1d5db;
+            padding: 15px;
+            margin: 0 auto;
+            font-family: 'Courier New', monospace;
+            font-size: 12px;
+            line-height: 1.2;
+        }
+        
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+            position: relative;
+            top: 50%;
+            transform: translateY(-50%);
+        }
+        
+        .printer-option {
+            padding: 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            margin-bottom: 10px;
+            cursor: pointer;
+        }
+        
+        .printer-option.selected {
+            border-color: #2563eb;
+            background: #dbeafe;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 5px;
+            display: none;
+            z-index: 1001;
+        }
+        
+        .toast.show {
+            display: block;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        @keyframes slideIn {
+            from { transform: translateX(100%); }
+            to { transform: translateX(0); }
+        }
+        
+        /* Responsive */
+        @media (min-width: 768px) {
+            .container {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 20px;
+            }
+            
+            .header {
+                grid-column: 1 / -1;
+            }
+            
+            .btn {
+                width: auto;
+                margin-right: 10px;
+            }
+            
+            .btn-group {
+                display: flex;
+                flex-wrap: wrap;
+                gap: 10px;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
+            <p>Receipt Printing System - willstech.store</p>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-store-alt"></i> Store Info</h2>
+            <div class="form-group">
+                <label class="form-label">Store Name</label>
+                <input type="text" id="storeName" class="form-control" value="Will's Tech Store">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Phone</label>
+                <input type="text" id="storePhone" class="form-control" value="+256 700 123 456">
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-receipt"></i> Receipt Details</h2>
+            <div class="form-group">
+                <label class="form-label">Customer Name</label>
+                <input type="text" id="customerName" class="form-control" placeholder="Enter customer name">
+            </div>
+            <div class="form-group">
+                <label class="form-label">Payment Method</label>
+                <select id="paymentMethod" class="form-control">
+                    <option value="Cash">Cash</option>
+                    <option value="Mobile Money">Mobile Money</option>
+                </select>
+            </div>
+            
+            <div id="printerStatus" class="printer-status status-disconnected">
+                <i class="fas fa-print"></i>
+                <span>Printer: Not Connected</span>
+            </div>
+            
+            <div class="btn-group">
+                <button id="selectPrinter" class="btn btn-primary">
+                    <i class="fas fa-bluetooth"></i> Select Printer
+                </button>
+                <button id="testPrint" class="btn btn-success" disabled>
+                    <i class="fas fa-print"></i> Test Print
+                </button>
+            </div>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-shopping-cart"></i> Items (UGX)</h2>
+            <div id="itemsContainer"></div>
+            <button id="addItem" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Add Item
+            </button>
+        </div>
+        
+        <div class="card">
+            <h2 class="card-title"><i class="fas fa-cogs"></i> Actions</h2>
+            <div class="btn-group">
+                <button id="printReceipt" class="btn btn-success">
+                    <i class="fas fa-print"></i> Print Receipt
+                </button>
+                <button id="previewReceipt" class="btn btn-primary">
+                    <i class="fas fa-eye"></i> Preview
+                </button>
+                <button id="clearAll" class="btn btn-danger">
+                    <i class="fas fa-redo"></i> Clear
+                </button>
+            </div>
+        </div>
+        
+        <div class="card" style="grid-column: 1 / -1;">
+            <h2 class="card-title"><i class="fas fa-eye"></i> Receipt Preview</h2>
+            <div id="receiptPreview" class="receipt-paper"></div>
+        </div>
+    </div>
+    
+    <!-- Printer Modal -->
+    <div id="printerModal" class="modal">
+        <div class="modal-content">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3>Select Printer Method</h3>
+                <button id="closeModal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div class="printer-option" data-method="usb-network">
+                <i class="fas fa-print"></i>
+                <strong>System Printer</strong>
+                <p>Print using your system printer</p>
+            </div>
+            
+            <div id="bluetoothOption" class="printer-option" data-method="web-bluetooth">
+                <i class="fas fa-bluetooth"></i>
+                <strong>Bluetooth Printer</strong>
+                <p>Connect to Bluetooth thermal printer</p>
+            </div>
+            
+            <button id="confirmMethod" class="btn btn-success" style="margin-top: 20px;">
+                <i class="fas fa-check"></i> Use Selected Method
+            </button>
+        </div>
+    </div>
+    
+    <!-- Toast -->
+    <div id="toast" class="toast"></div>
+
+    <script>
+        // Simple toast function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+        
+        // Generate unique receipt number
+        function generateReceiptNumber() {
+            const now = new Date();
+            const year = now.getFullYear().toString().slice(-2);
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hour = String(now.getHours()).padStart(2, '0');
+            const minute = String(now.getMinutes()).padStart(2, '0');
+            const second = String(now.getSeconds()).padStart(2, '0');
+            const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
+            
+            return `RCT-${year}${month}${day}-${hour}${minute}${second}-${random}`;
+        }
+        
+        // Format currency
+        function formatUGX(amount) {
+            return amount.toLocaleString('en-UG', {
+                style: 'currency',
+                currency: 'UGX',
+                minimumFractionDigits: 0
+            });
+        }
+        
+        // Global variables
+        let selectedPrinterMethod = null;
+        let bluetoothDevice = null;
+        let receiptItems = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            initializeReceipt();
+            setupEventListeners();
+        });
+        
+        function initializeReceipt() {
+            // Add sample item
+            addItem('Mobile Deposit', 1, 6000);
+            updateReceiptPreview();
+        }
+        
+        function setupEventListeners() {
+            // Printer modal
+            document.getElementById('selectPrinter').addEventListener('click', () => {
+                document.getElementById('printerModal').style.display = 'block';
+            });
+            
+            document.getElementById('closeModal').addEventListener('click', () => {
+                document.getElementById('printerModal').style.display = 'none';
+            });
+            
+            // Printer selection
+            document.querySelectorAll('.printer-option').forEach(option => {
+                option.addEventListener('click', function() {
+                    document.querySelectorAll('.printer-option').forEach(o => {
+                        o.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    selectedPrinterMethod = this.dataset.method;
+                });
+            });
+            
+            // Confirm method
+            document.getElementById('confirmMethod').addEventListener('click', function() {
+                if (!selectedPrinterMethod) {
+                    showToast('Please select a method first', 'error');
+                    return;
+                }
+                
+                document.getElementById('printerModal').style.display = 'none';
+                
+                const statusDiv = document.getElementById('printerStatus');
+                const testBtn = document.getElementById('testPrint');
+                const printBtn = document.getElementById('printReceipt');
+                
+                if (selectedPrinterMethod === 'usb-network') {
+                    statusDiv.className = 'printer-status status-connected';
+                    statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Ready for printing</span>';
+                    testBtn.disabled = false;
+                    printBtn.disabled = false;
+                    showToast('Ready to print!');
+                } else if (selectedPrinterMethod === 'web-bluetooth') {
+                    connectBluetooth();
+                }
+            });
+            
+            // Add item
+            document.getElementById('addItem').addEventListener('click', () => {
+                addItem('', 1, 0);
+            });
+            
+            // Print receipt
+            document.getElementById('printReceipt').addEventListener('click', printReceipt);
+            
+            // Test print
+            document.getElementById('testPrint').addEventListener('click', testPrint);
+            
+            // Preview
+            document.getElementById('previewReceipt').addEventListener('click', updateReceiptPreview);
+            
+            // Clear
+            document.getElementById('clearAll').addEventListener('click', () => {
+                if (confirm('Clear all items?')) {
+                    receiptItems = [];
+                    document.getElementById('itemsContainer').innerHTML = '';
+                    initializeReceipt();
+                    showToast('Cleared all items');
+                }
+            });
+            
+            // Auto-update preview
+            ['storeName', 'storePhone', 'customerName', 'paymentMethod'].forEach(id => {
+                document.getElementById(id).addEventListener('input', updateReceiptPreview);
+            });
+        }
+        
+        async function connectBluetooth() {
+            const statusDiv = document.getElementById('printerStatus');
+            const testBtn = document.getElementById('testPrint');
+            const printBtn = document.getElementById('printReceipt');
+            
+            try {
+                if (!navigator.bluetooth) {
+                    showToast('Bluetooth not supported', 'error');
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Searching for printers...</span>';
+                
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+                
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connecting...</span>';
+                
+                const server = await bluetoothDevice.gatt.connect();
+                
+                statusDiv.className = 'printer-status status-connected';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Connected to printer</span>';
+                testBtn.disabled = false;
+                printBtn.disabled = false;
+                
+                showToast('Bluetooth printer connected!');
+                
+                // Handle disconnection
+                bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+                    statusDiv.className = 'printer-status status-disconnected';
+                    statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Printer disconnected</span>';
+                    testBtn.disabled = true;
+                    printBtn.disabled = true;
+                    showToast('Printer disconnected', 'error');
+                });
+                
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                statusDiv.className = 'printer-status status-disconnected';
+                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Not connected</span>';
+                showToast('Bluetooth connection failed', 'error');
+            }
+        }
+        
+        function addItem(name, quantity, price) {
+            const item = {
+                id: Date.now(),
+                name: name || 'Item',
+                quantity: quantity,
+                price: price,
+                total: quantity * price
+            };
+            
+            receiptItems.push(item);
+            renderItems();
+            updateReceiptPreview();
+        }
+        
+        function renderItems() {
+            const container = document.getElementById('itemsContainer');
+            container.innerHTML = '';
+            
+            receiptItems.forEach((item, index) => {
+                const div = document.createElement('div');
+                div.className = 'form-group';
+                div.style.display = 'grid';
+                div.style.gridTemplateColumns = '2fr 1fr 1fr 1fr auto';
+                div.style.gap = '5px';
+                div.style.marginBottom = '10px';
+                
+                div.innerHTML = `
+                    <input type="text" class="form-control" value="${item.name}" 
+                           data-index="${index}" placeholder="Name" style="font-size: 14px; padding: 8px;">
+                    <input type="number" class="form-control" value="${item.quantity}" 
+                           data-index="${index}" min="1" style="font-size: 14px; padding: 8px;">
+                    <input type="number" class="form-control" value="${item.price}" 
+                           data-index="${index}" step="1000" style="font-size: 14px; padding: 8px;">
+                    <input type="text" class="form-control" value="${formatUGX(item.total)}" readonly 
+                           style="font-size: 14px; padding: 8px;">
+                    <button class="btn btn-danger" data-index="${index}" 
+                            style="padding: 8px; min-width: 40px;">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                container.appendChild(div);
+            });
+            
+            // Add event listeners
+            document.querySelectorAll('input[data-index]').forEach(input => {
+                input.addEventListener('input', function() {
+                    const index = parseInt(this.dataset.index);
+                    updateItem(index);
+                });
+            });
+            
+            document.querySelectorAll('button[data-index]').forEach(button => {
+                button.addEventListener('click', function() {
+                    const index = parseInt(this.dataset.index);
+                    receiptItems.splice(index, 1);
+                    renderItems();
+                    updateReceiptPreview();
+                });
+            });
+        }
+        
+        function updateItem(index) {
+            const inputs = document.querySelectorAll(`input[data-index="${index}"]`);
+            if (inputs.length < 3) return;
+            
+            receiptItems[index] = {
+                ...receiptItems[index],
+                name: inputs[0].value,
+                quantity: parseInt(inputs[1].value) || 0,
+                price: parseInt(inputs[2].value) || 0,
+                total: (parseInt(inputs[1].value) || 0) * (parseInt(inputs[2].value) || 0)
+            };
+            
+            if (inputs[3]) {
+                inputs[3].value = formatUGX(receiptItems[index].total);
+            }
+            
+            updateReceiptPreview();
+        }
+        
+        function updateReceiptPreview() {
+            const preview = document.getElementById('receiptPreview');
+            const now = new Date();
+            const receiptNumber = generateReceiptNumber();
+            const subtotal = receiptItems.reduce((sum, item) => sum + item.total, 0);
+            const vat = subtotal * 0.18;
+            const total = subtotal + vat;
+            
+            preview.innerHTML = `
+                <div style="text-align: center; margin-bottom: 5px;">
+                    <div style="font-weight: bold; font-size: 14px;">${document.getElementById('storeName').value}</div>
+                    <div style="font-size: 10px;">willstech.store</div>
+                    <div style="font-size: 10px;">${document.getElementById('storePhone').value}</div>
+                </div>
+                
+                <div style="text-align: center; border-top: 1px dashed #000; border-bottom: 1px dashed #000; 
+                     padding: 3px 0; margin: 5px 0; font-size: 12px; font-weight: bold;">
+                    RECEIPT
+                </div>
+                
+                <table style="width: 100%; font-size: 10px; margin: 5px 0;">
+                    <tr>
+                        <td><strong>DATE:</strong></td>
+                        <td>${now.toLocaleDateString()}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TIME:</strong></td>
+                        <td>${now.toLocaleTimeString()}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>CUSTOMER:</strong></td>
+                        <td>${document.getElementById('customerName').value || 'Walk-in'}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>RECEIPT:</strong></td>
+                        <td>${receiptNumber}</td>
+                    </tr>
+                </table>
+                
+                <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+                
+                <table style="width: 100%; font-size: 10px; margin: 5px 0;">
+                    ${receiptItems.map(item => `
+                        <tr>
+                            <td>${item.name}</td>
+                            <td style="text-align: right;">${formatUGX(item.price)}</td>
+                        </tr>
+                    `).join('')}
+                </table>
+                
+                <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+                
+                <table style="width: 100%; font-size: 10px; margin: 5px 0;">
+                    <tr>
+                        <td><strong>SUBTOTAL:</strong></td>
+                        <td style="text-align: right;">${formatUGX(subtotal)}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>VAT (18%):</strong></td>
+                        <td style="text-align: right;">${formatUGX(vat)}</td>
+                    </tr>
+                    <tr>
+                        <td><strong>TOTAL:</strong></td>
+                        <td style="text-align: right; font-weight: bold;">${formatUGX(total)}</td>
+                    </tr>
+                </table>
+                
+                <div style="text-align: center; margin-top: 10px; font-size: 10px;">
+                    <div><strong>PAYMENT:</strong> ${document.getElementById('paymentMethod').value}</div>
+                    <div style="color: green; font-weight: bold;">✓ SUCCESSFUL</div>
+                    <div><strong>THANK YOU!</strong></div>
+                    <div style="font-size: 9px;">willstech.store</div>
+                </div>
+            `;
+        }
+        
+        function testPrint() {
+            if (!selectedPrinterMethod) {
+                showToast('Select printer method first', 'error');
+                return;
+            }
+            
+            if (selectedPrinterMethod === 'usb-network') {
+                printViaSystem("TEST PRINT\nWill's Tech Store\nTest successful!\n\n");
+            } else if (selectedPrinterMethod === 'web-bluetooth') {
+                showToast('Test print via Bluetooth', 'success');
+            }
+        }
+        
+        function printReceipt() {
+            if (!selectedPrinterMethod) {
+                showToast('Select printer method first', 'error');
+                return;
+            }
+            
+            if (receiptItems.length === 0) {
+                showToast('Add items first', 'error');
+                return;
+            }
+            
+            if (selectedPrinterMethod === 'usb-network') {
+                printReceiptViaSystem();
+            } else if (selectedPrinterMethod === 'web-bluetooth') {
+                printReceiptViaBluetooth();
+            }
+        }
+        
+        function printReceiptViaSystem() {
+            const now = new Date();
+            const receiptNumber = generateReceiptNumber();
+            const subtotal = receiptItems.reduce((sum, item) => sum + item.total, 0);
+            const vat = subtotal * 0.18;
+            const total = subtotal + vat;
+            
+            // Create printable content
+            const printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Print Receipt</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: 58mm auto;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            body {
+                                margin: 0;
+                                padding: 2mm;
+                                font-family: 'Courier New', monospace;
+                                font-size: 10px;
+                                line-height: 1.2;
+                                width: 54mm;
+                            }
+                        }
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 10px;
+                            line-height: 1.2;
+                            margin: 2mm;
+                            padding: 0;
+                            white-space: pre-line;
+                        }
+                        .receipt-header {
+                            text-align: center;
+                            font-weight: bold;
+                            margin-bottom: 5px;
+                        }
+                        .divider {
+                            border-top: 1px dashed #000;
+                            margin: 5px 0;
+                        }
+                        .item-row {
+                            display: flex;
+                            justify-content: space-between;
+                            margin: 2px 0;
+                        }
+                        .total-row {
+                            display: flex;
+                            justify-content: space-between;
+                            font-weight: bold;
+                            margin-top: 5px;
+                            border-top: 1px solid #000;
+                            padding-top: 5px;
+                        }
+                        .footer {
+                            text-align: center;
+                            margin-top: 10px;
+                            font-size: 9px;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="receipt-header">
+                        ${document.getElementById('storeName').value}<br>
+                        willstech.store<br>
+                        ${document.getElementById('storePhone').value}
+                    </div>
+                    
+                    <div style="text-align: center; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 2px 0; margin: 3px 0;">
+                        RECEIPT
+                    </div>
+                    
+                    <div>
+                        <strong>DATE:</strong> ${now.toLocaleDateString()}<br>
+                        <strong>TIME:</strong> ${now.toLocaleTimeString()}<br>
+                        <strong>CUSTOMER:</strong> ${document.getElementById('customerName').value || 'Walk-in'}<br>
+                        <strong>RECEIPT:</strong> ${receiptNumber}
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div>
+                        <strong>ITEMS:</strong>
+                        ${receiptItems.map(item => `
+                            <div class="item-row">
+                                <span>${item.name}</span>
+                                <span>${formatUGX(item.price)}</span>
+                            </div>
+                        `).join('')}
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div>
+                        <div class="item-row">
+                            <span>SUBTOTAL:</span>
+                            <span>${formatUGX(subtotal)}</span>
+                        </div>
+                        <div class="item-row">
+                            <span>VAT (18%):</span>
+                            <span>${formatUGX(vat)}</span>
+                        </div>
+                        <div class="total-row">
+                            <span>TOTAL:</span>
+                            <span>${formatUGX(total)}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="divider"></div>
+                    
+                    <div class="footer">
+                        <strong>PAYMENT:</strong> ${document.getElementById('paymentMethod').value}<br>
+                        <span style="color: green; font-weight: bold;">✓ TRANSACTION SUCCESSFUL</span><br>
+                        <strong>THANK YOU!</strong><br>
+                        willstech.store
+                    </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 100);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            // Open print window
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            showToast('Printing receipt...');
+        }
+        
+        async function printReceiptViaBluetooth() {
+            if (!bluetoothDevice) {
+                showToast('Bluetooth printer not connected', 'error');
+                return;
+            }
+            
+            try {
+                const now = new Date();
+                const receiptNumber = generateReceiptNumber();
+                const subtotal = receiptItems.reduce((sum, item) => sum + item.total, 0);
+                const vat = subtotal * 0.18;
+                const total = subtotal + vat;
+                
+                // ESC/POS commands for thermal printer
+                let escpos = "\x1B\x40"; // Initialize printer
+                escpos += "\x1B\x61\x01"; // Center align
+                escpos += "WILL'S TECH STORE\n";
+                escpos += "willstech.store\n";
+                escpos += "\x1B\x61\x00"; // Left align
+                escpos += "----------------\n";
+                escpos += "\x1B\x61\x01"; // Center align
+                escpos += "RECEIPT\n";
+                escpos += "\x1B\x61\x00"; // Left align
+                escpos += "----------------\n";
+                escpos += `DATE:    ${now.toLocaleDateString()}\n`;
+                escpos += `TIME:    ${now.toLocaleTimeString()}\n`;
+                escpos += `CUSTOMER:${document.getElementById('customerName').value || 'Walk-in'}\n`;
+                escpos += `RECEIPT: ${receiptNumber}\n`;
+                escpos += "----------------\n";
+                escpos += "ITEMS:\n";
+                
+                receiptItems.forEach(item => {
+                    escpos += `${item.name} - ${formatUGX(item.price)}\n`;
+                });
+                
+                escpos += "----------------\n";
+                escpos += `SUBTOTAL: ${formatUGX(subtotal)}\n`;
+                escpos += `VAT (18%): ${formatUGX(vat)}\n`;
+                escpos += `TOTAL: ${formatUGX(total)}\n`;
+                escpos += "----------------\n";
+                escpos += `PAYMENT: ${document.getElementById('paymentMethod').value}\n`;
+                escpos += "STATUS: SUCCESSFUL\n";
+                escpos += "THANK YOU!\n";
+                escpos += "willstech.store\n";
+                escpos += "\x1D\x56\x42\x00"; // Cut paper
+                
+                if (!bluetoothDevice.gatt.connected) {
+                    await bluetoothDevice.gatt.connect();
+                }
+                
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                
+                const encoder = new TextEncoder();
+                await characteristic.writeValue(encoder.encode(escpos));
+                
+                showToast('Receipt sent to Bluetooth printer!');
+                
+            } catch (error) {
+                console.error('Bluetooth print error:', error);
+                showToast('Bluetooth printing failed', 'error');
+            }
+        }
+    </script>
+</body>
+</html>

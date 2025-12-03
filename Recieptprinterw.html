@@ -124,16 +124,18 @@
             border: 2px solid #ef4444;
         }
         
+        /* Receipt Preview - Optimized for 58mm */
         .receipt-paper {
             width: 100%;
             max-width: 280px;
             background: white;
             border: 1px solid #d1d5db;
-            padding: 15px;
+            padding: 20px 15px;
             margin: 0 auto;
             font-family: 'Courier New', monospace;
-            font-size: 12px;
+            font-size: 11px;
             line-height: 1.2;
+            position: relative;
         }
         
         /* Modal */
@@ -333,7 +335,7 @@
     <div id="toast" class="toast"></div>
 
     <script>
-        // Simple toast function
+        // Toast function
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -345,27 +347,32 @@
             }, 3000);
         }
         
-        // Generate unique receipt number
+        // Generate receipt number
         function generateReceiptNumber() {
             const now = new Date();
             const year = now.getFullYear().toString().slice(-2);
             const month = String(now.getMonth() + 1).padStart(2, '0');
             const day = String(now.getDate()).padStart(2, '0');
-            const hour = String(now.getHours()).padStart(2, '0');
-            const minute = String(now.getMinutes()).padStart(2, '0');
-            const second = String(now.getSeconds()).padStart(2, '0');
             const random = String(Math.floor(Math.random() * 1000)).padStart(3, '0');
             
-            return `RCT-${year}${month}${day}-${hour}${minute}${second}-${random}`;
+            return `RCT-UG-${now.getFullYear()}${month}${day}-${random}`;
+        }
+        
+        // Generate transaction ID
+        function generateTransactionId() {
+            const now = new Date();
+            const timestamp = now.getTime().toString().slice(-8);
+            const random = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
+            return `TXN${timestamp}${random}`;
         }
         
         // Format currency
         function formatUGX(amount) {
-            return amount.toLocaleString('en-UG', {
+            return new Intl.NumberFormat('en-UG', {
                 style: 'currency',
                 currency: 'UGX',
                 minimumFractionDigits: 0
-            });
+            }).format(amount);
         }
         
         // Global variables
@@ -380,8 +387,8 @@
         });
         
         function initializeReceipt() {
-            // Add sample item
-            addItem('Mobile Deposit', 1, 6000);
+            // Start with one empty item row
+            addEmptyItem();
             updateReceiptPreview();
         }
         
@@ -432,11 +439,14 @@
             
             // Add item
             document.getElementById('addItem').addEventListener('click', () => {
-                addItem('', 1, 0);
+                addEmptyItem();
             });
             
-            // Print receipt
-            document.getElementById('printReceipt').addEventListener('click', printReceipt);
+            // Print receipt - FIXED: Added proper event listener
+            document.getElementById('printReceipt').addEventListener('click', function() {
+                console.log('Print Receipt button clicked');
+                printReceipt();
+            });
             
             // Test print
             document.getElementById('testPrint').addEventListener('click', testPrint);
@@ -449,7 +459,7 @@
                 if (confirm('Clear all items?')) {
                     receiptItems = [];
                     document.getElementById('itemsContainer').innerHTML = '';
-                    initializeReceipt();
+                    addEmptyItem();
                     showToast('Cleared all items');
                 }
             });
@@ -458,6 +468,20 @@
             ['storeName', 'storePhone', 'customerName', 'paymentMethod'].forEach(id => {
                 document.getElementById(id).addEventListener('input', updateReceiptPreview);
             });
+        }
+        
+        function addEmptyItem() {
+            const item = {
+                id: Date.now(),
+                name: '',
+                quantity: 1,
+                price: 0,
+                total: 0
+            };
+            
+            receiptItems.push(item);
+            renderItems();
+            updateReceiptPreview();
         }
         
         async function connectBluetooth() {
@@ -506,20 +530,6 @@
             }
         }
         
-        function addItem(name, quantity, price) {
-            const item = {
-                id: Date.now(),
-                name: name || 'Item',
-                quantity: quantity,
-                price: price,
-                total: quantity * price
-            };
-            
-            receiptItems.push(item);
-            renderItems();
-            updateReceiptPreview();
-        }
-        
         function renderItems() {
             const container = document.getElementById('itemsContainer');
             container.innerHTML = '';
@@ -534,13 +544,13 @@
                 
                 div.innerHTML = `
                     <input type="text" class="form-control" value="${item.name}" 
-                           data-index="${index}" placeholder="Name" style="font-size: 14px; padding: 8px;">
+                           data-index="${index}" placeholder="Item name" style="font-size: 14px; padding: 8px;">
                     <input type="number" class="form-control" value="${item.quantity}" 
-                           data-index="${index}" min="1" style="font-size: 14px; padding: 8px;">
+                           data-index="${index}" min="1" placeholder="Qty" style="font-size: 14px; padding: 8px;">
                     <input type="number" class="form-control" value="${item.price}" 
-                           data-index="${index}" step="1000" style="font-size: 14px; padding: 8px;">
+                           data-index="${index}" step="1000" placeholder="Price" style="font-size: 14px; padding: 8px;">
                     <input type="text" class="form-control" value="${formatUGX(item.total)}" readonly 
-                           style="font-size: 14px; padding: 8px;">
+                           style="font-size: 14px; padding: 8px; background-color: #f9fafb;">
                     <button class="btn btn-danger" data-index="${index}" 
                             style="padding: 8px; min-width: 40px;">
                         <i class="fas fa-trash"></i>
@@ -562,7 +572,11 @@
                 button.addEventListener('click', function() {
                     const index = parseInt(this.dataset.index);
                     receiptItems.splice(index, 1);
-                    renderItems();
+                    if (receiptItems.length === 0) {
+                        addEmptyItem();
+                    } else {
+                        renderItems();
+                    }
                     updateReceiptPreview();
                 });
             });
@@ -591,74 +605,108 @@
             const preview = document.getElementById('receiptPreview');
             const now = new Date();
             const receiptNumber = generateReceiptNumber();
+            const transactionId = generateTransactionId();
             const subtotal = receiptItems.reduce((sum, item) => sum + item.total, 0);
-            const vat = subtotal * 0.18;
+            const vat = Math.round(subtotal * 0.18);
             const total = subtotal + vat;
             
+            let itemsContent = '';
+            if (receiptItems.length > 0) {
+                itemsContent = receiptItems.map(item => `
+                    <tr>
+                        <td style="padding: 1px 0;">${item.name || 'Item'}</td>
+                        <td style="text-align: right; padding: 1px 0;">${item.quantity}</td>
+                        <td style="text-align: right; padding: 1px 0;">${formatUGX(item.total)}</td>
+                    </tr>
+                `).join('');
+            } else {
+                itemsContent = '<tr><td colspan="3" style="text-align: center; padding: 10px 0;">No items added</td></tr>';
+            }
+            
             preview.innerHTML = `
-                <div style="text-align: center; margin-bottom: 5px;">
-                    <div style="font-weight: bold; font-size: 14px;">${document.getElementById('storeName').value}</div>
-                    <div style="font-size: 10px;">willstech.store</div>
-                    <div style="font-size: 10px;">${document.getElementById('storePhone').value}</div>
+                <div style="text-align: center; margin-bottom: 8px; padding-top: 5px;">
+                    <div style="font-weight: bold; font-size: 14px; margin-bottom: 3px; letter-spacing: 0.5px;">${document.getElementById('storeName').value}</div>
+                    <div style="font-size: 9px; margin-bottom: 1px;">Tech Store & Services</div>
+                    <div style="font-size: 9px;">Kampala Road, Kampala, Uganda</div>
+                    <div style="font-size: 9px; margin-top: 2px;">${document.getElementById('storePhone').value}</div>
                 </div>
                 
-                <div style="text-align: center; border-top: 1px dashed #000; border-bottom: 1px dashed #000; 
-                     padding: 3px 0; margin: 5px 0; font-size: 12px; font-weight: bold;">
-                    RECEIPT
+                <div style="border-top: 1px dashed #000; border-bottom: 1px dashed #000; 
+                     padding: 4px 0; margin: 6px 0;">
+                    <div style="text-align: center; font-size: 12px; font-weight: bold; letter-spacing: 1px;">SALES RECEIPT</div>
                 </div>
                 
-                <table style="width: 100%; font-size: 10px; margin: 5px 0;">
-                    <tr>
-                        <td><strong>DATE:</strong></td>
-                        <td>${now.toLocaleDateString()}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>TIME:</strong></td>
-                        <td>${now.toLocaleTimeString()}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>CUSTOMER:</strong></td>
-                        <td>${document.getElementById('customerName').value || 'Walk-in'}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>RECEIPT:</strong></td>
-                        <td>${receiptNumber}</td>
-                    </tr>
-                </table>
+                <div style="font-size: 9px; margin: 6px 0; line-height: 1.3;">
+                    <div style="margin-bottom: 2px;"><strong>Date:</strong> ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                    <div style="margin-bottom: 2px;"><strong>Time:</strong> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</div>
+                    <div style="margin-bottom: 2px;"><strong>Receipt No:</strong> ${receiptNumber}</div>
+                    <div style="margin-bottom: 2px;"><strong>Txn ID:</strong> ${transactionId}</div>
+                    <div style="margin-bottom: 2px;"><strong>Customer:</strong> ${document.getElementById('customerName').value || 'Walk-in Customer'}</div>
+                </div>
                 
-                <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+                <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
                 
-                <table style="width: 100%; font-size: 10px; margin: 5px 0;">
-                    ${receiptItems.map(item => `
-                        <tr>
-                            <td>${item.name}</td>
-                            <td style="text-align: right;">${formatUGX(item.price)}</td>
-                        </tr>
+                <div style="font-size: 9px; margin: 5px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px; font-weight: bold;">
+                        <span>ITEM</span>
+                        <span style="text-align: right;">QTY</span>
+                        <span style="text-align: right;">AMOUNT</span>
+                    </div>
+                </div>
+                
+                <div style="font-size: 9px; margin: 5px 0;">
+                    ${receiptItems.filter(item => item.name && item.price > 0).map(item => `
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                            <span style="flex: 2;">${item.name}</span>
+                            <span style="flex: 1; text-align: right; padding-right: 10px;">${item.quantity}</span>
+                            <span style="flex: 1; text-align: right;">${formatUGX(item.total)}</span>
+                        </div>
                     `).join('')}
-                </table>
+                    
+                    ${receiptItems.filter(item => item.name && item.price > 0).length === 0 ? 
+                        '<div style="text-align: center; padding: 10px 0; font-size: 9px; color: #666;">No items added</div>' : ''}
+                </div>
                 
-                <div style="border-top: 1px dashed #000; margin: 5px 0;"></div>
+                ${receiptItems.filter(item => item.name && item.price > 0).length > 0 ? `
+                <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
                 
-                <table style="width: 100%; font-size: 10px; margin: 5px 0;">
-                    <tr>
-                        <td><strong>SUBTOTAL:</strong></td>
-                        <td style="text-align: right;">${formatUGX(subtotal)}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>VAT (18%):</strong></td>
-                        <td style="text-align: right;">${formatUGX(vat)}</td>
-                    </tr>
-                    <tr>
-                        <td><strong>TOTAL:</strong></td>
-                        <td style="text-align: right; font-weight: bold;">${formatUGX(total)}</td>
-                    </tr>
-                </table>
+                <div style="font-size: 10px; margin: 8px 0;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                        <span>Subtotal:</span>
+                        <span style="font-weight: bold;">${formatUGX(subtotal)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 3px;">
+                        <span>VAT (18%):</span>
+                        <span>${formatUGX(vat)}</span>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; margin-top: 6px; padding-top: 6px; border-top: 1px solid #000;">
+                        <span style="font-weight: bold;">TOTAL:</span>
+                        <span style="font-weight: bold; font-size: 11px;">${formatUGX(total)}</span>
+                    </div>
+                </div>
+                ` : ''}
                 
-                <div style="text-align: center; margin-top: 10px; font-size: 10px;">
-                    <div><strong>PAYMENT:</strong> ${document.getElementById('paymentMethod').value}</div>
-                    <div style="color: green; font-weight: bold;">✓ SUCCESSFUL</div>
-                    <div><strong>THANK YOU!</strong></div>
-                    <div style="font-size: 9px;">willstech.store</div>
+                <div style="border-bottom: 1px dashed #000; margin: 8px 0;"></div>
+                
+                <div style="text-align: center; margin-top: 15px; margin-bottom: 10px; font-size: 9px; line-height: 1.3;">
+                    <div style="margin-bottom: 4px;"><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
+                    <div style="color: green; font-weight: bold; margin-bottom: 8px; font-size: 10px;">✓ TRANSACTION SUCCESSFUL</div>
+                    <div style="font-weight: bold; margin-bottom: 3px; font-size: 10px;">THANK YOU FOR SHOPPING WITH US!</div>
+                    <div style="margin-bottom: 2px;">${document.getElementById('storeName').value}</div>
+                    <div>Tel: ${document.getElementById('storePhone').value}</div>
+                </div>
+                
+                <!-- Footer -->
+                <div style="text-align: center; margin-top: 15px; font-size: 8px; color: #666; line-height: 1.2;">
+                    <div style="margin-bottom: 3px;">For inquiries call: ${document.getElementById('storePhone').value}</div>
+                    <div style="margin-bottom: 3px;">Email: info@willstech.store</div>
+                    <div style="margin-bottom: 5px;">Website: willstech.store</div>
+                    <div>*********************</div>
+                </div>
+                
+                <!-- Tear-off space -->
+                <div style="border-top: 1px dashed #ccc; margin-top: 20px; padding-top: 10px; text-align: center; font-size: 8px; color: #666;">
+                    --- Tear here ---
                 </div>
             `;
         }
@@ -670,38 +718,60 @@
             }
             
             if (selectedPrinterMethod === 'usb-network') {
-                printViaSystem("TEST PRINT\nWill's Tech Store\nTest successful!\n\n");
+                printTestReceiptViaSystem();
             } else if (selectedPrinterMethod === 'web-bluetooth') {
-                showToast('Test print via Bluetooth', 'success');
+                printTestReceiptViaBluetooth();
             }
         }
         
         function printReceipt() {
+            console.log('printReceipt function called');
+            console.log('Selected printer method:', selectedPrinterMethod);
+            console.log('Receipt items count:', receiptItems.length);
+            
             if (!selectedPrinterMethod) {
                 showToast('Select printer method first', 'error');
+                console.log('No printer method selected');
                 return;
             }
             
-            if (receiptItems.length === 0) {
-                showToast('Add items first', 'error');
+            // Filter out empty items
+            const validItems = receiptItems.filter(item => {
+                // Keep items that have a name AND a price > 0
+                return item.name && item.name.trim() !== '' && item.price > 0;
+            });
+            
+            if (validItems.length === 0) {
+                showToast('Add items with valid names and prices first', 'error');
+                console.log('No valid items to print');
                 return;
             }
+            
+            console.log('Valid items found:', validItems.length);
+            console.log('Proceeding with printing...');
             
             if (selectedPrinterMethod === 'usb-network') {
+                console.log('Printing via system printer');
                 printReceiptViaSystem();
             } else if (selectedPrinterMethod === 'web-bluetooth') {
+                console.log('Printing via Bluetooth');
                 printReceiptViaBluetooth();
             }
         }
         
         function printReceiptViaSystem() {
+            console.log('Starting system print...');
+            
             const now = new Date();
             const receiptNumber = generateReceiptNumber();
-            const subtotal = receiptItems.reduce((sum, item) => sum + item.total, 0);
-            const vat = subtotal * 0.18;
+            const transactionId = generateTransactionId();
+            
+            // Filter out empty items for printing
+            const itemsToPrint = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+            const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
+            const vat = Math.round(subtotal * 0.18);
             const total = subtotal + vat;
             
-            // Create printable content
             const printContent = `
                 <!DOCTYPE html>
                 <html>
@@ -716,104 +786,171 @@
                             }
                             body {
                                 margin: 0;
-                                padding: 2mm;
+                                padding: 2mm 1mm;
                                 font-family: 'Courier New', monospace;
-                                font-size: 10px;
+                                font-size: 9px;
                                 line-height: 1.2;
-                                width: 54mm;
+                                width: 56mm;
+                            }
+                            .page-break {
+                                page-break-after: always;
                             }
                         }
                         body {
                             font-family: 'Courier New', monospace;
-                            font-size: 10px;
+                            font-size: 9px;
                             line-height: 1.2;
-                            margin: 2mm;
+                            margin: 2mm 1mm;
                             padding: 0;
-                            white-space: pre-line;
+                            width: 56mm;
                         }
-                        .receipt-header {
+                        .receipt-content {
+                            padding: 3mm 2mm;
+                        }
+                        .center {
                             text-align: center;
-                            font-weight: bold;
-                            margin-bottom: 5px;
                         }
-                        .divider {
-                            border-top: 1px dashed #000;
-                            margin: 5px 0;
+                        .bold {
+                            font-weight: bold;
+                        }
+                        .dashed {
+                            border-bottom: 1px dashed #000;
+                            margin: 4px 0;
+                        }
+                        .table {
+                            width: 100%;
+                            border-collapse: collapse;
+                        }
+                        .table th {
+                            text-align: left;
+                            padding-bottom: 2px;
+                            border-bottom: 1px dashed #000;
+                        }
+                        .table td {
+                            padding: 1px 0;
+                        }
+                        .right {
+                            text-align: right;
+                        }
+                        .total-row {
+                            border-top: 1px solid #000;
+                            padding-top: 4px;
+                            margin-top: 4px;
+                        }
+                        .footer {
+                            margin-top: 15px;
+                            padding-top: 10px;
+                            border-top: 1px dashed #ccc;
+                            text-align: center;
+                            font-size: 8px;
+                            color: #666;
+                        }
+                        .tear-space {
+                            height: 20px;
+                            margin-top: 15px;
+                            border-top: 1px dashed #ccc;
+                            padding-top: 5px;
+                            text-align: center;
+                            font-size: 8px;
+                            color: #999;
                         }
                         .item-row {
                             display: flex;
                             justify-content: space-between;
-                            margin: 2px 0;
+                            margin-bottom: 2px;
                         }
-                        .total-row {
-                            display: flex;
-                            justify-content: space-between;
-                            font-weight: bold;
-                            margin-top: 5px;
-                            border-top: 1px solid #000;
-                            padding-top: 5px;
+                        .item-name {
+                            flex: 2;
                         }
-                        .footer {
-                            text-align: center;
-                            margin-top: 10px;
-                            font-size: 9px;
+                        .item-qty {
+                            flex: 1;
+                            text-align: right;
+                            padding-right: 10px;
+                        }
+                        .item-amount {
+                            flex: 1;
+                            text-align: right;
                         }
                     </style>
                 </head>
                 <body>
-                    <div class="receipt-header">
-                        ${document.getElementById('storeName').value}<br>
-                        willstech.store<br>
-                        ${document.getElementById('storePhone').value}
-                    </div>
-                    
-                    <div style="text-align: center; border-top: 1px dashed #000; border-bottom: 1px dashed #000; padding: 2px 0; margin: 3px 0;">
-                        RECEIPT
-                    </div>
-                    
-                    <div>
-                        <strong>DATE:</strong> ${now.toLocaleDateString()}<br>
-                        <strong>TIME:</strong> ${now.toLocaleTimeString()}<br>
-                        <strong>CUSTOMER:</strong> ${document.getElementById('customerName').value || 'Walk-in'}<br>
-                        <strong>RECEIPT:</strong> ${receiptNumber}
-                    </div>
-                    
-                    <div class="divider"></div>
-                    
-                    <div>
-                        <strong>ITEMS:</strong>
-                        ${receiptItems.map(item => `
-                            <div class="item-row">
-                                <span>${item.name}</span>
-                                <span>${formatUGX(item.price)}</span>
+                    <div class="receipt-content">
+                        <div class="center" style="margin-bottom: 6px; padding-top: 5px;">
+                            <div class="bold" style="font-size: 14px; margin-bottom: 3px; letter-spacing: 0.5px;">${document.getElementById('storeName').value}</div>
+                            <div style="font-size: 8px; margin-bottom: 1px;">Tech Store & Services</div>
+                            <div style="font-size: 8px;">Kampala Road, Kampala, Uganda</div>
+                            <div style="font-size: 8px; margin-top: 2px;">${document.getElementById('storePhone').value}</div>
+                        </div>
+                        
+                        <div class="dashed" style="padding: 4px 0;">
+                            <div class="center" style="font-size: 12px; font-weight: bold; letter-spacing: 1px;">SALES RECEIPT</div>
+                        </div>
+                        
+                        <div style="font-size: 9px; margin: 6px 0; line-height: 1.3;">
+                            <div style="margin-bottom: 2px;"><strong>Date:</strong> ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
+                            <div style="margin-bottom: 2px;"><strong>Time:</strong> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}</div>
+                            <div style="margin-bottom: 2px;"><strong>Receipt No:</strong> ${receiptNumber}</div>
+                            <div style="margin-bottom: 2px;"><strong>Txn ID:</strong> ${transactionId}</div>
+                            <div style="margin-bottom: 2px;"><strong>Customer:</strong> ${document.getElementById('customerName').value || 'Walk-in Customer'}</div>
+                        </div>
+                        
+                        <div class="dashed"></div>
+                        
+                        <div style="font-size: 9px; margin: 5px 0;">
+                            <div class="item-row" style="font-weight: bold; margin-bottom: 3px;">
+                                <span class="item-name">ITEM</span>
+                                <span class="item-qty">QTY</span>
+                                <span class="item-amount">AMOUNT</span>
                             </div>
-                        `).join('')}
-                    </div>
-                    
-                    <div class="divider"></div>
-                    
-                    <div>
-                        <div class="item-row">
-                            <span>SUBTOTAL:</span>
-                            <span>${formatUGX(subtotal)}</span>
                         </div>
-                        <div class="item-row">
-                            <span>VAT (18%):</span>
-                            <span>${formatUGX(vat)}</span>
+                        
+                        <div style="font-size: 9px; margin: 5px 0;">
+                            ${itemsToPrint.map(item => `
+                                <div class="item-row">
+                                    <span class="item-name">${item.name}</span>
+                                    <span class="item-qty">${item.quantity}</span>
+                                    <span class="item-amount">${formatUGX(item.total)}</span>
+                                </div>
+                            `).join('')}
                         </div>
-                        <div class="total-row">
-                            <span>TOTAL:</span>
-                            <span>${formatUGX(total)}</span>
+                        
+                        <div class="dashed"></div>
+                        
+                        <div style="font-size: 10px; margin: 8px 0;">
+                            <div class="item-row" style="margin-bottom: 3px;">
+                                <span>Subtotal:</span>
+                                <span style="font-weight: bold;">${formatUGX(subtotal)}</span>
+                            </div>
+                            <div class="item-row" style="margin-bottom: 3px;">
+                                <span>VAT (18%):</span>
+                                <span>${formatUGX(vat)}</span>
+                            </div>
+                            <div class="item-row" style="margin-top: 6px; padding-top: 6px; border-top: 1px solid #000;">
+                                <span style="font-weight: bold;">TOTAL:</span>
+                                <span style="font-weight: bold; font-size: 11px;">${formatUGX(total)}</span>
+                            </div>
                         </div>
-                    </div>
-                    
-                    <div class="divider"></div>
-                    
-                    <div class="footer">
-                        <strong>PAYMENT:</strong> ${document.getElementById('paymentMethod').value}<br>
-                        <span style="color: green; font-weight: bold;">✓ TRANSACTION SUCCESSFUL</span><br>
-                        <strong>THANK YOU!</strong><br>
-                        willstech.store
+                        
+                        <div class="dashed"></div>
+                        
+                        <div class="center" style="margin-top: 12px; font-size: 9px; line-height: 1.3;">
+                            <div style="margin-bottom: 4px;"><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
+                            <div style="color: green; font-weight: bold; margin-bottom: 8px; font-size: 10px;">✓ TRANSACTION SUCCESSFUL</div>
+                            <div class="bold" style="margin-bottom: 3px; font-size: 10px;">THANK YOU FOR SHOPPING WITH US!</div>
+                            <div style="margin-bottom: 2px;">${document.getElementById('storeName').value}</div>
+                            <div>Tel: ${document.getElementById('storePhone').value}</div>
+                        </div>
+                        
+                        <div class="center" style="margin-top: 15px; font-size: 8px; color: #666; line-height: 1.2;">
+                            <div style="margin-bottom: 3px;">For inquiries call: ${document.getElementById('storePhone').value}</div>
+                            <div style="margin-bottom: 3px;">Email: info@willstech.store</div>
+                            <div style="margin-bottom: 5px;">Website: willstech.store</div>
+                            <div>*********************</div>
+                        </div>
+                        
+                        <div class="tear-space">
+                            --- Tear here ---
+                        </div>
                     </div>
                     
                     <script>
@@ -821,19 +958,81 @@
                             window.print();
                             setTimeout(function() {
                                 window.close();
-                            }, 100);
+                            }, 500);
                         }
                     <\/script>
                 </body>
                 </html>
             `;
             
-            // Open print window
+            console.log('Opening print window...');
             const printWindow = window.open('', '_blank');
             printWindow.document.write(printContent);
             printWindow.document.close();
             
             showToast('Printing receipt...');
+        }
+        
+        function printTestReceiptViaSystem() {
+            const printContent = `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Test Print</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: 58mm auto;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            body {
+                                margin: 5mm 1mm;
+                                padding: 0;
+                                font-family: 'Courier New', monospace;
+                                font-size: 10px;
+                                width: 56mm;
+                            }
+                        }
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 10px;
+                            margin: 5mm 1mm;
+                            padding: 0;
+                            width: 56mm;
+                            text-align: center;
+                        }
+                        .test-content {
+                            padding: 10mm 2mm;
+                        }
+                    </style>
+                </head>
+                <body>
+                    <div class="test-content">
+                        <div style="font-weight: bold; margin-bottom: 10px;">TEST PRINT</div>
+                        <div>Will's Tech Store</div>
+                        <div>Kampala, Uganda</div>
+                        <div style="margin-top: 10px;">Print alignment test</div>
+                        <div>-------------------</div>
+                        <div style="margin-top: 20px;">✓ Printer working correctly</div>
+                    </div>
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 500);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+            
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            showToast('Printing test...');
         }
         
         async function printReceiptViaBluetooth() {
@@ -843,44 +1042,191 @@
             }
             
             try {
-                const now = new Date();
-                const receiptNumber = generateReceiptNumber();
-                const subtotal = receiptItems.reduce((sum, item) => sum + item.total, 0);
-                const vat = subtotal * 0.18;
-                const total = subtotal + vat;
-                
-                // ESC/POS commands for thermal printer
-                let escpos = "\x1B\x40"; // Initialize printer
-                escpos += "\x1B\x61\x01"; // Center align
-                escpos += "WILL'S TECH STORE\n";
-                escpos += "willstech.store\n";
-                escpos += "\x1B\x61\x00"; // Left align
-                escpos += "----------------\n";
-                escpos += "\x1B\x61\x01"; // Center align
-                escpos += "RECEIPT\n";
-                escpos += "\x1B\x61\x00"; // Left align
-                escpos += "----------------\n";
-                escpos += `DATE:    ${now.toLocaleDateString()}\n`;
-                escpos += `TIME:    ${now.toLocaleTimeString()}\n`;
-                escpos += `CUSTOMER:${document.getElementById('customerName').value || 'Walk-in'}\n`;
-                escpos += `RECEIPT: ${receiptNumber}\n`;
-                escpos += "----------------\n";
-                escpos += "ITEMS:\n";
-                
-                receiptItems.forEach(item => {
-                    escpos += `${item.name} - ${formatUGX(item.price)}\n`;
+                // Filter out empty items for Bluetooth printing
+                const itemsToPrint = receiptItems.filter(item => {
+                    return item.name && item.name.trim() !== '' && item.price > 0;
                 });
                 
+                if (itemsToPrint.length === 0) {
+                    showToast('No valid items to print', 'error');
+                    return;
+                }
+                
+                const now = new Date();
+                const receiptNumber = generateReceiptNumber();
+                const transactionId = generateTransactionId();
+                const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
+                const vat = Math.round(subtotal * 0.18);
+                const total = subtotal + vat;
+                
+                // Create ESC/POS commands in new organized format
+                let escposChunks = [];
+                
+                // Chunk 1: Header
+                let chunk1 = "\x1B\x40"; // Initialize printer
+                chunk1 += "\x1B\x61\x01"; // Center align
+                chunk1 += "\x1B\x21\x10"; // Double height
+                chunk1 += "WILL'S TECH STORE\n";
+                chunk1 += "\x1B\x21\x00"; // Normal text
+                chunk1 += "Tech Store & Services\n";
+                chunk1 += "Kampala Road, Kampala\n";
+                chunk1 += "Tel: +256 700 123 456\n";
+                chunk1 += "\x1B\x2D\x01"; // Underline on
+                chunk1 += "----------------\n";
+                chunk1 += "\x1B\x2D\x00"; // Underline off
+                chunk1 += "\x1B\x21\x10"; // Double height
+                chunk1 += "SALES RECEIPT\n";
+                chunk1 += "\x1B\x21\x00"; // Normal text
+                chunk1 += "\x1B\x2D\x01"; // Underline on
+                chunk1 += "----------------\n";
+                chunk1 += "\x1B\x2D\x00"; // Underline off
+                chunk1 += "\x1B\x61\x00"; // Left align
+                
+                // Receipt details
+                chunk1 += `Date:    ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}\n`;
+                chunk1 += `Time:    ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit', second:'2-digit'})}\n`;
+                chunk1 += `Receipt: ${receiptNumber}\n`;
+                chunk1 += `Txn ID:  ${transactionId}\n`;
+                chunk1 += `Customer:${document.getElementById('customerName').value || 'Walk-in Customer'}\n`;
+                chunk1 += "----------------\n";
+                
+                escposChunks.push(chunk1);
+                
+                // Chunk 2: Items header
+                let chunk2 = "\x1B\x21\x08"; // Bold
+                chunk2 += "ITEM                QTY    AMOUNT\n";
+                chunk2 += "\x1B\x21\x00"; // Normal
+                chunk2 += "----------------\n";
+                
+                // Add items
+                itemsToPrint.forEach(item => {
+                    const name = item.name.substring(0, 18).padEnd(18, ' ');
+                    const qty = item.quantity.toString().padStart(3, ' ');
+                    const amount = formatUGX(item.total).padStart(10, ' ');
+                    chunk2 += `${name} ${qty} ${amount}\n`;
+                });
+                
+                escposChunks.push(chunk2);
+                
+                // Chunk 3: Totals and footer
+                let chunk3 = "----------------\n";
+                chunk3 += `Subtotal:       ${formatUGX(subtotal).padStart(10, ' ')}\n`;
+                chunk3 += `VAT (18%):      ${formatUGX(vat).padStart(10, ' ')}\n`;
+                chunk3 += "----------------\n";
+                chunk3 += "\x1B\x21\x10"; // Double height for total
+                chunk3 += `TOTAL:          ${formatUGX(total).padStart(10, ' ')}\n`;
+                chunk3 += "\x1B\x21\x00"; // Normal
+                chunk3 += "----------------\n";
+                
+                // Payment info
+                chunk3 += `Payment: ${document.getElementById('paymentMethod').value}\n`;
+                chunk3 += "\x1B\x61\x01"; // Center align
+                chunk3 += "\x1B\x21\x08"; // Bold
+                chunk3 += "✓ TRANSACTION SUCCESSFUL\n";
+                chunk3 += "\x1B\x21\x00"; // Normal
+                chunk3 += "THANK YOU FOR SHOPPING\n";
+                chunk3 += "WITH US!\n";
+                chunk3 += "\x1B\x21\x08"; // Bold
+                chunk3 += "WILL'S TECH STORE\n";
+                chunk3 += "\x1B\x21\x00"; // Normal
+                chunk3 += "Tel: +256 700 123 456\n\n";
+                
+                // Footer
+                chunk3 += "For inquiries call:\n";
+                chunk3 += "+256 700 123 456\n";
+                chunk3 += "Email: info@willstech.store\n";
+                chunk3 += "Website: willstech.store\n";
+                chunk3 += "*********************\n\n\n\n";
+                
+                // Add tear-off space
+                chunk3 += "--- Tear here ---\n\n\n\n\n";
+                
+                chunk3 += "\x1D\x56\x41\x00"; // Partial cut (leaves paper for tearing)
+                
+                escposChunks.push(chunk3);
+                
+                // Ensure Bluetooth is connected
+                if (!bluetoothDevice.gatt.connected) {
+                    await bluetoothDevice.gatt.connect();
+                }
+                
+                const server = await bluetoothDevice.gatt.connect();
+                const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+                const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+                
+                const encoder = new TextEncoder();
+                
+                // Send chunks with small delay between them
+                for (let i = 0; i < escposChunks.length; i++) {
+                    const chunk = escposChunks[i];
+                    console.log(`Sending chunk ${i + 1} of ${escposChunks.length}, size: ${chunk.length} bytes`);
+                    
+                    // Split further if chunk is still too large
+                    if (chunk.length > 500) {
+                        const subChunks = splitString(chunk, 400);
+                        for (const subChunk of subChunks) {
+                            await characteristic.writeValue(encoder.encode(subChunk));
+                            await sleep(50);
+                        }
+                    } else {
+                        await characteristic.writeValue(encoder.encode(chunk));
+                        if (i < escposChunks.length - 1) {
+                            await sleep(50);
+                        }
+                    }
+                }
+                
+                showToast('Receipt sent to Bluetooth printer!');
+                
+            } catch (error) {
+                console.error('Bluetooth print error:', error);
+                showToast('Bluetooth printing failed: ' + error.message, 'error');
+            }
+        }
+        
+        // Helper function to split string into chunks
+        function splitString(str, maxLength) {
+            const chunks = [];
+            for (let i = 0; i < str.length; i += maxLength) {
+                chunks.push(str.substring(i, i + maxLength));
+            }
+            return chunks;
+        }
+        
+        // Helper function for delay
+        function sleep(ms) {
+            return new Promise(resolve => setTimeout(resolve, ms));
+        }
+        
+        async function printTestReceiptViaBluetooth() {
+            if (!bluetoothDevice) {
+                showToast('Bluetooth printer not connected', 'error');
+                return;
+            }
+            
+            try {
+                let escpos = "\x1B\x40"; // Initialize
+                escpos += "\x1B\x61\x01"; // Center align
+                escpos += "\x1B\x21\x30"; // Double height and width
+                escpos += "TEST PRINT\n";
+                escpos += "\x1B\x21\x00"; // Normal
                 escpos += "----------------\n";
-                escpos += `SUBTOTAL: ${formatUGX(subtotal)}\n`;
-                escpos += `VAT (18%): ${formatUGX(vat)}\n`;
-                escpos += `TOTAL: ${formatUGX(total)}\n`;
+                escpos += "Will's Tech Store\n";
+                escpos += "Printer Alignment Test\n";
                 escpos += "----------------\n";
-                escpos += `PAYMENT: ${document.getElementById('paymentMethod').value}\n`;
-                escpos += "STATUS: SUCCESSFUL\n";
-                escpos += "THANK YOU!\n";
-                escpos += "willstech.store\n";
-                escpos += "\x1D\x56\x42\x00"; // Cut paper
+                escpos += "This is a test receipt\n";
+                escpos += "to verify printer is\n";
+                escpos += "working correctly.\n";
+                escpos += "----------------\n";
+                escpos += "\x1B\x61\x01"; // Center
+                escpos += "\x1B\x21\x10"; // Double height
+                escpos += "✓ PRINT OK\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                escpos += "\n\n\n\n\n";
+                escpos += "\x1D\x56\x41\x00"; // Partial cut
+                
+                // Split test print into chunks if needed
+                const chunks = splitString(escpos, 500);
                 
                 if (!bluetoothDevice.gatt.connected) {
                     await bluetoothDevice.gatt.connect();
@@ -891,13 +1237,20 @@
                 const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
                 
                 const encoder = new TextEncoder();
-                await characteristic.writeValue(encoder.encode(escpos));
                 
-                showToast('Receipt sent to Bluetooth printer!');
+                // Send chunks
+                for (let i = 0; i < chunks.length; i++) {
+                    await characteristic.writeValue(encoder.encode(chunks[i]));
+                    if (i < chunks.length - 1) {
+                        await sleep(50); // Small delay between chunks
+                    }
+                }
+                
+                showToast('Test print sent to Bluetooth printer!');
                 
             } catch (error) {
-                console.error('Bluetooth print error:', error);
-                showToast('Bluetooth printing failed', 'error');
+                console.error('Bluetooth test error:', error);
+                showToast('Test print failed', 'error');
             }
         }
     </script>

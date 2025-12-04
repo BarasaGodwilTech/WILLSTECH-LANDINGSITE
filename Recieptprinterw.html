@@ -1142,5 +1142,23 @@ itemsToPrint.forEach(item => {
             }
         }
     </script>
+    <div class="card">
+    <h2 class="card-title"><i class="fas fa-info-circle"></i> Receipt Number Format</h2>
+    <div style="font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
+        <div><strong>Format:</strong> RCT-YYYYMMDD-HHMMSSmmmRR</div>
+        <div><strong>Example:</strong> RCT-20241212-14304512345</div>
+        <div><strong>Decodes to:</strong> 12/12/2024 at 14:30:45.123</div>
+        <div style="margin-top: 10px; font-size: 10px;">
+            <div>YYYY = Year (2024)</div>
+            <div>MM = Month (12)</div>
+            <div>DD = Day (12)</div>
+            <div>HH = Hour (14 = 2 PM)</div>
+            <div>MM = Minute (30)</div>
+            <div>SS = Second (45)</div>
+            <div>mmm = Millisecond (123)</div>
+            <div>RR = Random digits (45)</div>
+        </div>
+    </div>
+</div>
 </body>
 </html>

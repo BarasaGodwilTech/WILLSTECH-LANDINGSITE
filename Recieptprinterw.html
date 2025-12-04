@@ -627,7 +627,7 @@
                 <div style="text-align: center; margin-bottom: 5px;">
                     <div style="font-weight: bold; font-size: 11px; margin-bottom: 1px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
                     <div style="font-size: 5px; margin-bottom: 1px;">Elevate Your Lifestyle With Authentic Tech</div>
-                    <div style="font-size: 5px; margin-bottom: 1px;">Kampala Road, Kampala</div>
+                    <div style="font-size: 5px; margin-bottom: 1px;">Uganda</div>
                     <div style="font-size: 5px;">${document.getElementById('storePhone').value}</div>
                 </div>
                 
@@ -677,7 +677,7 @@
                 
                 <div style="text-align: center; font-size: 8px; margin-top: 6px; line-height: 1.2;">
                     <div><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
-                    <div style="color: green; font-weight: bold; margin: 2px 0;">✓ TRANSACTION SUCCESSFUL</div>
+                    <div style="color: green; font-weight: bold; margin: 2px 0;">✓ Payment received.</div>
                     <div style="font-weight: bold; margin: 2px 0; font-size: 7px;">THANK YOU FOR SHOPPING WITH US!</div>
                     <div>${document.getElementById('storeName').value.substring(0, 20)}</div>
                 </div>
@@ -782,7 +782,7 @@
                     <div style="text-align: center; margin-bottom: 3px;">
                         <div class="bold" style="font-size: 10px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
                         <div style="font-size: 5px;">Elevate Your Lifestyle With Authentic Tech</div>
-                        <div style="font-size: 5px;">Kampala Road, Kampala</div>
+                        <div style="font-size: 5px;">Uganda</div>
                         <div style="font-size: 5px;">${document.getElementById('storePhone').value}</div>
                     </div>
                     
@@ -836,7 +836,7 @@
                     
                     <div class="center" style="font-size: 8px; margin-top: 5px;">
                         <div><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
-                        <div style="color: green; font-weight: bold;">✓ TRANSACTION SUCCESSFUL</div>
+                        <div style="color: green; font-weight: bold;">✓ Payment received.</div>
                         <div class="bold">THANK YOU FOR SHOPPING</div>
                         <div>${document.getElementById('storeName').value.substring(0, 20)}</div>
                     </div>
@@ -957,7 +957,7 @@
                 escpos += "WILL'S TECH STORE\n";
                 escpos += "\x1B\x21\x00"; // Normal
                 escpos += "Elevate Your Lifestyle With Authentic Tech\n";
-                escpos += "Kampala Road, Kampala\n";
+                escpos += "Uganda\n";
                 escpos += "Tel: +256 751 924 844\n";
                 escpos += "-------------------------------\n";
                 escpos += "\x1B\x21\x08"; // Emphasized
@@ -1045,7 +1045,7 @@ itemsToPrint.forEach(item => {
                 escpos += `Payment: ${document.getElementById('paymentMethod').value}\n`;
                 escpos += "\x1B\x61\x01"; // Center align
                 escpos += "\x1B\x21\x08"; // Emphasized
-                escpos += "✓ TRANSACTION SUCCESSFUL\n";
+                escpos += "✓ Payment received.\n";
                 escpos += "\x1B\x21\x00"; // Normal
                 escpos += "THANK YOU FOR SHOPPING\n";
                 escpos += "WITH US!\n\n";

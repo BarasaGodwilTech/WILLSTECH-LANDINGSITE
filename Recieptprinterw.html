@@ -356,9 +356,9 @@
     const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
     const random = String(Math.floor(Math.random() * 100)).padStart(2, '0');
     
-    return `RCT-${datePart}-${timePart}${milliseconds}${random}`;
+    return `WTS-${datePart}-${timePart}${milliseconds}${random}`;
 }
-// Example: RCT-20241212-14304512345
+// Example: WTS-20241212-14304512345
         
         // Generate transaction ID
         function generateTransactionId() {
@@ -1145,8 +1145,8 @@ itemsToPrint.forEach(item => {
     <div class="card">
     <h2 class="card-title"><i class="fas fa-info-circle"></i> Receipt Number Format</h2>
     <div style="font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-        <div><strong>Format:</strong> RCT-YYYYMMDD-HHMMSSmmmRR</div>
-        <div><strong>Example:</strong> RCT-20241212-14304512345</div>
+        <div><strong>Format:</strong> WTS-YYYYMMDD-HHMMSSmmmRR</div>
+        <div><strong>Example:</strong> WTS-20241212-14304512345</div>
         <div><strong>Decodes to:</strong> 12/12/2024 at 14:30:45.123</div>
         <div style="margin-top: 10px; font-size: 10px;">
             <div>YYYY = Year (2024)</div>

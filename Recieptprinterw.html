@@ -5,234 +5,403 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Will's Tech Store - Receipt Printer</title>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-        
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            padding: 10px;
-            max-width: 100%;
-            overflow-x: hidden;
-        }
-        
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+    
+    body {
+        font-family: Arial, sans-serif;
+        background: #f5f5f5;
+        padding: 10px;
+        max-width: 100%;
+        overflow-x: hidden;
+    }
+    
+    .container {
+        max-width: 100%;
+        margin: 0 auto;
+    }
+    
+    .header {
+        background: #2563eb;
+        color: white;
+        padding: 15px;
+        border-radius: 10px;
+        margin-bottom: 15px;
+        text-align: center;
+    }
+    
+    .header h1 {
+        font-size: 1.5rem;
+        margin-bottom: 5px;
+    }
+    
+    .card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+    }
+    
+    .card-title {
+        color: #2563eb;
+        font-size: 1.2rem;
+        margin-bottom: 15px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .form-group {
+        margin-bottom: 15px;
+    }
+    
+    .form-label {
+        display: block;
+        font-weight: bold;
+        margin-bottom: 5px;
+        color: #374151;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 10px;
+        border: 2px solid #d1d5db;
+        border-radius: 5px;
+        font-size: 16px;
+    }
+    
+    .btn {
+        padding: 12px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: bold;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        width: 100%;
+        margin-bottom: 10px;
+        justify-content: center;
+    }
+    
+    .btn-primary {
+        background: #2563eb;
+        color: white;
+    }
+    
+    .btn-success {
+        background: #10b981;
+        color: white;
+    }
+    
+    .btn-danger {
+        background: #ef4444;
+        color: white;
+    }
+    
+    .btn-warning {
+        background: #f59e0b;
+        color: white;
+    }
+    
+    .printer-status {
+        padding: 12px;
+        border-radius: 5px;
+        margin: 15px 0;
+        font-weight: bold;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .status-connected {
+        background: #d1fae5;
+        color: #065f46;
+        border: 2px solid #10b981;
+    }
+    
+    .status-disconnected {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 2px solid #ef4444;
+    }
+    
+    /* User info bar */
+    .user-info-bar {
+        background: linear-gradient(135deg, #2563eb, #1e40af);
+        color: white;
+        padding: 10px 15px;
+        border-radius: 8px;
+        margin-bottom: 15px;
+        box-shadow: 0 2px 10px rgba(37, 99, 235, 0.3);
+    }
+    
+    .user-info-content {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .user-info-left {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+    }
+    
+    .user-info-right {
+        display: flex;
+        gap: 10px;
+    }
+    
+    /* Receipt Preview - Optimized for 58mm */
+    .receipt-paper {
+        width: 100%;
+        max-width: 200px;
+        background: white;
+        border: 1px solid #d1d5db;
+        padding: 15px 10px;
+        margin: 0 auto;
+        font-family: 'Courier New', 'Monaco', monospace;
+        font-size: 9px;
+        line-height: 1.1;
+        position: relative;
+    }
+    
+    /* Modal */
+    .modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0,0,0,0.5);
+        z-index: 1000;
+        padding: 20px;
+    }
+    
+    .modal-content {
+        background: white;
+        padding: 20px;
+        border-radius: 10px;
+        max-width: 500px;
+        margin: 0 auto;
+        position: relative;
+        top: 50%;
+        transform: translateY(-50%);
+    }
+    
+    .printer-option {
+        padding: 15px;
+        border: 2px solid #d1d5db;
+        border-radius: 5px;
+        margin-bottom: 10px;
+        cursor: pointer;
+    }
+    
+    .printer-option.selected {
+        border-color: #2563eb;
+        background: #dbeafe;
+    }
+    
+    /* Tab switching */
+    .tab-switch {
+        display: flex;
+        margin-bottom: 20px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .tab-switch button {
+        flex: 1;
+        padding: 10px;
+        background: none;
+        border: none;
+        cursor: pointer;
+        font-weight: bold;
+        color: #6b7280;
+        border-bottom: 3px solid transparent;
+    }
+    
+    .tab-switch button.active {
+        color: #2563eb;
+        border-bottom: 3px solid #2563eb;
+    }
+    
+    /* Toast */
+    .toast {
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        background: #10b981;
+        color: white;
+        border-radius: 5px;
+        display: none;
+        z-index: 1001;
+    }
+    
+    .toast.show {
+        display: block;
+        animation: slideIn 0.3s ease;
+    }
+    
+    .toast.error {
+        background: #ef4444;
+    }
+    
+    .toast.warning {
+        background: #f59e0b;
+    }
+    
+    @keyframes slideIn {
+        from { transform: translateX(100%); }
+        to { transform: translateX(0); }
+    }
+    
+    /* Status indicators */
+    .status-online {
+        background: #d1fae5;
+        color: #065f46;
+        border: 2px solid #10b981;
+    }
+    
+    .status-offline {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 2px solid #ef4444;
+    }
+    
+    /* Login modal animation */
+    #loginModal .modal-content {
+        animation: slideDown 0.3s ease;
+    }
+    
+    @keyframes slideDown {
+        from { transform: translateY(-50px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
+    }
+    
+    /* Responsive */
+    @media (min-width: 768px) {
         .container {
-            max-width: 100%;
-            margin: 0 auto;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
         }
         
         .header {
-            background: #2563eb;
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            text-align: center;
-        }
-        
-        .header h1 {
-            font-size: 1.5rem;
-            margin-bottom: 5px;
-        }
-        
-        .card {
-            background: white;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 15px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-        }
-        
-        .card-title {
-            color: #2563eb;
-            font-size: 1.2rem;
-            margin-bottom: 15px;
-            padding-bottom: 8px;
-            border-bottom: 2px solid #e5e7eb;
-        }
-        
-        .form-group {
-            margin-bottom: 15px;
-        }
-        
-        .form-label {
-            display: block;
-            font-weight: bold;
-            margin-bottom: 5px;
-            color: #374151;
-        }
-        
-        .form-control {
-            width: 100%;
-            padding: 10px;
-            border: 2px solid #d1d5db;
-            border-radius: 5px;
-            font-size: 16px;
+            grid-column: 1 / -1;
         }
         
         .btn {
-            padding: 12px 20px;
-            border: none;
-            border-radius: 5px;
-            font-weight: bold;
-            cursor: pointer;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            width: 100%;
-            margin-bottom: 10px;
-            justify-content: center;
+            width: auto;
+            margin-right: 10px;
         }
         
-        .btn-primary {
-            background: #2563eb;
-            color: white;
-        }
-        
-        .btn-success {
-            background: #10b981;
-            color: white;
-        }
-        
-        .btn-danger {
-            background: #ef4444;
-            color: white;
-        }
-        
-        .printer-status {
-            padding: 12px;
-            border-radius: 5px;
-            margin: 15px 0;
-            font-weight: bold;
+        .btn-group {
             display: flex;
-            align-items: center;
+            flex-wrap: wrap;
             gap: 10px;
         }
-        
-        .status-connected {
-            background: #d1fae5;
-            color: #065f46;
-            border: 2px solid #10b981;
-        }
-        
-        .status-disconnected {
-            background: #fee2e2;
-            color: #991b1b;
-            border: 2px solid #ef4444;
-        }
-        
-        /* Receipt Preview - Optimized for 58mm */
-        .receipt-paper {
-            width: 100%;
-            max-width: 200px;
-            background: white;
-            border: 1px solid #d1d5db;
-            padding: 15px 10px;
-            margin: 0 auto;
-            font-family: 'Courier New', 'Monaco', monospace;
-            font-size: 9px;
-            line-height: 1.1;
-            position: relative;
-        }
-        
-        /* Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.5);
-            z-index: 1000;
-            padding: 20px;
-        }
-        
-        .modal-content {
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            max-width: 500px;
-            margin: 0 auto;
-            position: relative;
-            top: 50%;
-            transform: translateY(-50%);
-        }
-        
-        .printer-option {
-            padding: 15px;
-            border: 2px solid #d1d5db;
-            border-radius: 5px;
-            margin-bottom: 10px;
-            cursor: pointer;
-        }
-        
-        .printer-option.selected {
-            border-color: #2563eb;
-            background: #dbeafe;
-        }
-        
-        /* Toast */
-        .toast {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 12px 20px;
-            background: #10b981;
-            color: white;
-            border-radius: 5px;
-            display: none;
-            z-index: 1001;
-        }
-        
-        .toast.show {
-            display: block;
-            animation: slideIn 0.3s ease;
-        }
-        
-        .toast.error {
-            background: #ef4444;
-        }
-        
-        @keyframes slideIn {
-            from { transform: translateX(100%); }
-            to { transform: translateX(0); }
-        }
-        
-        /* Responsive */
-        @media (min-width: 768px) {
-            .container {
-                display: grid;
-                grid-template-columns: repeat(2, 1fr);
-                gap: 20px;
-            }
-            
-            .header {
-                grid-column: 1 / -1;
-            }
-            
-            .btn {
-                width: auto;
-                margin-right: 10px;
-            }
-            
-            .btn-group {
-                display: flex;
-                flex-wrap: wrap;
-                gap: 10px;
-            }
-        }
-    </style>
+    }
+</style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
 <body>
-    <div class="container">
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content" style="max-width: 400px;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3><i class="fas fa-user-lock"></i> Authentication Required</h3>
+                <button onclick="closeLoginModal()" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+            </div>
+            
+            <div class="tab-switch">
+                <button id="loginTabBtn" class="active" onclick="showLoginTab()">Login</button>
+                <button id="registerTabBtn" onclick="showRegisterTab()">Register</button>
+            </div>
+            
+            <div id="loginTab" style="display: block;">
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="loginUsername" class="form-control" placeholder="Enter username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="loginPassword" class="form-control" placeholder="Enter password">
+                </div>
+                <button onclick="login()" class="btn btn-success">
+                    <i class="fas fa-sign-in-alt"></i> Login
+                </button>
+            </div>
+            
+            <div id="registerTab" style="display: none;">
+                <div class="form-group">
+                    <label class="form-label">Full Name</label>
+                    <input type="text" id="regFullName" class="form-control" placeholder="Your name will appear on receipts">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Username</label>
+                    <input type="text" id="regUsername" class="form-control" placeholder="Choose a username">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Email (Optional)</label>
+                    <input type="email" id="regEmail" class="form-control" placeholder="email@example.com">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Phone (Optional)</label>
+                    <input type="text" id="regPhone" class="form-control" placeholder="+256 XXX XXX XXX">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Password</label>
+                    <input type="password" id="regPassword" class="form-control" placeholder="Minimum 8 characters">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Confirm Password</label>
+                    <input type="password" id="regConfirmPassword" class="form-control" placeholder="Re-enter password">
+                </div>
+                <button onclick="register()" class="btn btn-primary">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- User Info Bar -->
+    <div id="userInfoBar" class="user-info-bar" style="display: none;">
+        <div class="user-info-content">
+            <div class="user-info-left">
+                <div>
+                    <i class="fas fa-user"></i>
+                    <span id="currentUserName">Loading...</span>
+                </div>
+                <div>
+                    <i class="fas fa-receipt"></i>
+                    <span id="currentReceiptNumber">Next: ---</span>
+                </div>
+                <div id="syncStatus" class="status-online" style="padding: 5px 10px; font-size: 12px;">
+                    <i class="fas fa-wifi"></i>
+                    <span>Online</span>
+                </div>
+            </div>
+            <div class="user-info-right">
+                <button onclick="showReceiptHistory()" class="btn btn-warning" style="padding: 5px 10px; font-size: 12px;">
+                    <i class="fas fa-history"></i> History
+                </button>
+                <button onclick="logout()" class="btn btn-danger" style="padding: 5px 10px; font-size: 12px;">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="container" id="mainContainer" style="display: none;">
         <div class="header">
             <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
-            <p>Receipt Printing System - willstech.store</p>
+            <p>Secure Receipting System - willstech.store</p>
         </div>
         
         <div class="card">
@@ -257,7 +426,7 @@
                 <label class="form-label">Payment Method</label>
                 <select id="paymentMethod" class="form-control">
                     <option value="Cash">Cash</option>
-                    <option value="Mobile Money">Mobile Money</option>
+                    <option value="Mobile Money" selected>Mobile Money</option>
                     <option value="Card">Card</option>
                 </select>
             </div>
@@ -336,6 +505,30 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // ============================================
+        // MAIN SCRIPT - REPLACE YOUR ENTIRE SCRIPT
+        // ============================================
+        
+        // Global variables
+        let currentUser = null;
+        let selectedPrinterMethod = null;
+        let bluetoothDevice = null;
+        let receiptItems = [];
+        let currentReceiptNumber = null;
+        let deviceId = null;
+        let syncInterval = null;
+        
+        // Initialize database
+        async function initDatabase() {
+            try {
+                await DB.init();
+                console.log('Database initialized');
+            } catch (error) {
+                console.error('Failed to initialize database:', error);
+                showToast('Failed to initialize storage', 'error');
+            }
+        }
+        
         // Toast function
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -348,49 +541,397 @@
             }, 3000);
         }
         
-        // Generate receipt number
-        function generateReceiptNumber() {
-    const now = new Date();
-    const datePart = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}`;
-    const timePart = `${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`;
-    const milliseconds = String(now.getMilliseconds()).padStart(3, '0');
-    const random = String(Math.floor(Math.random() * 100)).padStart(2, '0');
-    
-    return `WTS-${datePart}-${timePart}${milliseconds}${random}`;
-}
-// Example: WTS-20241212-14304512345
+        // Generate device ID
+        function generateDeviceId() {
+            if (!deviceId) {
+                deviceId = 'DEV-' + Math.random().toString(36).substr(2, 9).toUpperCase();
+                localStorage.setItem('deviceId', deviceId);
+            }
+            return deviceId;
+        }
         
-        // Generate transaction ID
-        function generateTransactionId() {
-            const now = new Date();
-            const timestamp = now.getTime().toString().slice(-8);
-            const random = String(Math.floor(Math.random() * 10000)).padStart(4, '0');
-            return `TXN${timestamp}${random}`;
+        // Hash password
+        async function hashPassword(password, salt) {
+            const encoder = new TextEncoder();
+            const data = encoder.encode(password + salt);
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+            const hashArray = Array.from(new Uint8Array(hashBuffer));
+            return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+        }
+        
+        // Generate receipt number
+        async function generateReceiptNumber() {
+            if (!currentUser) {
+                throw new Error('User not logged in');
+            }
+            
+            try {
+                // Get current sequence
+                const sequence = await DB.sequences.get(currentUser.id);
+                
+                // Generate next number
+                let nextNumber = sequence.lastNumber + 1;
+                
+                // Check if number is pending (used by other device)
+                while (sequence.pendingNumbers && sequence.pendingNumbers.includes(nextNumber)) {
+                    nextNumber++;
+                }
+                
+                // Update sequence
+                sequence.lastNumber = nextNumber;
+                if (!sequence.pendingNumbers) sequence.pendingNumbers = [];
+                sequence.pendingNumbers.push(nextNumber);
+                sequence.lastSync = new Date().toISOString();
+                
+                await DB.sequences.update(currentUser.id, sequence);
+                
+                // Format: USER001-00001
+                const userIdStr = currentUser.id.toString().padStart(3, '0');
+                const receiptNum = nextNumber.toString().padStart(5, '0');
+                currentReceiptNumber = `USER${userIdStr}-${receiptNum}`;
+                
+                // Save pending sync
+                await DB.sync.addPending({
+                    type: 'RECEIPT_NUMBER_GENERATED',
+                    userId: currentUser.id,
+                    receiptNumber: currentReceiptNumber,
+                    sequenceNumber: nextNumber
+                });
+                
+                return currentReceiptNumber;
+                
+            } catch (error) {
+                console.error('Failed to generate receipt number:', error);
+                throw error;
+            }
         }
         
         // Format currency
         function formatUGX(amount) {
-    return 'UGX ' + amount.toLocaleString('en-US');
-}
+            return 'UGX ' + amount.toLocaleString('en-US');
+        }
         
-        // Global variables
-        let selectedPrinterMethod = null;
-        let bluetoothDevice = null;
-        let receiptItems = [];
+        // Authentication functions
+        function showLoginModal() {
+            document.getElementById('loginModal').style.display = 'block';
+            document.getElementById('mainContainer').style.display = 'none';
+            document.getElementById('userInfoBar').style.display = 'none';
+        }
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeReceipt();
-            setupEventListeners();
-        });
+        function closeLoginModal() {
+            document.getElementById('loginModal').style.display = 'none';
+            if (currentUser) {
+                document.getElementById('mainContainer').style.display = 'grid';
+                document.getElementById('userInfoBar').style.display = 'block';
+            }
+        }
         
+        function showLoginTab() {
+            document.getElementById('registerTab').style.display = 'none';
+            document.getElementById('loginTab').style.display = 'block';
+            document.getElementById('loginTabBtn').classList.add('active');
+            document.getElementById('registerTabBtn').classList.remove('active');
+        }
+        
+        function showRegisterTab() {
+            document.getElementById('loginTab').style.display = 'none';
+            document.getElementById('registerTab').style.display = 'block';
+            document.getElementById('registerTabBtn').classList.add('active');
+            document.getElementById('loginTabBtn').classList.remove('active');
+        }
+        
+        async function login() {
+            const username = document.getElementById('loginUsername').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!username || !password) {
+                showToast('Please enter username and password', 'error');
+                return;
+            }
+            
+            try {
+                const user = await DB.users.getByUsername(username);
+                
+                if (!user) {
+                    showToast('User not found', 'error');
+                    return;
+                }
+                
+                // Verify password
+                const hashedPassword = await hashPassword(password, user.salt);
+                
+                if (hashedPassword !== user.passwordHash) {
+                    showToast('Invalid password', 'error');
+                    return;
+                }
+                
+                // Create session
+                currentUser = {
+                    id: user.id,
+                    username: user.username,
+                    fullName: user.fullName,
+                    storeName: user.storeName || 'Will\'s Tech Store',
+                    phone: user.phone || '+256 751 924 844'
+                };
+                
+                // Save session
+                await DB.sessions.save({
+                    userId: user.id,
+                    userData: currentUser,
+                    deviceId: generateDeviceId(),
+                    loginTime: new Date().toISOString(),
+                    expires: Date.now() + (7 * 24 * 60 * 60 * 1000) // 7 days
+                });
+                
+                // Update UI
+                document.getElementById('currentUserName').textContent = currentUser.fullName;
+                document.getElementById('storeName').value = currentUser.storeName;
+                document.getElementById('storePhone').value = currentUser.phone;
+                
+                closeLoginModal();
+                showToast(`Welcome back, ${currentUser.fullName}!`);
+                
+                // Load next receipt number
+                await loadNextReceiptNumber();
+                
+                // Start sync
+                startAutoSync();
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                showToast('Login failed: ' + error.message, 'error');
+            }
+        }
+        
+        async function register() {
+            const fullName = document.getElementById('regFullName').value.trim();
+            const username = document.getElementById('regUsername').value.trim();
+            const email = document.getElementById('regEmail').value.trim();
+            const phone = document.getElementById('regPhone').value.trim();
+            const password = document.getElementById('regPassword').value;
+            const confirmPassword = document.getElementById('regConfirmPassword').value;
+            
+            // Validation
+            if (!fullName || !username || !password) {
+                showToast('Please fill all required fields', 'error');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showToast('Password must be at least 8 characters', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match', 'error');
+                return;
+            }
+            
+            try {
+                // Generate salt and hash password
+                const salt = Math.random().toString(36).substring(2) + Date.now().toString(36);
+                const passwordHash = await hashPassword(password, salt);
+                
+                // Create user
+                const userId = await DB.users.create({
+                    username: username,
+                    passwordHash: passwordHash,
+                    salt: salt,
+                    fullName: fullName,
+                    email: email || null,
+                    phone: phone || null,
+                    storeName: 'Will\'s Tech Store',
+                    createdAt: new Date().toISOString()
+                });
+                
+                // Auto login
+                currentUser = {
+                    id: userId,
+                    username: username,
+                    fullName: fullName,
+                    storeName: 'Will\'s Tech Store',
+                    phone: phone || '+256 751 924 844'
+                };
+                
+                // Save session
+                await DB.sessions.save({
+                    userId: userId,
+                    userData: currentUser,
+                    deviceId: generateDeviceId(),
+                    loginTime: new Date().toISOString(),
+                    expires: Date.now() + (7 * 24 * 60 * 60 * 1000)
+                });
+                
+                // Update UI
+                document.getElementById('currentUserName').textContent = currentUser.fullName;
+                document.getElementById('storeName').value = currentUser.storeName;
+                document.getElementById('storePhone').value = currentUser.phone;
+                
+                // Clear form
+                document.getElementById('regFullName').value = '';
+                document.getElementById('regUsername').value = '';
+                document.getElementById('regEmail').value = '';
+                document.getElementById('regPhone').value = '';
+                document.getElementById('regPassword').value = '';
+                document.getElementById('regConfirmPassword').value = '';
+                
+                showLoginTab();
+                closeLoginModal();
+                showToast(`Account created successfully! Welcome ${fullName}`);
+                
+                // Load next receipt number
+                await loadNextReceiptNumber();
+                
+                // Start sync
+                startAutoSync();
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                if (error.message.includes('already exists')) {
+                    showToast('Username already exists', 'error');
+                } else {
+                    showToast('Registration failed: ' + error.message, 'error');
+                }
+            }
+        }
+        
+        async function logout() {
+            if (confirm('Are you sure you want to logout?')) {
+                if (currentUser) {
+                    await DB.sessions.delete(currentUser.id);
+                }
+                
+                currentUser = null;
+                currentReceiptNumber = null;
+                stopAutoSync();
+                
+                showToast('Logged out successfully');
+                showLoginModal();
+            }
+        }
+        
+        async function checkSession() {
+            try {
+                const sessions = await DB.sessions.get('all');
+                if (!sessions || sessions.length === 0) return false;
+                
+                // Get latest session (simplified - in real app you'd check expiration)
+                const session = sessions[0];
+                
+                if (session.expires < Date.now()) {
+                    await DB.sessions.delete(session.userId);
+                    return false;
+                }
+                
+                currentUser = session.userData;
+                deviceId = session.deviceId || generateDeviceId();
+                
+                // Update UI
+                document.getElementById('currentUserName').textContent = currentUser.fullName;
+                document.getElementById('storeName').value = currentUser.storeName;
+                document.getElementById('storePhone').value = currentUser.phone;
+                document.getElementById('userInfoBar').style.display = 'block';
+                document.getElementById('mainContainer').style.display = 'grid';
+                document.getElementById('loginModal').style.display = 'none';
+                
+                await loadNextReceiptNumber();
+                startAutoSync();
+                
+                return true;
+                
+            } catch (error) {
+                console.error('Session check error:', error);
+                return false;
+            }
+        }
+        
+        async function loadNextReceiptNumber() {
+            if (!currentUser) return;
+            
+            try {
+                const sequence = await DB.sequences.get(currentUser.id);
+                const nextNumber = sequence.lastNumber + 1;
+                const userIdStr = currentUser.id.toString().padStart(3, '0');
+                const receiptNum = nextNumber.toString().padStart(5, '0');
+                
+                document.getElementById('currentReceiptNumber').textContent = 
+                    `Next: USER${userIdStr}-${receiptNum}`;
+                    
+            } catch (error) {
+                console.error('Failed to load receipt number:', error);
+                document.getElementById('currentReceiptNumber').textContent = 'Next: ---';
+            }
+        }
+        
+        // Sync functions
+        async function performSync() {
+            if (!currentUser) return;
+            
+            try {
+                const pending = await DB.sync.getPending();
+                
+                // In a real app, you would send to server here
+                // For now, we'll just mark as synced
+                for (const item of pending) {
+                    await DB.sync.markCompleted(item.id);
+                }
+                
+                // Update sync status
+                const syncStatus = document.getElementById('syncStatus');
+                if (navigator.onLine) {
+                    syncStatus.className = 'status-online';
+                    syncStatus.innerHTML = '<i class="fas fa-wifi"></i><span>Online</span>';
+                }
+                
+            } catch (error) {
+                console.error('Sync error:', error);
+                const syncStatus = document.getElementById('syncStatus');
+                syncStatus.className = 'status-offline';
+                syncStatus.innerHTML = '<i class="fas fa-exclamation-triangle"></i><span>Sync Error</span>';
+            }
+        }
+        
+        function startAutoSync() {
+            if (syncInterval) clearInterval(syncInterval);
+            
+            syncInterval = setInterval(() => {
+                if (currentUser && navigator.onLine) {
+                    performSync();
+                }
+            }, 30000); // Every 30 seconds
+            
+            // Initial sync
+            setTimeout(performSync, 1000);
+        }
+        
+        function stopAutoSync() {
+            if (syncInterval) {
+                clearInterval(syncInterval);
+                syncInterval = null;
+            }
+        }
+        
+        // Network status monitoring
+        function updateNetworkStatus() {
+            const syncStatus = document.getElementById('syncStatus');
+            
+            if (navigator.onLine) {
+                syncStatus.className = 'status-online';
+                syncStatus.innerHTML = '<i class="fas fa-wifi"></i><span>Online</span>';
+            } else {
+                syncStatus.className = 'status-offline';
+                syncStatus.innerHTML = '<i class="fas fa-wifi-slash"></i><span>Offline</span>';
+            }
+        }
+        
+        // Receipt functions (keep your existing but modified)
         function initializeReceipt() {
             addEmptyItem();
             updateReceiptPreview();
         }
         
         function setupEventListeners() {
-            // Printer modal
+            // Your existing event listeners
             document.getElementById('selectPrinter').addEventListener('click', () => {
                 document.getElementById('printerModal').style.display = 'block';
             });
@@ -399,7 +940,6 @@
                 document.getElementById('printerModal').style.display = 'none';
             });
             
-            // Printer selection
             document.querySelectorAll('.printer-option').forEach(option => {
                 option.addEventListener('click', function() {
                     document.querySelectorAll('.printer-option').forEach(o => {
@@ -410,7 +950,6 @@
                 });
             });
             
-            // Confirm method
             document.getElementById('confirmMethod').addEventListener('click', function() {
                 if (!selectedPrinterMethod) {
                     showToast('Please select a method first', 'error');
@@ -434,23 +973,18 @@
                 }
             });
             
-            // Add item
             document.getElementById('addItem').addEventListener('click', () => {
                 addEmptyItem();
             });
             
-            // Print receipt
             document.getElementById('printReceipt').addEventListener('click', function() {
                 printReceipt();
             });
             
-            // Test print
             document.getElementById('testPrint').addEventListener('click', testPrint);
             
-            // Preview
             document.getElementById('previewReceipt').addEventListener('click', updateReceiptPreview);
             
-            // Clear
             document.getElementById('clearAll').addEventListener('click', () => {
                 if (confirm('Clear all items?')) {
                     receiptItems = [];
@@ -478,51 +1012,6 @@
             receiptItems.push(item);
             renderItems();
             updateReceiptPreview();
-        }
-        
-        async function connectBluetooth() {
-            const statusDiv = document.getElementById('printerStatus');
-            const testBtn = document.getElementById('testPrint');
-            const printBtn = document.getElementById('printReceipt');
-            
-            try {
-                if (!navigator.bluetooth) {
-                    showToast('Bluetooth not supported', 'error');
-                    return;
-                }
-                
-                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Searching for printers...</span>';
-                
-                bluetoothDevice = await navigator.bluetooth.requestDevice({
-                    acceptAllDevices: true,
-                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
-                });
-                
-                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connecting...</span>';
-                
-                const server = await bluetoothDevice.gatt.connect();
-                
-                statusDiv.className = 'printer-status status-connected';
-                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Connected to printer</span>';
-                testBtn.disabled = false;
-                printBtn.disabled = false;
-                
-                showToast('Bluetooth printer connected!');
-                
-                bluetoothDevice.addEventListener('gattserverdisconnected', () => {
-                    statusDiv.className = 'printer-status status-disconnected';
-                    statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Printer disconnected</span>';
-                    testBtn.disabled = true;
-                    printBtn.disabled = true;
-                    showToast('Printer disconnected', 'error');
-                });
-                
-            } catch (error) {
-                console.error('Bluetooth error:', error);
-                statusDiv.className = 'printer-status status-disconnected';
-                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Not connected</span>';
-                showToast('Bluetooth connection failed', 'error');
-            }
         }
         
         function renderItems() {
@@ -599,8 +1088,6 @@
         function updateReceiptPreview() {
             const preview = document.getElementById('receiptPreview');
             const now = new Date();
-            const receiptNumber = generateReceiptNumber();
-            const transactionId = generateTransactionId();
             
             // Filter valid items
             const validItems = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
@@ -608,18 +1095,22 @@
             const vat = Math.round(subtotal * 0.18);
             const total = subtotal + vat;
             
+            // Get issuer name
+            const issuerName = currentUser ? currentUser.fullName : 'Not Logged In';
+            const receiptNumber = currentReceiptNumber || 'LOGIN-REQUIRED';
+            
             let itemsHTML = '';
             if (validItems.length > 0) {
                 itemsHTML = validItems.map(item => {
-    const itemName = item.name.substring(0, 18).padEnd(18, ' ');
-    const qty = item.quantity.toString().padStart(2, ' ');
-    const amount = formatUGX(item.total).padStart(10, ' ');
-    return `
-    <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
-        <span style="font-size: 8px; font-family: 'Courier New', monospace;">${itemName} ${qty} ${amount}</span>
-    </div>
-    `;
-}).join('');
+                    const itemName = item.name.substring(0, 18).padEnd(18, ' ');
+                    const qty = item.quantity.toString().padStart(2, ' ');
+                    const amount = formatUGX(item.total).padStart(10, ' ');
+                    return `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
+                        <span style="font-size: 8px; font-family: 'Courier New', monospace;">${itemName} ${qty} ${amount}</span>
+                    </div>
+                    `;
+                }).join('');
             } else {
                 itemsHTML = '<div style="text-align: center; padding: 5px 0; font-size: 8px; color: #666;">No items added</div>';
             }
@@ -627,8 +1118,8 @@
             preview.innerHTML = `
                 <div style="text-align: center; margin-bottom: 5px;">
                     <div style="font-weight: bold; font-size: 11px; margin-bottom: 1px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
-                    <div style="font-size: 7px; margin-bottom: 1px;">Elevate Your Lifestyle \n With Authentic Tech</div>
-                    <div style="font-size: 7px; margin-bottom: 1px;">www.willstech.store</div>
+                    <div style="font-size: 7px; margin-bottom: 1px;">Issued by: ${issuerName.substring(0, 20)}</div>
+                    <div style="font-size: 7px; margin-bottom: 1px;">Elevate Your Lifestyle With Authentic Tech</div>
                     <div style="font-size: 7px;">${document.getElementById('storePhone').value}</div>
                 </div>
                 
@@ -639,7 +1130,7 @@
                 <div style="font-size: 8px; margin: 4px 0; line-height: 1.2;">
                     <div><strong>Date:</strong> ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                     <div><strong>Time:</strong> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                    <div><strong>Receipt:</strong> ${receiptNumber.substring(0, 15)}</div>
+                    <div><strong>Receipt:</strong> ${receiptNumber}</div>
                     <div><strong>Customer:</strong> ${document.getElementById('customerName').value.substring(0, 15) || 'Walk-in'}</div>
                 </div>
                 
@@ -647,8 +1138,8 @@
                 
                 <div style="font-size: 8px; margin-bottom: 2px;">
                     <div style="font-weight: bold; margin-bottom: 1px;">
-    <span style="font-size: 8px; font-family: 'Courier New', monospace;">ITEM               QTY    AMOUNT</span>
-</div>
+                        <span style="font-size: 8px; font-family: 'Courier New', monospace;">ITEM               QTY    AMOUNT</span>
+                    </div>
                 </div>
                 
                 <div style="font-size: 8px; margin-bottom: 4px;">
@@ -692,21 +1183,15 @@
             `;
         }
         
-        function testPrint() {
-            if (!selectedPrinterMethod) {
-                showToast('Select printer method first', 'error');
+        // Print function - MODIFIED
+        async function printReceipt() {
+            console.log('Print Receipt function called');
+            
+            if (!currentUser) {
+                showToast('Please login to print receipts', 'error');
+                showLoginModal();
                 return;
             }
-            
-            if (selectedPrinterMethod === 'usb-network') {
-                printTestReceiptViaSystem();
-            } else if (selectedPrinterMethod === 'web-bluetooth') {
-                printTestReceiptViaBluetooth();
-            }
-        }
-        
-        function printReceipt() {
-            console.log('Print Receipt function called');
             
             if (!selectedPrinterMethod) {
                 showToast('Select printer method first', 'error');
@@ -723,23 +1208,72 @@
             
             console.log('Valid items found:', validItems.length);
             
-            if (selectedPrinterMethod === 'usb-network') {
-                printReceiptViaSystem();
-            } else if (selectedPrinterMethod === 'web-bluetooth') {
-                printReceiptViaBluetooth();
+            try {
+                // Generate receipt number
+                const receiptNumber = await generateReceiptNumber();
+                
+                // Calculate totals
+                const subtotal = validItems.reduce((sum, item) => sum + item.total, 0);
+                const vat = Math.round(subtotal * 0.18);
+                const total = subtotal + vat;
+                
+                // Save receipt to database
+                const receiptData = {
+                    userId: currentUser.id,
+                    receiptNumber: receiptNumber,
+                    customerName: document.getElementById('customerName').value || 'Walk-in',
+                    items: validItems,
+                    subtotal: subtotal,
+                    vat: vat,
+                    total: total,
+                    paymentMethod: document.getElementById('paymentMethod').value,
+                    transactionDate: new Date().toISOString(),
+                    storeName: document.getElementById('storeName').value,
+                    storePhone: document.getElementById('storePhone').value,
+                    deviceId: deviceId
+                };
+                
+                await DB.receipts.save(receiptData);
+                
+                // Add to sync queue
+                await DB.sync.addPending({
+                    type: 'RECEIPT_CREATED',
+                    userId: currentUser.id,
+                    receiptData: receiptData
+                });
+                
+                // Update UI
+                document.getElementById('currentReceiptNumber').textContent = 
+                    `Last: ${receiptNumber}`;
+                
+                // Print based on selected method
+                if (selectedPrinterMethod === 'usb-network') {
+                    await printReceiptViaSystem(receiptNumber, receiptData);
+                } else if (selectedPrinterMethod === 'web-bluetooth') {
+                    await printReceiptViaBluetooth(receiptNumber, receiptData);
+                }
+                
+                showToast(`Receipt ${receiptNumber} printed successfully`);
+                
+                // Clear form for next receipt
+                setTimeout(() => {
+                    document.getElementById('customerName').value = '';
+                    receiptItems = [];
+                    document.getElementById('itemsContainer').innerHTML = '';
+                    addEmptyItem();
+                    loadNextReceiptNumber();
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Print error:', error);
+                showToast('Failed to print receipt: ' + error.message, 'error');
             }
         }
         
-        function printReceiptViaSystem() {
+        // Modified print functions to accept receipt data
+        async function printReceiptViaSystem(receiptNumber, receiptData) {
+            // Your existing printReceiptViaSystem code, but use receiptData
             const now = new Date();
-            const receiptNumber = generateReceiptNumber();
-            const transactionId = generateTransactionId();
-            
-            // Filter valid items
-            const itemsToPrint = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
-            const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
-            const vat = Math.round(subtotal * 0.18);
-            const total = subtotal + vat;
             
             const printContent = `
                 <!DOCTYPE html>
@@ -781,10 +1315,10 @@
                 </head>
                 <body>
                     <div style="text-align: center; margin-bottom: 3px;">
-                        <div class="bold" style="font-size: 10px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
-                        <div style="font-size: 7px;">Elevate Your Lifestyle With \n Authentic Tech</div>
-                        <div style="font-size: 7px;">www.willstech.store</div>
-                        <div style="font-size: 7px;">${document.getElementById('storePhone').value}</div>
+                        <div class="bold" style="font-size: 10px;">${receiptData.storeName.substring(0, 20)}</div>
+                        <div style="font-size: 7px;">Issued by: ${currentUser.fullName.substring(0, 20)}</div>
+                        <div style="font-size: 7px;">Elevate Your Lifestyle With Authentic Tech</div>
+                        <div style="font-size: 7px;">${receiptData.storePhone}</div>
                     </div>
                     
                     <div class="dashed" style="padding-top: 2px;">
@@ -794,8 +1328,8 @@
                     <div style="font-size: 8px; margin: 3px 0;">
                         <div><strong>Date:</strong> ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}</div>
                         <div><strong>Time:</strong> ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}</div>
-                        <div><strong>Receipt:</strong> ${receiptNumber.substring(0, 15)}</div>
-                        <div><strong>Customer:</strong> ${document.getElementById('customerName').value.substring(0, 15) || 'Walk-in'}</div>
+                        <div><strong>Receipt:</strong> ${receiptNumber}</div>
+                        <div><strong>Customer:</strong> ${receiptData.customerName.substring(0, 15)}</div>
                     </div>
                     
                     <div class="dashed"></div>
@@ -808,7 +1342,7 @@
                         </div>
                     </div>
                     
-                    ${itemsToPrint.map(item => `
+                    ${receiptData.items.map(item => `
                         <div class="item-row" style="font-size: 8px;">
                             <span style="flex: 3;">${item.name.substring(0, 20)}</span>
                             <span style="flex: 1; text-align: right;">${item.quantity}</span>
@@ -821,36 +1355,32 @@
                     <div style="font-size: 9px;">
                         <div class="item-row">
                             <span>Subtotal:</span>
-                            <span>${formatUGX(subtotal)}</span>
+                            <span>${formatUGX(receiptData.subtotal)}</span>
                         </div>
                         <div class="item-row">
                             <span>VAT (18%):</span>
-                            <span>${formatUGX(vat)}</span>
+                            <span>${formatUGX(receiptData.vat)}</span>
                         </div>
                         <div class="item-row" style="margin-top: 3px; padding-top: 2px; border-top: 1px solid #000; font-weight: bold;">
                             <span>TOTAL:</span>
-                            <span style="font-size: 10px;">${formatUGX(total)}</span>
+                            <span style="font-size: 10px;">${formatUGX(receiptData.total)}</span>
                         </div>
                     </div>
                     
                     <div class="dashed"></div>
                     
                     <div class="center" style="font-size: 8px; margin-top: 5px;">
-                        <div><strong>Payment:</strong> ${document.getElementById('paymentMethod').value}</div>
+                        <div><strong>Payment:</strong> ${receiptData.paymentMethod}</div>
                         <div style="color: green; font-weight: bold;">✓ Payment received.</div>
                         <div class="bold">THANK YOU FOR SHOPPING</div>
-                        <div>${document.getElementById('storeName').value.substring(0, 20)}</div>
+                        <div>${receiptData.storeName.substring(0, 20)}</div>
                     </div>
                     
                     <div class="footer">
-                        <div>For inquiries: ${document.getElementById('storePhone').value}</div>
+                        <div>For inquiries: ${receiptData.storePhone}</div>
                         <div>Email: info@willstech.store</div>
                         <div>Website: willstech.store</div>
                         <div style="margin-top: 2px;">*************************</div>
-                    </div>
-                    
-                    <div style="margin-top: 15px; text-align: center; font-size: 7px; color: #999;">
-                        --- Tear here ---
                     </div>
                     
                     <script>
@@ -872,7 +1402,127 @@
             showToast('Printing receipt...');
         }
         
+        // Keep your existing Bluetooth functions but update them similarly
+        
+        // Initialize the app
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Initialize database
+            await initDatabase();
+            
+            // Check for existing session
+            const hasSession = await checkSession();
+            
+            if (!hasSession) {
+                showLoginModal();
+            }
+            
+            // Initialize receipt
+            initializeReceipt();
+            setupEventListeners();
+            
+            // Setup network monitoring
+            window.addEventListener('online', updateNetworkStatus);
+            window.addEventListener('offline', updateNetworkStatus);
+            updateNetworkStatus();
+            
+            // Auto-save draft every 30 seconds
+            setInterval(() => {
+                if (currentUser) {
+                    localStorage.setItem('receiptDraft', JSON.stringify({
+                        items: receiptItems,
+                        customerName: document.getElementById('customerName').value,
+                        paymentMethod: document.getElementById('paymentMethod').value
+                    }));
+                }
+            }, 30000);
+            
+            // Load draft if exists
+            const draft = localStorage.getItem('receiptDraft');
+            if (draft) {
+                try {
+                    const draftData = JSON.parse(draft);
+                    receiptItems = draftData.items || [];
+                    document.getElementById('customerName').value = draftData.customerName || '';
+                    document.getElementById('paymentMethod').value = draftData.paymentMethod || 'Mobile Money';
+                    if (receiptItems.length > 0) {
+                        renderItems();
+                    } else {
+                        addEmptyItem();
+                    }
+                } catch (e) {
+                    console.error('Failed to load draft:', e);
+                }
+            }
+        });
+        
+        // Utility functions (keep your existing ones)
+        function showReceiptHistory() {
+            showToast('Receipt history feature coming soon!', 'warning');
+        }
+        
+        // Your existing Bluetooth connection functions remain the same
+        async function connectBluetooth() {
+            // Keep your existing connectBluetooth function
+            const statusDiv = document.getElementById('printerStatus');
+            const testBtn = document.getElementById('testPrint');
+            const printBtn = document.getElementById('printReceipt');
+            
+            try {
+                if (!navigator.bluetooth) {
+                    showToast('Bluetooth not supported', 'error');
+                    return;
+                }
+                
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Searching for printers...</span>';
+                
+                bluetoothDevice = await navigator.bluetooth.requestDevice({
+                    acceptAllDevices: true,
+                    optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+                });
+                
+                statusDiv.innerHTML = '<i class="fas fa-spinner fa-spin"></i><span>Connecting...</span>';
+                
+                const server = await bluetoothDevice.gatt.connect();
+                
+                statusDiv.className = 'printer-status status-connected';
+                statusDiv.innerHTML = '<i class="fas fa-check-circle"></i><span>Connected to printer</span>';
+                testBtn.disabled = false;
+                printBtn.disabled = false;
+                
+                showToast('Bluetooth printer connected!');
+                
+                bluetoothDevice.addEventListener('gattserverdisconnected', () => {
+                    statusDiv.className = 'printer-status status-disconnected';
+                    statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Printer disconnected</span>';
+                    testBtn.disabled = true;
+                    printBtn.disabled = true;
+                    showToast('Printer disconnected', 'error');
+                });
+                
+            } catch (error) {
+                console.error('Bluetooth error:', error);
+                statusDiv.className = 'printer-status status-disconnected';
+                statusDiv.innerHTML = '<i class="fas fa-times-circle"></i><span>Not connected</span>';
+                showToast('Bluetooth connection failed', 'error');
+            }
+        }
+        
+        function testPrint() {
+            // Keep your existing testPrint function
+            if (!selectedPrinterMethod) {
+                showToast('Select printer method first', 'error');
+                return;
+            }
+            
+            if (selectedPrinterMethod === 'usb-network') {
+                printTestReceiptViaSystem();
+            } else if (selectedPrinterMethod === 'web-bluetooth') {
+                printTestReceiptViaBluetooth();
+            }
+        }
+        
         function printTestReceiptViaSystem() {
+            // Keep your existing test print function
             const printContent = `
                 <!DOCTYPE html>
                 <html>
@@ -907,7 +1557,7 @@
                 <body>
                     <div style="font-weight: bold; margin-bottom: 10px; font-size: 12px;">TEST PRINT</div>
                     <div>Will's Tech Store</div>
-                    <div>Kampala, Uganda</div>
+                    <div>Secure Receipting System</div>
                     <div style="margin-top: 10px;">Print alignment test</div>
                     <div>-------------------</div>
                     <div style="margin-top: 20px; color: green; font-weight: bold;">✓ Printer working correctly</div>
@@ -931,25 +1581,15 @@
             showToast('Printing test...');
         }
         
-        async function printReceiptViaBluetooth() {
+        async function printReceiptViaBluetooth(receiptNumber, receiptData) {
+            // Keep your existing Bluetooth print function, but update with receiptData
             if (!bluetoothDevice) {
                 showToast('Bluetooth printer not connected', 'error');
                 return;
             }
             
             try {
-                const itemsToPrint = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
-                
-                if (itemsToPrint.length === 0) {
-                    showToast('No valid items to print', 'error');
-                    return;
-                }
-                
                 const now = new Date();
-                const receiptNumber = generateReceiptNumber();
-                const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
-                const vat = Math.round(subtotal * 0.18);
-                const total = subtotal + vat;
                 
                 // Create ESC/POS commands
                 let escpos = "\x1B\x40"; // Initialize
@@ -957,9 +1597,10 @@
                 escpos += "\x1B\x21\x08"; // Emphasized
                 escpos += "WILL'S TECH STORE\n";
                 escpos += "\x1B\x21\x00"; // Normal
+                escpos += "Issued by: " + currentUser.fullName.substring(0, 20) + "\n";
                 escpos += "Elevate Your Lifestyle With\nAuthentic Tech\n";
                 escpos += "www.willstech.store\n";
-                escpos += "Tel: +256 751 924 844\n";
+                escpos += "Tel: " + receiptData.storePhone + "\n";
                 escpos += "-------------------------------\n";
                 escpos += "\x1B\x21\x08"; // Emphasized
                 escpos += "SALES RECEIPT\n";
@@ -970,80 +1611,36 @@
                 // Receipt details
                 escpos += `Date: ${now.toLocaleDateString('en-GB', { day: 'numeric', month: 'short', year: 'numeric' })}\n`;
                 escpos += `Time: ${now.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}\n`;
-                escpos += `Receipt: ${receiptNumber.substring(0, 15)}\n`;
-                escpos += `Customer: ${document.getElementById('customerName').value.substring(0, 15) || 'Walk-in'}\n`;
+                escpos += `Receipt: ${receiptNumber}\n`;
+                escpos += `Customer: ${receiptData.customerName.substring(0, 15)}\n`;
                 escpos += "-------------------------------\n";
                 
-               // First, find the maximum lengths needed for each column
-let maxNameLength = 0;
-let maxQtyLength = 0;
-let maxAmountLength = 0;
-
-// Calculate maximum lengths from actual data
-itemsToPrint.forEach(item => {
-    // Name length (max 30 characters to avoid overflow)
-    const nameLength = Math.min(item.name.length, 30);
-    maxNameLength = Math.max(maxNameLength, nameLength);
-    
-    // Quantity length
-    const qtyLength = item.quantity.toString().length;
-    maxQtyLength = Math.max(maxQtyLength, qtyLength);
-    
-    // Amount length
-    const formattedAmount = formatUGX(item.total);
-    maxAmountLength = Math.max(maxAmountLength, formattedAmount.length);
-});
-
-// Add minimum padding for readability
-maxNameLength = Math.max(maxNameLength, 4);  // Minimum 4 chars for "ITEM"
-maxQtyLength = Math.max(maxQtyLength, 3);    // Minimum 3 chars for "QTY"
-maxAmountLength = Math.max(maxAmountLength, 6); // Minimum 6 chars for "AMOUNT"
-
-// Calculate QTY position - center it between name and amount
-const totalLineWidth = maxNameLength + 3 + maxQtyLength + 3 + maxAmountLength;
-const qtyStartPosition = maxNameLength + Math.floor((totalLineWidth - maxNameLength - maxAmountLength - maxQtyLength) / 2);
-
-// Items header - aligned with data columns
-escpos += "\x1B\x21\x08"; // Emphasized
-escpos += "ITEM".padEnd(maxNameLength, ' ');
-escpos += " ".repeat(qtyStartPosition - maxNameLength);
-escpos += "QTY".padStart(Math.ceil(maxQtyLength/2) + 1, ' ').padEnd(maxQtyLength, ' ');
-escpos += " ".repeat(totalLineWidth - qtyStartPosition - maxQtyLength - maxAmountLength);
-escpos += "AMOUNT".padStart(maxAmountLength, ' ');
-escpos += "\n";
-escpos += "\x1B\x21\x00"; // Normal
-
-// Items
-itemsToPrint.forEach(item => {
-    // Truncate name if too long, add ellipsis
-    const displayName = item.name.length > maxNameLength 
-        ? item.name.substring(0, maxNameLength - 1) + '…'
-        : item.name;
-    
-    const name = displayName.padEnd(maxNameLength, ' ');
-    const qty = item.quantity.toString().padStart(maxQtyLength, ' ');
-    const amount = formatUGX(item.total).padStart(maxAmountLength, ' ');
-    
-    // Align QTY in the center
-    const namePadding = name;
-    const qtyPadding = " ".repeat(qtyStartPosition - maxNameLength);
-    
-    escpos += `${namePadding}${qtyPadding}${qty} ${amount}\n`;
-});
+                // Items header
+                escpos += "\x1B\x21\x08"; // Emphasized
+                escpos += "ITEM               QTY    AMOUNT\n";
+                escpos += "\x1B\x21\x00"; // Normal
+                
+                // Items
+                receiptData.items.forEach(item => {
+                    const name = item.name.substring(0, 20).padEnd(20, ' ');
+                    const qty = item.quantity.toString().padStart(3, ' ');
+                    const amount = formatUGX(item.total).padStart(10, ' ');
+                    escpos += `${name} ${qty} ${amount}\n`;
+                });
                 
                 escpos += "-------------------------------\n";
                 
                 // Totals
-                escpos += `Subtotal:       ${formatUGX(subtotal).padStart(10, ' ')}\n`;
-                escpos += `VAT (18%):      ${formatUGX(vat).padStart(10, ' ')}\n`;
+                escpos += `Subtotal:       ${formatUGX(receiptData.subtotal).padStart(10, ' ')}\n`;
+                escpos += `VAT (18%):      ${formatUGX(receiptData.vat).padStart(10, ' ')}\n`;
                 escpos += "-------------------------------\n";
                 escpos += "\x1B\x21\x10"; // Double height
-                escpos += `TOTAL:          ${formatUGX(total).padStart(10, ' ')}\n`;
+                escpos += `TOTAL:          ${formatUGX(receiptData.total).padStart(10, ' ')}\n`;
                 escpos += "\x1B\x21\x00"; // Normal
                 escpos += "-------------------------------\n";
                 
                 // Payment info
-                escpos += `Payment: ${document.getElementById('paymentMethod').value}\n`;
+                escpos += `Payment: ${receiptData.paymentMethod}\n`;
                 escpos += "\x1B\x61\x01"; // Center align
                 escpos += "\x1B\x21\x08"; // Emphasized
                 escpos += "✓ Payment received.\n";
@@ -1053,7 +1650,7 @@ itemsToPrint.forEach(item => {
                 
                 // Footer
                 escpos += "For inquiries call:\n";
-                escpos += "+256 751 924 844\n";
+                escpos += receiptData.storePhone + "\n";
                 escpos += "Email: info@willstech.store\n";
                 escpos += "Website: willstech.store\n";
                 escpos += "**************************\n\n\n\n\n";
@@ -1070,7 +1667,7 @@ itemsToPrint.forEach(item => {
                 const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
                 const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
                 
-                // Split into chunks for reliable transmission
+                // Split into chunks
                 const encoder = new TextEncoder();
                 const chunks = splitString(escpos, 100);
                 
@@ -1098,6 +1695,7 @@ itemsToPrint.forEach(item => {
         }
         
         async function printTestReceiptViaBluetooth() {
+            // Keep your existing test Bluetooth print function
             if (!bluetoothDevice) {
                 showToast('Bluetooth printer not connected', 'error');
                 return;
@@ -1111,7 +1709,7 @@ itemsToPrint.forEach(item => {
                 escpos += "\x1B\x21\x00"; // Normal
                 escpos += "-------------------------------\n";
                 escpos += "Will's Tech Store\n";
-                escpos += "Printer Test\n";
+                escpos += "Secure Receipting System\n";
                 escpos += "---------------------------------\n";
                 escpos += "Print alignment test\n";
                 escpos += "for thermal printer\n";
@@ -1142,23 +1740,5 @@ itemsToPrint.forEach(item => {
             }
         }
     </script>
-    <div class="card">
-    <h2 class="card-title"><i class="fas fa-info-circle"></i> Receipt Number Format</h2>
-    <div style="font-family: 'Courier New', monospace; font-size: 12px; padding: 10px; background: #f8f9fa; border-radius: 5px;">
-        <div><strong>Format:</strong> WTS-YYYYMMDD-HHMMSSmmmRR</div>
-        <div><strong>Example:</strong> WTS-20241212-14304512345</div>
-        <div><strong>Decodes to:</strong> 12/12/2024 at 14:30:45.123</div>
-        <div style="margin-top: 10px; font-size: 10px;">
-            <div>YYYY = Year (2024)</div>
-            <div>MM = Month (12)</div>
-            <div>DD = Day (12)</div>
-            <div>HH = Hour (14 = 2 PM)</div>
-            <div>MM = Minute (30)</div>
-            <div>SS = Second (45)</div>
-            <div>mmm = Millisecond (123)</div>
-            <div>RR = Random digits (45)</div>
-        </div>
-    </div>
-</div>
 </body>
 </html>

@@ -627,7 +627,7 @@
             preview.innerHTML = `
                 <div style="text-align: center; margin-bottom: 5px;">
                     <div style="font-weight: bold; font-size: 11px; margin-bottom: 1px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
-                    <div style="font-size: 7px; margin-bottom: 1px;">Elevate Your Lifestyle With Authentic Tech</div>
+                    <div style="font-size: 7px; margin-bottom: 1px;">Elevate Your Lifestyle \n With Authentic Tech</div>
                     <div style="font-size: 7px; margin-bottom: 1px;">www.willstech.store</div>
                     <div style="font-size: 7px;">${document.getElementById('storePhone').value}</div>
                 </div>
@@ -687,7 +687,7 @@
                     <div>For inquiries: ${document.getElementById('storePhone').value}</div>
                     <div>Email: info@willstech.store</div>
                     <div>Website: willstech.store</div>
-                    <div style="margin-top: 2px;">*******************</div>
+                    <div style="margin-top: 2px;">*************************</div>
                 </div>
             `;
         }
@@ -782,7 +782,7 @@
                 <body>
                     <div style="text-align: center; margin-bottom: 3px;">
                         <div class="bold" style="font-size: 10px;">${document.getElementById('storeName').value.substring(0, 20)}</div>
-                        <div style="font-size: 7px;">Elevate Your Lifestyle With Authentic Tech</div>
+                        <div style="font-size: 7px;">Elevate Your Lifestyle With \n Authentic Tech</div>
                         <div style="font-size: 7px;">www.willstech.store</div>
                         <div style="font-size: 7px;">${document.getElementById('storePhone').value}</div>
                     </div>
@@ -846,7 +846,7 @@
                         <div>For inquiries: ${document.getElementById('storePhone').value}</div>
                         <div>Email: info@willstech.store</div>
                         <div>Website: willstech.store</div>
-                        <div style="margin-top: 2px;">*******************</div>
+                        <div style="margin-top: 2px;">*************************</div>
                     </div>
                     
                     <div style="margin-top: 15px; text-align: center; font-size: 7px; color: #999;">
@@ -957,7 +957,7 @@
                 escpos += "\x1B\x21\x08"; // Emphasized
                 escpos += "WILL'S TECH STORE\n";
                 escpos += "\x1B\x21\x00"; // Normal
-                escpos += "Elevate Your Lifestyle With Authentic Tech\n";
+                escpos += "Elevate Your Lifestyle With\nAuthentic Tech\n";
                 escpos += "www.willstech.store\n";
                 escpos += "Tel: +256 751 924 844\n";
                 escpos += "-------------------------------\n";
@@ -1056,7 +1056,7 @@ itemsToPrint.forEach(item => {
                 escpos += "+256 751 924 844\n";
                 escpos += "Email: info@willstech.store\n";
                 escpos += "Website: willstech.store\n";
-                escpos += "********************\n\n\n\n\n";
+                escpos += "**************************\n\n\n\n\n";
                 
                 // Cut paper
                 escpos += "\x1D\x56\x41\x00"; // Partial cut

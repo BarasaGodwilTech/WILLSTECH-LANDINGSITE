@@ -261,6 +261,15 @@
                     <option value="Card">Card</option>
                 </select>
             </div>
+            <div class="form-group">
+    <label class="form-label">Delivery Fee</label>
+    <div style="display: flex; gap: 10px; align-items: center;">
+        <input type="number" id="deliveryFee" class="form-control" value="5000" step="1000" style="flex: 1;">
+        <label style="white-space: nowrap;">
+            <input type="checkbox" id="freeDelivery"> Free Delivery
+        </label>
+    </div>
+</div>
             
             <div id="printerStatus" class="printer-status status-disconnected">
                 <i class="fas fa-print"></i>
@@ -383,6 +392,19 @@
             initializeReceipt();
             setupEventListeners();
         });
+        // Add delivery fee listeners
+document.getElementById('deliveryFee').addEventListener('input', updateReceiptPreview);
+document.getElementById('freeDelivery').addEventListener('change', function() {
+    const feeInput = document.getElementById('deliveryFee');
+    if (this.checked) {
+        feeInput.disabled = true;
+        feeInput.value = '0';
+    } else {
+        feeInput.disabled = false;
+        feeInput.value = '5000';
+    }
+    updateReceiptPreview();
+});
         
         function initializeReceipt() {
             addEmptyItem();
@@ -461,9 +483,10 @@
             });
             
             // Auto-update preview
-            ['storeName', 'storePhone', 'customerName', 'paymentMethod'].forEach(id => {
-                document.getElementById(id).addEventListener('input', updateReceiptPreview);
-            });
+            // Add 'deliveryFee' and 'freeDelivery' to this array
+['storeName', 'storePhone', 'customerName', 'paymentMethod', 'deliveryFee'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateReceiptPreview);
+});
         }
         
         function addEmptyItem() {
@@ -605,8 +628,11 @@
             // Filter valid items
             const validItems = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
             const subtotal = validItems.reduce((sum, item) => sum + item.total, 0);
-            const vat = Math.round(subtotal * 0.18);
-            const total = subtotal + vat;
+            let deliveryFee = 0;
+if (!document.getElementById('freeDelivery').checked) {
+    deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+}
+             const total = subtotal + deliveryFee;
             
             let itemsHTML = '';
             if (validItems.length > 0) {
@@ -663,10 +689,12 @@
                         <span>Subtotal:</span>
                         <span>${formatUGX(subtotal)}</span>
                     </div>
-                    <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
-                        <span>VAT (18%):</span>
-                        <span>${formatUGX(vat)}</span>
-                    </div>
+                    ${deliveryFee > 0 ? `
+<div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+    <span>Delivery Fee:</span>
+    <span>${formatUGX(deliveryFee)}</span>
+</div>
+` : ''}
                     <div style="display: flex; justify-content: space-between; margin-top: 3px; padding-top: 3px; border-top: 1px solid #000; font-weight: bold;">
                         <span>TOTAL:</span>
                         <span style="font-size: 10px;">${formatUGX(total)}</span>
@@ -738,8 +766,11 @@
             // Filter valid items
             const itemsToPrint = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
             const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
-            const vat = Math.round(subtotal * 0.18);
-            const total = subtotal + vat;
+            let deliveryFee = 0;
+if (!document.getElementById('freeDelivery').checked) {
+    deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+}
+const total = subtotal + deliveryFee;
             
             const printContent = `
                 <!DOCTYPE html>
@@ -823,10 +854,12 @@
                             <span>Subtotal:</span>
                             <span>${formatUGX(subtotal)}</span>
                         </div>
-                        <div class="item-row">
-                            <span>VAT (18%):</span>
-                            <span>${formatUGX(vat)}</span>
-                        </div>
+                       ${deliveryFee > 0 ? `
+<div class="item-row">
+    <span>Delivery Fee:</span>
+    <span>${formatUGX(deliveryFee)}</span>
+</div>
+` : ''}
                         <div class="item-row" style="margin-top: 3px; padding-top: 2px; border-top: 1px solid #000; font-weight: bold;">
                             <span>TOTAL:</span>
                             <span style="font-size: 10px;">${formatUGX(total)}</span>
@@ -948,8 +981,11 @@
                 const now = new Date();
                 const receiptNumber = generateReceiptNumber();
                 const subtotal = itemsToPrint.reduce((sum, item) => sum + item.total, 0);
-                const vat = Math.round(subtotal * 0.18);
-                const total = subtotal + vat;
+                let deliveryFee = 0;
+if (!document.getElementById('freeDelivery').checked) {
+    deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+}
+const total = subtotal + deliveryFee;
                 
                 // Create ESC/POS commands
                 let escpos = "\x1B\x40"; // Initialize
@@ -1035,7 +1071,9 @@ itemsToPrint.forEach(item => {
                 
                 // Totals
                 escpos += `Subtotal:       ${formatUGX(subtotal).padStart(10, ' ')}\n`;
-                escpos += `VAT (18%):      ${formatUGX(vat).padStart(10, ' ')}\n`;
+                if (deliveryFee > 0) {
+    escpos += `Delivery Fee:   ${formatUGX(deliveryFee).padStart(10, ' ')}\n`;
+}
                 escpos += "-------------------------------\n";
                 escpos += "\x1B\x21\x10"; // Double height
                 escpos += `TOTAL:          ${formatUGX(total).padStart(10, ' ')}\n`;

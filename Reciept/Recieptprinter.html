@@ -446,10 +446,10 @@ let allProducts = [];
 // Load products from site-config.json
 async function loadProducts() {
     try {
-        const response = await fetch('data/site-config.json');
+        const response = await fetch('../data/site-config.json');
         if (!response.ok) {
             // Try with .json extension
-            const response2 = await fetch('data/site-config.json');
+            const response2 = await fetch('../data/site-config.json');
             if (!response2.ok) throw new Error('Products file not found');
             const text = await response2.text();
             allProducts = JSON.parse(text).products || [];

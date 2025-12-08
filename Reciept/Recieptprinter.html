@@ -395,6 +395,7 @@
     }
 }
 
+/* Mobile optimizations */
 @media (max-width: 480px) {
     .product-info {
         flex-direction: column;
@@ -411,17 +412,78 @@
     
     .product-results {
         position: fixed;
-        left: 10px;
-        right: 10px;
-        top: auto;
-        max-height: 50vh;
+        left: 0;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        max-height: none;
+        height: 100vh;
         z-index: 2000;
+        border-radius: 0;
+        border: none;
+        margin-top: 0;
+        overflow-y: auto;
+        background: white;
     }
     
-    /* For mobile, show results above keyboard */
-    .product-search-container.mobile-focus .product-results {
-        bottom: 50vh;
-        top: auto;
+    .product-results-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background: #2563eb;
+        color: white;
+        position: sticky;
+        top: 0;
+        z-index: 2001;
+    }
+    
+    .product-results-header h3 {
+        margin: 0;
+        font-size: 18px;
+    }
+    
+    .close-results {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+        padding: 0;
+    }
+    
+    .product-result-item {
+        padding: 14px 15px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    
+    .product-search-container {
+        position: relative;
+    }
+    
+    /* Hide original dropdown styling for mobile */
+    .product-results:not(.mobile-expanded) {
+        display: none !important;
+    }
+    
+    .product-results.mobile-expanded {
+        display: block !important;
+    }
+    
+    /* Overlay for mobile */
+    .mobile-results-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 1999;
+        display: none;
+    }
+    
+    .mobile-results-overlay.active {
+        display: block;
     }
 }
 
@@ -722,6 +784,7 @@ async function loadProducts() {
 }
 // Setup product search functionality
 // Setup product search functionality with responsive improvements
+// Setup product search functionality with responsive improvements
 function setupProductSearch() {
     const searchInput = document.getElementById('productSearch');
     const resultsDiv = document.getElementById('productResults');
@@ -729,13 +792,81 @@ function setupProductSearch() {
     if (!searchInput || !resultsDiv) return;
     
     let selectedIndex = -1;
-    let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const isMobile = window.innerWidth <= 480;
+    let mobileOverlay = null;
+    
+    // Create mobile overlay if needed
+    if (isMobile) {
+        mobileOverlay = document.createElement('div');
+        mobileOverlay.className = 'mobile-results-overlay';
+        mobileOverlay.addEventListener('click', closeMobileResults);
+        document.querySelector('.product-search-container').appendChild(mobileOverlay);
+        
+        // Add close button to mobile results
+        const closeButton = document.createElement('button');
+        closeButton.className = 'close-results';
+        closeButton.innerHTML = '&times;';
+        closeButton.addEventListener('click', closeMobileResults);
+        
+        const header = document.createElement('div');
+        header.className = 'product-results-header';
+        header.innerHTML = '<h3>Search Results</h3>';
+        header.appendChild(closeButton);
+        
+        resultsDiv.insertBefore(header, resultsDiv.firstChild);
+    }
     
     // Clear search results
     function clearResults() {
         resultsDiv.innerHTML = '';
         resultsDiv.style.display = 'none';
+        resultsDiv.classList.remove('mobile-expanded');
+        if (mobileOverlay) mobileOverlay.classList.remove('active');
         selectedIndex = -1;
+    }
+    
+    // Close mobile results
+    function closeMobileResults() {
+        resultsDiv.style.display = 'none';
+        resultsDiv.classList.remove('mobile-expanded');
+        if (mobileOverlay) mobileOverlay.classList.remove('active');
+        searchInput.blur();
+    }
+    
+    // Show mobile results
+    function showMobileResults() {
+        if (!isMobile) return;
+        
+        resultsDiv.classList.add('mobile-expanded');
+        resultsDiv.style.display = 'block';
+        if (mobileOverlay) mobileOverlay.classList.add('active');
+        
+        // Position the dropdown
+        const inputRect = searchInput.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        
+        // Set to take most of the screen
+        resultsDiv.style.top = '0';
+        resultsDiv.style.left = '0';
+        resultsDiv.style.right = '0';
+        resultsDiv.style.bottom = '0';
+        resultsDiv.style.position = 'fixed';
+        resultsDiv.style.zIndex = '2000';
+        
+        // Add close button if not already there
+        if (!resultsDiv.querySelector('.product-results-header')) {
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-results';
+            closeButton.innerHTML = '&times;';
+            closeButton.addEventListener('click', closeMobileResults);
+            
+            const header = document.createElement('div');
+            header.className = 'product-results-header';
+            header.innerHTML = '<h3>Search Results</h3>';
+            header.appendChild(closeButton);
+            
+            resultsDiv.insertBefore(header, resultsDiv.firstChild);
+        }
     }
     
     // Highlight selected item
@@ -757,7 +888,7 @@ function setupProductSearch() {
         }
     }
     
-    // Handle keyboard navigation
+    // Handle keyboard navigation (for desktop)
     searchInput.addEventListener('keydown', function(e) {
         if (!resultsDiv.style.display || resultsDiv.style.display === 'none') return;
         
@@ -785,8 +916,12 @@ function setupProductSearch() {
                 break;
                 
             case 'Escape':
-                clearResults();
-                searchInput.blur();
+                if (isMobile) {
+                    closeMobileResults();
+                } else {
+                    clearResults();
+                    searchInput.blur();
+                }
                 break;
         }
     });
@@ -804,6 +939,8 @@ function setupProductSearch() {
         if (allProducts.length > 50) {
             resultsDiv.innerHTML = '<div class="product-result-item loading">Searching...</div>';
             resultsDiv.style.display = 'block';
+            if (isMobile) showMobileResults();
+            return;
         }
         
         // Filter products with better search algorithm
@@ -838,7 +975,7 @@ function setupProductSearch() {
             
             return score > 0;
         }).sort((a, b) => {
-            // Sort by relevance (you could implement a proper scoring system)
+            // Sort by relevance
             const aName = a.name.toLowerCase();
             const bName = b.name.toLowerCase();
             const searchLower = searchTerm.toLowerCase();
@@ -853,7 +990,7 @@ function setupProductSearch() {
             
             // Finally sort by name
             return aName.localeCompare(bName);
-        }).slice(0, 15); // Limit to 15 results for performance
+        }).slice(0, isMobile ? 20 : 15); // Show more on mobile
         
         if (filtered.length === 0) {
             resultsDiv.innerHTML = `
@@ -867,6 +1004,7 @@ function setupProductSearch() {
                 </div>
             `;
             resultsDiv.style.display = 'block';
+            if (isMobile) showMobileResults();
             return;
         }
         
@@ -886,7 +1024,22 @@ function setupProductSearch() {
             </div>
         `).join('');
         
-        // Add keyboard navigation hint
+        // Add header back for mobile
+        if (isMobile) {
+            const closeButton = document.createElement('button');
+            closeButton.className = 'close-results';
+            closeButton.innerHTML = '&times;';
+            closeButton.addEventListener('click', closeMobileResults);
+            
+            const header = document.createElement('div');
+            header.className = 'product-results-header';
+            header.innerHTML = '<h3>Search Results (' + filtered.length + ')</h3>';
+            header.appendChild(closeButton);
+            
+            resultsDiv.insertBefore(header, resultsDiv.firstChild);
+        }
+        
+        // Add keyboard navigation hint (desktop only)
         if (filtered.length > 0 && !isMobile) {
             resultsDiv.innerHTML += `
                 <div class="product-search-hint">
@@ -897,6 +1050,11 @@ function setupProductSearch() {
         
         resultsDiv.style.display = 'block';
         selectedIndex = -1;
+        
+        // Show mobile results if on mobile
+        if (isMobile) {
+            showMobileResults();
+        }
         
         // Add click event to results
         resultsDiv.querySelectorAll('.product-result-item').forEach((item, index) => {
@@ -913,56 +1071,55 @@ function setupProductSearch() {
                     const successMsg = `Added "${product.name.substring(0, 25)}${product.name.length > 25 ? '...' : ''}"`;
                     showToast(successMsg);
                     
-                    // Focus back on search for quick adding
+                    // Focus back on search for quick adding (desktop only)
                     if (!isMobile) {
                         setTimeout(() => searchInput.focus(), 100);
                     }
                 }
             });
             
-            // Better hover/active states for touch devices
-            item.addEventListener('touchstart', function() {
-                this.classList.add('selected');
-            });
-            
-            item.addEventListener('touchend', function() {
-                this.classList.remove('selected');
-            });
+            // Better touch states for mobile
+            if (isMobile) {
+                item.addEventListener('touchstart', function() {
+                    this.style.backgroundColor = '#dbeafe';
+                });
+                
+                item.addEventListener('touchend', function() {
+                    this.style.backgroundColor = '';
+                });
+            }
         });
         
     }, 150)); // Debounce for 150ms
     
-    // Handle focus/blur for mobile optimization
+    // Handle focus for mobile optimization
     searchInput.addEventListener('focus', function() {
-        if (isMobile) {
-            document.querySelector('.product-search-container').classList.add('mobile-focus');
-        }
-        
         // If there's text in the input, show results
         if (this.value.trim().length > 0) {
             this.dispatchEvent(new Event('input'));
         }
     });
     
-    searchInput.addEventListener('blur', function() {
-        if (isMobile) {
-            document.querySelector('.product-search-container').classList.remove('mobile-focus');
-        }
-        
-        // Delay hiding results to allow clicks
-        setTimeout(() => {
-            if (!resultsDiv.contains(document.activeElement)) {
+    // Handle blur with delay for mobile
+    if (!isMobile) {
+        searchInput.addEventListener('blur', function() {
+            // Delay hiding results to allow clicks
+            setTimeout(() => {
+                if (!resultsDiv.contains(document.activeElement)) {
+                    clearResults();
+                }
+            }, 200);
+        });
+    }
+    
+    // Close results when clicking outside (desktop only)
+    if (!isMobile) {
+        document.addEventListener('click', function(event) {
+            if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
                 clearResults();
             }
-        }, 200);
-    });
-    
-    // Close results when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
-            clearResults();
-        }
-    });
+        });
+    }
     
     // Handle window resize for responsive adjustments
     let resizeTimeout;
@@ -970,17 +1127,62 @@ function setupProductSearch() {
         clearTimeout(resizeTimeout);
         resizeTimeout = setTimeout(() => {
             if (resultsDiv.style.display === 'block') {
-                // Reposition dropdown on resize
-                const inputRect = searchInput.getBoundingClientRect();
-                resultsDiv.style.width = inputRect.width + 'px';
+                // Update positioning on resize
+                if (window.innerWidth <= 480) {
+                    resultsDiv.style.position = 'fixed';
+                    resultsDiv.style.top = '0';
+                    resultsDiv.style.left = '0';
+                    resultsDiv.style.right = '0';
+                    resultsDiv.style.bottom = '0';
+                } else {
+                    resultsDiv.style.position = 'absolute';
+                    resultsDiv.style.top = '100%';
+                    resultsDiv.style.left = '0';
+                    resultsDiv.style.right = '0';
+                    resultsDiv.style.bottom = 'auto';
+                    resultsDiv.style.width = searchInput.offsetWidth + 'px';
+                }
             }
         }, 250);
     });
     
     // Initial positioning
-    const inputRect = searchInput.getBoundingClientRect();
-    resultsDiv.style.width = inputRect.width + 'px';
+    if (!isMobile) {
+        const inputRect = searchInput.getBoundingClientRect();
+        resultsDiv.style.width = inputRect.width + 'px';
+    }
 }
+
+// Detect mobile/desktop and optimize
+function optimizeForDevice() {
+    const isMobile = window.innerWidth <= 480;
+    const searchInput = document.getElementById('productSearch');
+    
+    if (searchInput) {
+        if (isMobile) {
+            // Mobile optimizations
+            searchInput.setAttribute('inputmode', 'search');
+            searchInput.setAttribute('autocapitalize', 'none');
+            searchInput.setAttribute('autocorrect', 'off');
+            
+            // Prevent zoom on focus (iOS)
+            searchInput.addEventListener('focus', function() {
+                document.body.style.zoom = "100%";
+                // Prevent automatic scroll
+                window.scrollTo(0, 0);
+            });
+        } else {
+            // Desktop optimizations
+            searchInput.removeAttribute('inputmode');
+            searchInput.removeAttribute('autocapitalize');
+            searchInput.removeAttribute('autocorrect');
+        }
+    }
+}
+
+// Call on load and resize
+window.addEventListener('load', optimizeForDevice);
+window.addEventListener('resize', optimizeForDevice);
 
 // Helper function for debouncing
 function debounce(func, wait) {
@@ -1057,6 +1259,7 @@ function addProductToReceipt(product) {
 document.addEventListener('DOMContentLoaded', function() {
     initializeReceipt();
     setupEventListeners();
+    optimizeForDevice()
     loadProducts(); // Add this line
 });
 

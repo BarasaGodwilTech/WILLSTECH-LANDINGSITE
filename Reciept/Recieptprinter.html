@@ -372,6 +372,10 @@
 
 /* Responsive adjustments */
 @media (max-width: 768px) {
+    .container {
+        display: block; /* Change from grid to block on mobile */
+    }
+    
     .product-search-input {
         font-size: 16px;
         padding: 14px 45px 14px 15px;
@@ -380,10 +384,18 @@
     .product-results {
         max-height: 250px;
         border-radius: 6px;
+        position: fixed !important; /* Force fixed positioning */
+        left: 20px !important;
+        right: 20px !important;
+        top: auto !important;
+        bottom: 10px !important;
+        max-height: 60vh;
+        z-index: 2000;
+        width: auto !important; /* Remove fixed width */
     }
     
     .product-result-item {
-        padding: 10px 12px;
+        padding: 12px 15px;
     }
     
     .product-name {
@@ -392,6 +404,17 @@
     
     .product-price {
         font-size: 14px;
+    }
+    
+    /* Fix for mobile grid layout */
+    .btn {
+        width: 100%;
+        margin-right: 0;
+        margin-bottom: 10px;
+    }
+    
+    .btn-group {
+        display: block;
     }
 }
 
@@ -410,18 +433,16 @@
     }
     
     .product-results {
-        position: fixed;
-        left: 10px;
-        right: 10px;
-        top: auto;
+        left: 10px !important;
+        right: 10px !important;
+        bottom: 5px !important;
         max-height: 50vh;
-        z-index: 2000;
+        box-shadow: 0 -2px 10px rgba(0,0,0,0.1); /* Add shadow at top for mobile */
     }
     
-    /* For mobile, show results above keyboard */
-    .product-search-container.mobile-focus .product-results {
-        bottom: 50vh;
-        top: auto;
+    /* Ensure results appear above keyboard on focus */
+    .product-search-input:focus + .product-results {
+        bottom: 50vh !important;
     }
 }
 
@@ -429,10 +450,45 @@
 @media (hover: none) and (pointer: coarse) {
     .product-result-item {
         padding: 14px 15px;
+        min-height: 44px; /* Apple's recommended touch target size */
     }
     
     .product-result-item:active {
         background-color: #dbeafe;
+        transform: scale(0.98); /* Add touch feedback */
+        transition: transform 0.1s;
+    }
+}
+
+/* Prevent zoom on mobile input focus */
+@media (max-width: 768px) {
+    .product-search-input {
+        font-size: 16px; /* Prevent iOS zoom */
+    }
+    
+    select,
+    input[type="text"],
+    input[type="number"] {
+        font-size: 16px !important; /* Prevent zoom on all inputs */
+    }
+}
+
+/* Mobile-specific fixes for dropdown positioning */
+@media (max-width: 768px) {
+    .product-search-container {
+        position: static; /* Change from relative to static */
+    }
+    
+    .product-search-wrapper {
+        position: relative;
+    }
+    
+    /* Force the dropdown to be visible and properly positioned */
+    .product-results:not([style*="display: none"]) {
+        display: block !important;
+        opacity: 1 !important;
+        visibility: visible !important;
+        transform: translateY(0) !important;
     }
 }
         

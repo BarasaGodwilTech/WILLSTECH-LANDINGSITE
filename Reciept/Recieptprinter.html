@@ -721,51 +721,185 @@ async function loadProducts() {
     }
 }
 // Setup product search functionality
+// Setup product search functionality with responsive improvements
 function setupProductSearch() {
     const searchInput = document.getElementById('productSearch');
     const resultsDiv = document.getElementById('productResults');
     
     if (!searchInput || !resultsDiv) return;
     
-    searchInput.addEventListener('input', function() {
-        const searchTerm = this.value.toLowerCase().trim();
+    let selectedIndex = -1;
+    let isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    
+    // Clear search results
+    function clearResults() {
+        resultsDiv.innerHTML = '';
+        resultsDiv.style.display = 'none';
+        selectedIndex = -1;
+    }
+    
+    // Highlight selected item
+    function highlightSelected() {
+        const items = resultsDiv.querySelectorAll('.product-result-item');
+        items.forEach((item, index) => {
+            item.classList.toggle('selected', index === selectedIndex);
+        });
         
-        if (searchTerm.length < 2) {
-            resultsDiv.style.display = 'none';
+        // Scroll selected item into view
+        if (selectedIndex >= 0) {
+            const selectedItem = items[selectedIndex];
+            if (selectedItem) {
+                selectedItem.scrollIntoView({
+                    block: 'nearest',
+                    behavior: 'smooth'
+                });
+            }
+        }
+    }
+    
+    // Handle keyboard navigation
+    searchInput.addEventListener('keydown', function(e) {
+        if (!resultsDiv.style.display || resultsDiv.style.display === 'none') return;
+        
+        const items = resultsDiv.querySelectorAll('.product-result-item');
+        if (items.length === 0) return;
+        
+        switch(e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                selectedIndex = (selectedIndex + 1) % items.length;
+                highlightSelected();
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                selectedIndex = selectedIndex <= 0 ? items.length - 1 : selectedIndex - 1;
+                highlightSelected();
+                break;
+                
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0 && items[selectedIndex]) {
+                    items[selectedIndex].click();
+                }
+                break;
+                
+            case 'Escape':
+                clearResults();
+                searchInput.blur();
+                break;
+        }
+    });
+    
+    // Handle search input
+    searchInput.addEventListener('input', debounce(function() {
+        const searchTerm = this.value.trim();
+        
+        if (searchTerm.length === 0) {
+            clearResults();
             return;
         }
         
-        // Filter products
-        const filtered = allProducts.filter(product => 
-            product.name.toLowerCase().includes(searchTerm) ||
-            product.sku.toLowerCase().includes(searchTerm) ||
-            (product.category && product.category.toLowerCase().includes(searchTerm))
-        );
+        // Show loading state for large datasets
+        if (allProducts.length > 50) {
+            resultsDiv.innerHTML = '<div class="product-result-item loading">Searching...</div>';
+            resultsDiv.style.display = 'block';
+        }
+        
+        // Filter products with better search algorithm
+        const filtered = allProducts.filter(product => {
+            const searchLower = searchTerm.toLowerCase();
+            
+            // Score products based on match quality
+            let score = 0;
+            
+            // Exact name match (highest priority)
+            if (product.name.toLowerCase() === searchLower) score += 100;
+            
+            // Name contains search term
+            if (product.name.toLowerCase().includes(searchLower)) score += 50;
+            
+            // SKU exact match
+            if (product.sku && product.sku.toLowerCase() === searchLower) score += 75;
+            
+            // SKU contains search term
+            if (product.sku && product.sku.toLowerCase().includes(searchLower)) score += 40;
+            
+            // Category match
+            if (product.category && product.category.toLowerCase().includes(searchLower)) score += 20;
+            
+            // Partial word matching
+            const searchWords = searchLower.split(' ');
+            const productName = product.name.toLowerCase();
+            
+            searchWords.forEach(word => {
+                if (word.length > 2 && productName.includes(word)) score += 10;
+            });
+            
+            return score > 0;
+        }).sort((a, b) => {
+            // Sort by relevance (you could implement a proper scoring system)
+            const aName = a.name.toLowerCase();
+            const bName = b.name.toLowerCase();
+            const searchLower = searchTerm.toLowerCase();
+            
+            // Prioritize exact matches at the beginning
+            if (aName === searchLower && bName !== searchLower) return -1;
+            if (bName === searchLower && aName !== searchLower) return 1;
+            
+            // Then prioritize matches at the start of the name
+            if (aName.startsWith(searchLower) && !bName.startsWith(searchLower)) return -1;
+            if (bName.startsWith(searchLower) && !aName.startsWith(searchLower)) return 1;
+            
+            // Finally sort by name
+            return aName.localeCompare(bName);
+        }).slice(0, 15); // Limit to 15 results for performance
         
         if (filtered.length === 0) {
-            resultsDiv.innerHTML = '<div class="product-result-item" style="color: #666; font-style: italic;">No products found</div>';
+            resultsDiv.innerHTML = `
+                <div class="product-no-results">
+                    <i class="fas fa-search" style="margin-bottom: 8px; display: block; font-size: 24px; color: #d1d5db;"></i>
+                    No products found for "${searchTerm}"
+                    ${allProducts.length > 0 ? 
+                        `<div style="font-size: 12px; margin-top: 5px;">Try a different search term</div>` : 
+                        `<div style="font-size: 12px; margin-top: 5px;">No products available in database</div>`
+                    }
+                </div>
+            `;
             resultsDiv.style.display = 'block';
             return;
         }
         
-        // Display results
-        resultsDiv.innerHTML = filtered.slice(0, 10).map(product => `
+        // Display results with better formatting
+        resultsDiv.innerHTML = filtered.map(product => `
             <div class="product-result-item" data-product-id="${product.id}">
-                <div style="flex: 1;">
-                    <div class="product-name">${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''}</div>
-                    <div style="font-size: 12px; color: #666;">${product.category || 'Uncategorized'}</div>
-                </div>
-                <div style="text-align: right;">
-                    <div class="product-price">${formatUGX(product.price)}</div>
-                    <div class="product-sku">${product.sku || 'N/A'}</div>
+                <div class="product-info">
+                    <div class="product-name-price">
+                        <div class="product-name">${escapeHtml(product.name)}</div>
+                        ${product.category ? `<div class="product-category">${escapeHtml(product.category)}</div>` : ''}
+                    </div>
+                    <div class="product-price-sku">
+                        <div class="product-price">${formatUGX(product.price)}</div>
+                        ${product.sku ? `<div class="product-sku">${escapeHtml(product.sku)}</div>` : ''}
+                    </div>
                 </div>
             </div>
         `).join('');
         
+        // Add keyboard navigation hint
+        if (filtered.length > 0 && !isMobile) {
+            resultsDiv.innerHTML += `
+                <div class="product-search-hint">
+                    <i class="fas fa-keyboard"></i> Use ↑↓ arrows to navigate, Enter to select
+                </div>
+            `;
+        }
+        
         resultsDiv.style.display = 'block';
+        selectedIndex = -1;
         
         // Add click event to results
-        resultsDiv.querySelectorAll('.product-result-item').forEach(item => {
+        resultsDiv.querySelectorAll('.product-result-item').forEach((item, index) => {
             item.addEventListener('click', function() {
                 const productId = this.dataset.productId;
                 const product = allProducts.find(p => p.id == productId);
@@ -773,20 +907,122 @@ function setupProductSearch() {
                 if (product) {
                     addProductToReceipt(product);
                     searchInput.value = '';
-                    resultsDiv.style.display = 'none';
-                    showToast(`Added ${product.name.substring(0, 30)}...`);
+                    clearResults();
+                    
+                    // Show success feedback
+                    const successMsg = `Added "${product.name.substring(0, 25)}${product.name.length > 25 ? '...' : ''}"`;
+                    showToast(successMsg);
+                    
+                    // Focus back on search for quick adding
+                    if (!isMobile) {
+                        setTimeout(() => searchInput.focus(), 100);
+                    }
                 }
             });
+            
+            // Better hover/active states for touch devices
+            item.addEventListener('touchstart', function() {
+                this.classList.add('selected');
+            });
+            
+            item.addEventListener('touchend', function() {
+                this.classList.remove('selected');
+            });
         });
-    });
+        
+    }, 150)); // Debounce for 150ms
     
-    // Hide results when clicking outside
-    document.addEventListener('click', function(event) {
-        if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
-            resultsDiv.style.display = 'none';
+    // Handle focus/blur for mobile optimization
+    searchInput.addEventListener('focus', function() {
+        if (isMobile) {
+            document.querySelector('.product-search-container').classList.add('mobile-focus');
+        }
+        
+        // If there's text in the input, show results
+        if (this.value.trim().length > 0) {
+            this.dispatchEvent(new Event('input'));
         }
     });
+    
+    searchInput.addEventListener('blur', function() {
+        if (isMobile) {
+            document.querySelector('.product-search-container').classList.remove('mobile-focus');
+        }
+        
+        // Delay hiding results to allow clicks
+        setTimeout(() => {
+            if (!resultsDiv.contains(document.activeElement)) {
+                clearResults();
+            }
+        }, 200);
+    });
+    
+    // Close results when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
+            clearResults();
+        }
+    });
+    
+    // Handle window resize for responsive adjustments
+    let resizeTimeout;
+    window.addEventListener('resize', function() {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            if (resultsDiv.style.display === 'block') {
+                // Reposition dropdown on resize
+                const inputRect = searchInput.getBoundingClientRect();
+                resultsDiv.style.width = inputRect.width + 'px';
+            }
+        }, 250);
+    });
+    
+    // Initial positioning
+    const inputRect = searchInput.getBoundingClientRect();
+    resultsDiv.style.width = inputRect.width + 'px';
 }
+
+// Helper function for debouncing
+function debounce(func, wait) {
+    let timeout;
+    return function executedFunction(...args) {
+        const later = () => {
+            clearTimeout(timeout);
+            func(...args);
+        };
+        clearTimeout(timeout);
+        timeout = setTimeout(later, wait);
+    };
+}
+
+// Helper function to escape HTML
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
+}
+
+// Detect if device is mobile and optimize accordingly
+function optimizeForMobile() {
+    const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+    const searchInput = document.getElementById('productSearch');
+    
+    if (isMobile && searchInput) {
+        // For mobile, change placeholder
+        searchInput.placeholder = "Search products...";
+        
+        // Add touch-friendly attributes
+        searchInput.setAttribute('inputmode', 'search');
+        searchInput.setAttribute('autocapitalize', 'none');
+        searchInput.setAttribute('autocorrect', 'off');
+        
+        // Prevent zoom on focus (iOS)
+        searchInput.addEventListener('focus', function() {
+            document.body.style.zoom = "100%";
+        });
+    }
+}
+
 
 // Add product to receipt
 function addProductToReceipt(product) {

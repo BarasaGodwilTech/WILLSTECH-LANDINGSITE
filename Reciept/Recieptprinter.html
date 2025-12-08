@@ -174,6 +174,41 @@
             border-color: #2563eb;
             background: #dbeafe;
         }
+        .product-result-item {
+    padding: 10px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f1f1f1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.product-result-item:hover {
+    background: #f0f9ff;
+}
+
+.product-result-item:last-child {
+    border-bottom: none;
+}
+
+.product-name {
+    font-weight: bold;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.product-price {
+    color: #2563eb;
+    font-weight: bold;
+}
+
+.product-sku {
+    font-size: 12px;
+    color: #666;
+    background: #f3f4f6;
+    padding: 2px 6px;
+    border-radius: 3px;
+}
         
         /* Toast */
         .toast {
@@ -245,6 +280,10 @@
                 <label class="form-label">Phone</label>
                 <input type="text" id="storePhone" class="form-control" value="+256 751 924 844">
             </div>
+            <br> <br> <br> <br> <br> <br> <br> <br>
+
+               <a href="receipts.html" class="btn btn-primary" style="text-decoration: none;">
+               <i class="fas fa-history"></i>  Receipt History </a>
         </div>
         
         <div class="card">
@@ -288,6 +327,18 @@
         
         <div class="card">
             <h2 class="card-title"><i class="fas fa-shopping-cart"></i> Items (UGX)</h2>
+            <!-- ADD THIS SECTION -->
+    <div class="form-group">
+        <label class="form-label">Search & Add Products</label>
+        <div style="position: relative;">
+            <input type="text" id="productSearch" class="form-control" 
+                   placeholder="Type to search products..." 
+                   style="padding-right: 40px;">
+            <i class="fas fa-search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+        </div>
+        <div id="productResults" style="display: none; position: absolute; z-index: 100; width: 100%; background: white; border: 1px solid #d1d5db; border-radius: 5px; max-height: 200px; overflow-y: auto; margin-top: 5px;"></div>
+    </div>
+    <!-- END OF ADDED SECTION -->
             <div id="itemsContainer"></div>
             <button id="addItem" class="btn btn-primary">
                 <i class="fas fa-plus"></i> Add Item
@@ -387,11 +438,225 @@
         let bluetoothDevice = null;
         let receiptItems = [];
         
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            initializeReceipt();
-            setupEventListeners();
+
+        // Add this near other global variables
+let allProducts = [];
+
+// Load products from data/site-config.js
+// Load products from site-config.json
+async function loadProducts() {
+    try {
+        const response = await fetch('data/site-config.js');
+        if (!response.ok) {
+            // Try with .json extension
+            const response2 = await fetch('data/site-config.json');
+            if (!response2.ok) throw new Error('Products file not found');
+            const text = await response2.text();
+            allProducts = JSON.parse(text).products || [];
+        } else {
+            const text = await response.text();
+            // Try to parse as JSON, might be JavaScript file
+            try {
+                // If it's a JS file with export, try to extract JSON
+                const jsonMatch = text.match(/const products = (\[.*?\])/s);
+                if (jsonMatch) {
+                    allProducts = JSON.parse(jsonMatch[1]);
+                } else {
+                    // Try to parse the whole file as JSON
+                    allProducts = JSON.parse(text).products || [];
+                }
+            } catch (e) {
+                console.error('Error parsing products:', e);
+                allProducts = [];
+            }
+        }
+        
+        console.log('Loaded products:', allProducts.length);
+        
+        // Setup search functionality
+        setupProductSearch();
+        
+    } catch (error) {
+        console.error('Failed to load products:', error);
+        showToast('Could not load products list', 'error');
+        // Fallback to empty array
+        allProducts = [];
+    }
+}
+// Setup product search functionality
+function setupProductSearch() {
+    const searchInput = document.getElementById('productSearch');
+    const resultsDiv = document.getElementById('productResults');
+    
+    if (!searchInput || !resultsDiv) return;
+    
+    searchInput.addEventListener('input', function() {
+        const searchTerm = this.value.toLowerCase().trim();
+        
+        if (searchTerm.length < 2) {
+            resultsDiv.style.display = 'none';
+            return;
+        }
+        
+        // Filter products
+        const filtered = allProducts.filter(product => 
+            product.name.toLowerCase().includes(searchTerm) ||
+            product.sku.toLowerCase().includes(searchTerm) ||
+            (product.category && product.category.toLowerCase().includes(searchTerm))
+        );
+        
+        if (filtered.length === 0) {
+            resultsDiv.innerHTML = '<div class="product-result-item" style="color: #666; font-style: italic;">No products found</div>';
+            resultsDiv.style.display = 'block';
+            return;
+        }
+        
+        // Display results
+        resultsDiv.innerHTML = filtered.slice(0, 10).map(product => `
+            <div class="product-result-item" data-product-id="${product.id}">
+                <div style="flex: 1;">
+                    <div class="product-name">${product.name.substring(0, 40)}${product.name.length > 40 ? '...' : ''}</div>
+                    <div style="font-size: 12px; color: #666;">${product.category || 'Uncategorized'}</div>
+                </div>
+                <div style="text-align: right;">
+                    <div class="product-price">${formatUGX(product.price)}</div>
+                    <div class="product-sku">${product.sku || 'N/A'}</div>
+                </div>
+            </div>
+        `).join('');
+        
+        resultsDiv.style.display = 'block';
+        
+        // Add click event to results
+        resultsDiv.querySelectorAll('.product-result-item').forEach(item => {
+            item.addEventListener('click', function() {
+                const productId = this.dataset.productId;
+                const product = allProducts.find(p => p.id == productId);
+                
+                if (product) {
+                    addProductToReceipt(product);
+                    searchInput.value = '';
+                    resultsDiv.style.display = 'none';
+                    showToast(`Added ${product.name.substring(0, 30)}...`);
+                }
+            });
         });
+    });
+    
+    // Hide results when clicking outside
+    document.addEventListener('click', function(event) {
+        if (!searchInput.contains(event.target) && !resultsDiv.contains(event.target)) {
+            resultsDiv.style.display = 'none';
+        }
+    });
+}
+
+// Add product to receipt
+function addProductToReceipt(product) {
+    // Check if product already exists in receipt
+    const existingIndex = receiptItems.findIndex(item => 
+        item.name.toLowerCase() === product.name.toLowerCase() || 
+        item.sku === product.sku
+    );
+    
+    if (existingIndex >= 0) {
+        // Increment quantity if already exists
+        receiptItems[existingIndex].quantity += 1;
+        receiptItems[existingIndex].total = receiptItems[existingIndex].quantity * receiptItems[existingIndex].price;
+    } else {
+        // Add new item
+        const item = {
+            id: product.id || Date.now(),
+            name: product.name,
+            quantity: 1,
+            price: product.price,
+            total: product.price,
+            sku: product.sku
+        };
+        receiptItems.push(item);
+    }
+    
+    renderItems();
+    updateReceiptPreview();
+}
+
+// Call loadProducts on initialization
+document.addEventListener('DOMContentLoaded', function() {
+    initializeReceipt();
+    setupEventListeners();
+    loadProducts(); // Add this line
+});
+
+        // ========== NEW FUNCTIONS FOR SAVING RECEIPTS ==========
+
+// Function to prepare receipt data for saving
+function prepareReceiptData() {
+    const now = new Date();
+    const receiptNumber = generateReceiptNumber();
+    const transactionId = generateTransactionId();
+    
+    // Filter valid items
+    const itemsToSave = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+    
+    if (itemsToSave.length === 0) {
+        return null;
+    }
+    
+    const subtotal = itemsToSave.reduce((sum, item) => sum + item.total, 0);
+    let deliveryFee = 0;
+    if (!document.getElementById('freeDelivery').checked) {
+        deliveryFee = parseInt(document.getElementById('deliveryFee').value) || 0;
+    }
+    const total = subtotal + deliveryFee;
+    
+    // Prepare receipt object
+    const receiptData = {
+        id: Date.now().toString(), // Unique ID
+        receiptNumber: receiptNumber,
+        transactionId: transactionId,
+        timestamp: now.toISOString(),
+        customerName: document.getElementById('customerName').value || 'Walk-in',
+        storeName: document.getElementById('storeName').value,
+        storePhone: document.getElementById('storePhone').value,
+        paymentMethod: document.getElementById('paymentMethod').value,
+        freeDelivery: document.getElementById('freeDelivery').checked,
+        deliveryFee: deliveryFee,
+        subtotal: subtotal,
+        totalAmount: total,
+        items: itemsToSave.map(item => ({
+            name: item.name,
+            quantity: item.quantity,
+            price: item.price,
+            total: item.total
+        }))
+    };
+    
+    return receiptData;
+}
+
+// Function to save receipt to localStorage
+function saveReceiptToStorage(receiptData) {
+    // Get existing receipts
+    const storedReceipts = localStorage.getItem('willstech_receipts');
+    const receipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+    
+    // Add new receipt at the beginning (newest first)
+    receipts.unshift(receiptData);
+    
+    // Save back to localStorage
+    localStorage.setItem('willstech_receipts', JSON.stringify(receipts));
+    
+    // Update receipt counter
+    const counter = (parseInt(localStorage.getItem('willstech_receipt_counter')) || 0) + 1;
+    localStorage.setItem('willstech_receipt_counter', counter.toString());
+    
+    console.log('Receipt saved:', receiptData.receiptNumber);
+}
+
+// Function to show saved receipt toast
+function showSavedReceiptToast(receiptNumber) {
+    showToast(`Receipt ${receiptNumber} saved to history! <a href="receipts.html" style="color: white; text-decoration: underline;">View History</a>`, 'success');
+}
         // Add delivery fee listeners
 document.getElementById('deliveryFee').addEventListener('input', updateReceiptPreview);
 document.getElementById('freeDelivery').addEventListener('change', function() {
@@ -721,42 +986,54 @@ if (!document.getElementById('freeDelivery').checked) {
         }
         
         function testPrint() {
-            if (!selectedPrinterMethod) {
-                showToast('Select printer method first', 'error');
-                return;
-            }
-            
-            if (selectedPrinterMethod === 'usb-network') {
-                printTestReceiptViaSystem();
-            } else if (selectedPrinterMethod === 'web-bluetooth') {
-                printTestReceiptViaBluetooth();
-            }
-        }
+    if (!selectedPrinterMethod) {
+        showToast('Select printer method first', 'error');
+        return;
+    }
+    
+    if (selectedPrinterMethod === 'usb-network') {
+        printTestReceiptViaSystem();
+    } else if (selectedPrinterMethod === 'web-bluetooth') {
+        printTestReceiptViaBluetooth();
+    }
+    
+    // Show message that test prints are not saved
+    showToast('Test print - not saved to history', 'success');
+}
         
         function printReceipt() {
-            console.log('Print Receipt function called');
-            
-            if (!selectedPrinterMethod) {
-                showToast('Select printer method first', 'error');
-                return;
-            }
-            
-            // Filter out empty items
-            const validItems = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
-            
-            if (validItems.length === 0) {
-                showToast('Add items with valid names and prices first', 'error');
-                return;
-            }
-            
-            console.log('Valid items found:', validItems.length);
-            
-            if (selectedPrinterMethod === 'usb-network') {
-                printReceiptViaSystem();
-            } else if (selectedPrinterMethod === 'web-bluetooth') {
-                printReceiptViaBluetooth();
-            }
-        }
+    console.log('Print Receipt function called');
+    
+    if (!selectedPrinterMethod) {
+        showToast('Select printer method first', 'error');
+        return;
+    }
+    
+    // Filter out empty items
+    const validItems = receiptItems.filter(item => item.name && item.name.trim() !== '' && item.price > 0);
+    
+    if (validItems.length === 0) {
+        showToast('Add items with valid names and prices first', 'error');
+        return;
+    }
+    
+    console.log('Valid items found:', validItems.length);
+    
+    // ========== NEW: SAVE RECEIPT TO STORAGE ==========
+    const receiptData = prepareReceiptData();
+    if (receiptData) {
+        saveReceiptToStorage(receiptData);
+        showSavedReceiptToast(receiptData.receiptNumber);
+    }
+    // ========== END NEW CODE ==========
+    
+    if (selectedPrinterMethod === 'usb-network') {
+        printReceiptViaSystem();
+    } else if (selectedPrinterMethod === 'web-bluetooth') {
+        printReceiptViaBluetooth();
+    }
+}
+        
         
         function printReceiptViaSystem() {
             const now = new Date();

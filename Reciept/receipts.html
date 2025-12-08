@@ -1,0 +1,911 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt History - Will's Tech Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 10px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            background: #2563eb;
+            color: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 1.8rem;
+            margin-bottom: 10px;
+        }
+        
+        .controls {
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .search-box {
+            flex: 1;
+            min-width: 200px;
+        }
+        
+        .search-box input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #d1d5db;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        
+        .stats {
+            display: flex;
+            gap: 20px;
+            background: white;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        .stat-card {
+            flex: 1;
+            min-width: 150px;
+            padding: 15px;
+            border-radius: 8px;
+            text-align: center;
+        }
+        
+        .stat-card.total {
+            background: #dbeafe;
+            border: 2px solid #2563eb;
+        }
+        
+        .stat-card.today {
+            background: #d1fae5;
+            border: 2px solid #10b981;
+        }
+        
+        .stat-card.amount {
+            background: #fef3c7;
+            border: 2px solid #f59e0b;
+        }
+        
+        .stat-card h3 {
+            font-size: 0.9rem;
+            color: #374151;
+            margin-bottom: 5px;
+        }
+        
+        .stat-card .value {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #1f2937;
+        }
+        
+        .receipts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .receipt-card {
+            background: white;
+            border-radius: 10px;
+            padding: 15px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            transition: transform 0.2s;
+        }
+        
+        .receipt-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+        
+        .receipt-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .receipt-number {
+            font-weight: bold;
+            color: #2563eb;
+            font-size: 14px;
+        }
+        
+        .receipt-date {
+            color: #6b7280;
+            font-size: 12px;
+        }
+        
+        .receipt-info {
+            margin-bottom: 10px;
+        }
+        
+        .receipt-info div {
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .receipt-items {
+            margin: 10px 0;
+            font-size: 12px;
+            color: #4b5563;
+        }
+        
+        .receipt-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 10px;
+            padding-top: 10px;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .receipt-total {
+            font-weight: bold;
+            font-size: 16px;
+            color: #059669;
+        }
+        
+        .receipt-actions {
+            display: flex;
+            gap: 5px;
+        }
+        
+        .btn {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 5px;
+            font-weight: bold;
+            cursor: pointer;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+        }
+        
+        .btn-view {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .btn-print {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-delete {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-back {
+            background: #2563eb;
+            color: white;
+            padding: 12px 20px;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            z-index: 1000;
+            padding: 20px;
+        }
+        
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 500px;
+            margin: 0 auto;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+        
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        
+        .close-modal {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: #6b7280;
+        }
+        
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        
+        .page-btn {
+            padding: 8px 15px;
+            border: 2px solid #d1d5db;
+            background: white;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+        
+        .page-btn.active {
+            background: #2563eb;
+            color: white;
+            border-color: #2563eb;
+        }
+        
+        @media (max-width: 768px) {
+            .receipts-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .controls {
+                flex-direction: column;
+            }
+            
+            .stats {
+                flex-direction: column;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <a href="Recieptprinter.html" class="btn-back">
+            <i class="fas fa-arrow-left"></i> Back to Printer
+        </a>
+        
+        <div class="header">
+            <h1><i class="fas fa-history"></i> Receipt History</h1>
+            <p>All receipts from Will's Tech Store</p>
+        </div>
+        
+        <div class="controls">
+            <div class="search-box">
+                <input type="text" id="searchInput" placeholder="Search by receipt number, customer name, or date...">
+            </div>
+            <button id="filterToday" class="btn btn-view">
+                <i class="fas fa-calendar-day"></i> Today's Receipts
+            </button>
+            <button id="exportData" class="btn btn-print">
+                <i class="fas fa-download"></i> Export Data
+            </button>
+            <button id="clearAllData" class="btn btn-danger">
+                <i class="fas fa-trash"></i> Clear All Data
+            </button>
+        </div>
+        
+        <div class="stats">
+            <div class="stat-card total">
+                <h3>Total Receipts</h3>
+                <div class="value" id="totalReceipts">0</div>
+            </div>
+            <div class="stat-card today">
+                <h3>Today's Receipts</h3>
+                <div class="value" id="todayReceipts">0</div>
+            </div>
+            <div class="stat-card amount">
+                <h3>Total Revenue</h3>
+                <div class="value" id="totalRevenue">UGX 0</div>
+            </div>
+        </div>
+        
+        <div class="receipts-grid" id="receiptsGrid">
+            <!-- Receipt cards will be loaded here -->
+        </div>
+        
+        <div class="pagination" id="pagination">
+            <!-- Pagination buttons will be loaded here -->
+        </div>
+    </div>
+    
+    <!-- Receipt Detail Modal -->
+    <div id="receiptModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Receipt Details</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div id="receiptDetailContent"></div>
+        </div>
+    </div>
+    
+    <script>
+        // Local Storage keys
+        const RECEIPTS_STORAGE_KEY = 'willstech_receipts';
+        const RECEIPT_COUNTER_KEY = 'willstech_receipt_counter';
+        
+        // Global variables
+        let allReceipts = [];
+        let currentPage = 1;
+        const receiptsPerPage = 12;
+        let filteredReceipts = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            loadReceipts();
+            setupEventListeners();
+            updateStats();
+        });
+        
+        // Load receipts from localStorage
+        function loadReceipts() {
+            const storedReceipts = localStorage.getItem(RECEIPTS_STORAGE_KEY);
+            allReceipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+            filteredReceipts = [...allReceipts];
+            displayReceipts();
+        }
+        
+        // Save receipts to localStorage
+        function saveReceipts() {
+            localStorage.setItem(RECEIPTS_STORAGE_KEY, JSON.stringify(allReceipts));
+        }
+        
+        // Display receipts with pagination
+        function displayReceipts() {
+            const grid = document.getElementById('receiptsGrid');
+            const pagination = document.getElementById('pagination');
+            
+            if (filteredReceipts.length === 0) {
+                grid.innerHTML = `
+                    <div style="grid-column: 1 / -1; text-align: center; padding: 40px; background: white; border-radius: 10px;">
+                        <i class="fas fa-receipt" style="font-size: 48px; color: #d1d5db; margin-bottom: 20px;"></i>
+                        <h3>No receipts found</h3>
+                        <p>Start printing receipts from the main page to see them here.</p>
+                    </div>
+                `;
+                pagination.innerHTML = '';
+                return;
+            }
+            
+            // Calculate pagination
+            const totalPages = Math.ceil(filteredReceipts.length / receiptsPerPage);
+            const startIndex = (currentPage - 1) * receiptsPerPage;
+            const endIndex = startIndex + receiptsPerPage;
+            const pageReceipts = filteredReceipts.slice(startIndex, endIndex);
+            
+            // Clear grid
+            grid.innerHTML = '';
+            
+            // Create receipt cards
+            pageReceipts.forEach(receipt => {
+                const card = createReceiptCard(receipt);
+                grid.appendChild(card);
+            });
+            
+            // Create pagination buttons
+            createPagination(totalPages);
+        }
+        
+        // Create receipt card element
+        function createReceiptCard(receipt) {
+            const card = document.createElement('div');
+            card.className = 'receipt-card';
+            card.dataset.id = receipt.id;
+            
+            const itemCount = receipt.items.length;
+            const deliveryText = receipt.deliveryFee === 0 ? 
+                (receipt.freeDelivery ? 'Free Delivery' : 'No Delivery') : 
+                `Delivery: UGX ${receipt.deliveryFee.toLocaleString()}`;
+            
+            card.innerHTML = `
+                <div class="receipt-header">
+                    <div class="receipt-number">${receipt.receiptNumber}</div>
+                    <div class="receipt-date">${formatDate(receipt.timestamp)}</div>
+                </div>
+                <div class="receipt-info">
+                    <div><strong>Customer:</strong> ${receipt.customerName || 'Walk-in'}</div>
+                    <div><strong>Payment:</strong> ${receipt.paymentMethod}</div>
+                    <div><strong>Items:</strong> ${itemCount} item${itemCount !== 1 ? 's' : ''}</div>
+                    <div><strong>Delivery:</strong> ${deliveryText}</div>
+                </div>
+                <div class="receipt-items">
+                    ${receipt.items.slice(0, 3).map(item => 
+                        `<div>${item.name.substring(0, 20)}${item.name.length > 20 ? '...' : ''} - ${item.quantity} × UGX ${item.price.toLocaleString()}</div>`
+                    ).join('')}
+                    ${itemCount > 3 ? `<div>+${itemCount - 3} more items...</div>` : ''}
+                </div>
+                <div class="receipt-footer">
+                    <div class="receipt-total">UGX ${receipt.totalAmount.toLocaleString()}</div>
+                    <div class="receipt-actions">
+                        <button class="btn btn-view view-receipt" data-id="${receipt.id}">
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                        <button class="btn btn-print reprint-receipt" data-id="${receipt.id}">
+                            <i class="fas fa-print"></i> Print
+                        </button>
+                        <button class="btn btn-delete delete-receipt" data-id="${receipt.id}">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+            
+            return card;
+        }
+        
+        // Create pagination buttons
+        function createPagination(totalPages) {
+            const pagination = document.getElementById('pagination');
+            pagination.innerHTML = '';
+            
+            if (totalPages <= 1) return;
+            
+            // Previous button
+            if (currentPage > 1) {
+                const prevBtn = document.createElement('button');
+                prevBtn.className = 'page-btn';
+                prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+                prevBtn.onclick = () => {
+                    currentPage--;
+                    displayReceipts();
+                };
+                pagination.appendChild(prevBtn);
+            }
+            
+            // Page numbers
+            for (let i = 1; i <= totalPages; i++) {
+                const pageBtn = document.createElement('button');
+                pageBtn.className = 'page-btn' + (i === currentPage ? ' active' : '');
+                pageBtn.textContent = i;
+                pageBtn.onclick = () => {
+                    currentPage = i;
+                    displayReceipts();
+                };
+                pagination.appendChild(pageBtn);
+            }
+            
+            // Next button
+            if (currentPage < totalPages) {
+                const nextBtn = document.createElement('button');
+                nextBtn.className = 'page-btn';
+                nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+                nextBtn.onclick = () => {
+                    currentPage++;
+                    displayReceipts();
+                };
+                pagination.appendChild(nextBtn);
+            }
+        }
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Search
+            document.getElementById('searchInput').addEventListener('input', function() {
+                const searchTerm = this.value.toLowerCase();
+                if (searchTerm) {
+                    filteredReceipts = allReceipts.filter(receipt => 
+                        receipt.receiptNumber.toLowerCase().includes(searchTerm) ||
+                        receipt.customerName.toLowerCase().includes(searchTerm) ||
+                        formatDate(receipt.timestamp).toLowerCase().includes(searchTerm)
+                    );
+                } else {
+                    filteredReceipts = [...allReceipts];
+                }
+                currentPage = 1;
+                displayReceipts();
+            });
+            
+            // Filter today's receipts
+            document.getElementById('filterToday').addEventListener('click', function() {
+                const today = new Date().toDateString();
+                filteredReceipts = allReceipts.filter(receipt => 
+                    new Date(receipt.timestamp).toDateString() === today
+                );
+                currentPage = 1;
+                displayReceipts();
+            });
+            
+            // Export data
+            document.getElementById('exportData').addEventListener('click', exportData);
+            
+            // Clear all data
+            document.getElementById('clearAllData').addEventListener('click', function() {
+                if (confirm('Are you sure you want to delete ALL receipt data? This action cannot be undone.')) {
+                    localStorage.removeItem(RECEIPTS_STORAGE_KEY);
+                    localStorage.removeItem(RECEIPT_COUNTER_KEY);
+                    allReceipts = [];
+                    filteredReceipts = [];
+                    displayReceipts();
+                    updateStats();
+                    showToast('All data cleared successfully', 'success');
+                }
+            });
+            
+            // Modal close
+            document.querySelector('.close-modal').addEventListener('click', function() {
+                document.getElementById('receiptModal').style.display = 'none';
+            });
+            
+            // Close modal when clicking outside
+            window.addEventListener('click', function(event) {
+                const modal = document.getElementById('receiptModal');
+                if (event.target === modal) {
+                    modal.style.display = 'none';
+                }
+            });
+            
+            // Use event delegation for receipt card actions
+            document.addEventListener('click', function(event) {
+                // View receipt
+                if (event.target.closest('.view-receipt')) {
+                    const receiptId = event.target.closest('.view-receipt').dataset.id;
+                    viewReceipt(receiptId);
+                }
+                
+                // Reprint receipt
+                if (event.target.closest('.reprint-receipt')) {
+                    const receiptId = event.target.closest('.reprint-receipt').dataset.id;
+                    reprintReceipt(receiptId);
+                }
+                
+                // Delete receipt
+                if (event.target.closest('.delete-receipt')) {
+                    const receiptId = event.target.closest('.delete-receipt').dataset.id;
+                    deleteReceipt(receiptId);
+                }
+            });
+        }
+        
+        // View receipt details
+        function viewReceipt(receiptId) {
+            const receipt = allReceipts.find(r => r.id === receiptId);
+            if (!receipt) return;
+            
+            const modalContent = document.getElementById('receiptDetailContent');
+            modalContent.innerHTML = `
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 14px; color: #6b7280; margin-bottom: 5px;">Receipt Number</div>
+                    <div style="font-size: 18px; font-weight: bold; color: #2563eb;">${receipt.receiptNumber}</div>
+                </div>
+                
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-bottom: 20px;">
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280;">Date</div>
+                        <div style="font-size: 14px;">${formatDateTime(receipt.timestamp)}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280;">Customer</div>
+                        <div style="font-size: 14px;">${receipt.customerName || 'Walk-in'}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280;">Payment Method</div>
+                        <div style="font-size: 14px;">${receipt.paymentMethod}</div>
+                    </div>
+                    <div>
+                        <div style="font-size: 12px; color: #6b7280;">Delivery</div>
+                        <div style="font-size: 14px;">
+                            ${receipt.freeDelivery ? 'Free Delivery' : 
+                              receipt.deliveryFee > 0 ? `UGX ${receipt.deliveryFee.toLocaleString()}` : 'No Delivery'}
+                        </div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <div style="font-size: 14px; font-weight: bold; margin-bottom: 10px; color: #374151;">Items</div>
+                    <div style="max-height: 200px; overflow-y: auto;">
+                        ${receipt.items.map(item => `
+                            <div style="display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #e5e7eb;">
+                                <div style="flex: 2;">
+                                    <div style="font-weight: bold;">${item.name}</div>
+                                    <div style="font-size: 12px; color: #6b7280;">Qty: ${item.quantity}</div>
+                                </div>
+                                <div style="flex: 1; text-align: right;">
+                                    <div>UGX ${item.price.toLocaleString()}</div>
+                                    <div style="font-weight: bold;">UGX ${item.total.toLocaleString()}</div>
+                                </div>
+                            </div>
+                        `).join('')}
+                    </div>
+                </div>
+                
+                <div style="background: #f9fafb; padding: 15px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Subtotal:</span>
+                        <span>UGX ${receipt.subtotal.toLocaleString()}</span>
+                    </div>
+                    ${receipt.deliveryFee > 0 ? `
+                    <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                        <span>Delivery Fee:</span>
+                        <span>UGX ${receipt.deliveryFee.toLocaleString()}</span>
+                    </div>
+                    ` : ''}
+                    <div style="display: flex; justify-content: space-between; margin-top: 10px; padding-top: 10px; border-top: 2px solid #2563eb; font-weight: bold;">
+                        <span>TOTAL:</span>
+                        <span style="font-size: 18px; color: #059669;">UGX ${receipt.totalAmount.toLocaleString()}</span>
+                    </div>
+                </div>
+                
+                <div style="display: flex; gap: 10px; margin-top: 20px;">
+                    <button onclick="reprintReceipt('${receipt.id}')" class="btn btn-print" style="flex: 1;">
+                        <i class="fas fa-print"></i> Reprint Receipt
+                    </button>
+                    <button onclick="deleteReceipt('${receipt.id}')" class="btn btn-delete" style="flex: 1;">
+                        <i class="fas fa-trash"></i> Delete Receipt
+                    </button>
+                </div>
+            `;
+            
+            document.getElementById('receiptModal').style.display = 'block';
+        }
+        
+        // Reprint receipt
+        function reprintReceipt(receiptId) {
+            const receipt = allReceipts.find(r => r.id === receiptId);
+            if (!receipt) return;
+            
+            // Open print window with receipt data
+            const printContent = createPrintContent(receipt);
+            const printWindow = window.open('', '_blank');
+            printWindow.document.write(printContent);
+            printWindow.document.close();
+            
+            showToast('Opening receipt for printing...', 'success');
+        }
+        
+        // Create print content for reprint
+        function createPrintContent(receipt) {
+            return `
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>Reprint Receipt ${receipt.receiptNumber}</title>
+                    <style>
+                        @media print {
+                            @page {
+                                size: 58mm auto;
+                                margin: 0;
+                                padding: 0;
+                            }
+                            body {
+                                margin: 0;
+                                padding: 2mm 1mm;
+                                font-family: 'Courier New', monospace;
+                                font-size: 8px;
+                                line-height: 1.1;
+                                width: 56mm;
+                                max-width: 56mm;
+                            }
+                        }
+                        body {
+                            font-family: 'Courier New', monospace;
+                            font-size: 8px;
+                            line-height: 1.1;
+                            margin: 2mm 1mm;
+                            padding: 0;
+                            width: 56mm;
+                            max-width: 56mm;
+                        }
+                        .center { text-align: center; }
+                        .bold { font-weight: bold; }
+                        .dashed { border-bottom: 1px dashed #000; margin: 2px 0; }
+                        .item-row { display: flex; justify-content: space-between; margin-bottom: 1px; }
+                        .footer { margin-top: 10px; font-size: 7px; color: #666; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div style="text-align: center; margin-bottom: 3px;">
+                        <div class="bold" style="font-size: 10px;">Will's Tech Store</div>
+                        <div style="font-size: 7px;">Elevate Your Lifestyle With Authentic Tech</div>
+                        <div style="font-size: 7px;">www.willstech.store</div>
+                        <div style="font-size: 7px;">+256 751 924 844</div>
+                    </div>
+                    
+                    <div class="dashed" style="padding-top: 2px;">
+                        <div class="center bold" style="font-size: 9px;">SALES RECEIPT (REPRINT)</div>
+                    </div>
+                    
+                    <div style="font-size: 8px; margin: 3px 0;">
+                        <div><strong>Date:</strong> ${formatDateTime(receipt.timestamp)}</div>
+                        <div><strong>Receipt:</strong> ${receipt.receiptNumber}</div>
+                        <div><strong>Customer:</strong> ${receipt.customerName || 'Walk-in'}</div>
+                    </div>
+                    
+                    <div class="dashed"></div>
+                    
+                    <div style="font-size: 8px; margin-bottom: 2px;">
+                        <div class="item-row bold">
+                            <span style="flex: 3;">ITEM</span>
+                            <span style="flex: 1; text-align: right;">QTY</span>
+                            <span style="flex: 2; text-align: right;">AMOUNT</span>
+                        </div>
+                    </div>
+                    
+                    ${receipt.items.map(item => `
+                        <div class="item-row" style="font-size: 8px;">
+                            <span style="flex: 3;">${item.name.substring(0, 20)}</span>
+                            <span style="flex: 1; text-align: right;">${item.quantity}</span>
+                            <span style="flex: 2; text-align: right;">UGX ${item.total.toLocaleString()}</span>
+                        </div>
+                    `).join('')}
+                    
+                    <div class="dashed"></div>
+                    
+                    <div style="font-size: 9px;">
+                        <div class="item-row">
+                            <span>Subtotal:</span>
+                            <span>UGX ${receipt.subtotal.toLocaleString()}</span>
+                        </div>
+                        ${receipt.deliveryFee > 0 ? `
+                        <div class="item-row">
+                            <span>Delivery Fee:</span>
+                            <span>UGX ${receipt.deliveryFee.toLocaleString()}</span>
+                        </div>
+                        ` : ''}
+                        <div class="item-row" style="margin-top: 3px; padding-top: 2px; border-top: 1px solid #000; font-weight: bold;">
+                            <span>TOTAL:</span>
+                            <span style="font-size: 10px;">UGX ${receipt.totalAmount.toLocaleString()}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="dashed"></div>
+                    
+                    <div class="center" style="font-size: 8px; margin-top: 5px;">
+                        <div><strong>Payment:</strong> ${receipt.paymentMethod}</div>
+                        <div style="color: green; font-weight: bold;">✓ Payment received.</div>
+                        <div class="bold">(REPRINT) THANK YOU FOR SHOPPING</div>
+                    </div>
+                    
+                    <div class="footer">
+                        <div>For inquiries: +256 751 924 844</div>
+                        <div>Website: willstech.store</div>
+                        <div style="margin-top: 2px;">*************************</div>
+                    </div>
+                    
+                    <script>
+                        window.onload = function() {
+                            window.print();
+                            setTimeout(function() {
+                                window.close();
+                            }, 100);
+                        }
+                    <\/script>
+                </body>
+                </html>
+            `;
+        }
+        
+        // Delete receipt
+        function deleteReceipt(receiptId) {
+            if (!confirm('Are you sure you want to delete this receipt? This action cannot be undone.')) {
+                return;
+            }
+            
+            allReceipts = allReceipts.filter(receipt => receipt.id !== receiptId);
+            filteredReceipts = filteredReceipts.filter(receipt => receipt.id !== receiptId);
+            saveReceipts();
+            displayReceipts();
+            updateStats();
+            
+            // Close modal if open
+            document.getElementById('receiptModal').style.display = 'none';
+            
+            showToast('Receipt deleted successfully', 'success');
+        }
+        
+        // Export data as JSON
+        function exportData() {
+            const dataStr = JSON.stringify(allReceipts, null, 2);
+            const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+            
+            const exportFileDefaultName = `willstech_receipts_${new Date().toISOString().split('T')[0]}.json`;
+            
+            const linkElement = document.createElement('a');
+            linkElement.setAttribute('href', dataUri);
+            linkElement.setAttribute('download', exportFileDefaultName);
+            linkElement.click();
+            
+            showToast('Data exported successfully', 'success');
+        }
+        
+        // Update statistics
+        function updateStats() {
+            const today = new Date().toDateString();
+            const todayReceipts = allReceipts.filter(receipt => 
+                new Date(receipt.timestamp).toDateString() === today
+            );
+            
+            const totalRevenue = allReceipts.reduce((sum, receipt) => sum + receipt.totalAmount, 0);
+            
+            document.getElementById('totalReceipts').textContent = allReceipts.length;
+            document.getElementById('todayReceipts').textContent = todayReceipts.length;
+            document.getElementById('totalRevenue').textContent = `UGX ${totalRevenue.toLocaleString()}`;
+        }
+        
+        // Format date
+        function formatDate(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleDateString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric'
+            });
+        }
+        
+        // Format date and time
+        function formatDateTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleString('en-GB', {
+                day: 'numeric',
+                month: 'short',
+                year: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        }
+        
+        // Toast function
+        function showToast(message, type = 'success') {
+            // Create toast element if it doesn't exist
+            let toast = document.getElementById('toast');
+            if (!toast) {
+                toast = document.createElement('div');
+                toast.id = 'toast';
+                toast.style.cssText = `
+                    position: fixed;
+                    top: 20px;
+                    right: 20px;
+                    padding: 12px 20px;
+                    background: ${type === 'success' ? '#10b981' : '#ef4444'};
+                    color: white;
+                    border-radius: 5px;
+                    z-index: 1001;
+                    display: none;
+                `;
+                document.body.appendChild(toast);
+            }
+            
+            toast.textContent = message;
+            toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 3000);
+        }
+    </script>
+</body>
+</html>

@@ -209,6 +209,232 @@
     padding: 2px 6px;
     border-radius: 3px;
 }
+/* Product Search Container */
+.product-search-container {
+    position: relative;
+    margin-bottom: 15px;
+}
+
+.product-search-wrapper {
+    position: relative;
+}
+
+.product-search-input {
+    width: 100%;
+    padding: 12px 40px 12px 15px;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: border-color 0.2s;
+}
+
+.product-search-input:focus {
+    outline: none;
+    border-color: #2563eb;
+    box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+}
+
+.product-search-icon {
+    position: absolute;
+    right: 15px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: #6b7280;
+    pointer-events: none;
+}
+
+/* Product Results Dropdown */
+.product-results {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    max-height: 300px;
+    overflow-y: auto;
+    z-index: 1000;
+    margin-top: 5px;
+    display: none;
+}
+
+.product-result-item {
+    padding: 12px 15px;
+    cursor: pointer;
+    border-bottom: 1px solid #f3f4f6;
+    transition: background-color 0.15s;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.product-result-item:hover {
+    background-color: #f0f9ff;
+}
+
+.product-result-item:last-child {
+    border-bottom: none;
+}
+
+.product-result-item.selected {
+    background-color: #dbeafe;
+    border-left: 3px solid #2563eb;
+}
+
+.product-info {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.product-name-price {
+    flex: 1;
+    min-width: 0; /* Prevents overflow */
+}
+
+.product-name {
+    font-weight: 600;
+    font-size: 14px;
+    color: #1f2937;
+    margin-bottom: 3px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.product-category {
+    font-size: 12px;
+    color: #6b7280;
+    background: #f3f4f6;
+    padding: 2px 8px;
+    border-radius: 12px;
+    display: inline-block;
+    margin-bottom: 4px;
+}
+
+.product-price-sku {
+    text-align: right;
+    flex-shrink: 0;
+}
+
+.product-price {
+    color: #2563eb;
+    font-weight: 700;
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.product-sku {
+    font-size: 11px;
+    color: #9ca3af;
+    background: #f9fafb;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+}
+
+.product-no-results {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+    font-style: italic;
+}
+
+/* Keyboard navigation hint */
+.product-search-hint {
+    font-size: 11px;
+    color: #9ca3af;
+    margin-top: 5px;
+    padding: 5px 0;
+    border-top: 1px solid #f3f4f6;
+    text-align: center;
+}
+
+/* Loading state */
+.product-results.loading {
+    padding: 20px;
+    text-align: center;
+    color: #6b7280;
+}
+
+.product-results.loading::after {
+    content: "Loading...";
+    animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.5; }
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .product-search-input {
+        font-size: 16px;
+        padding: 14px 45px 14px 15px;
+    }
+    
+    .product-results {
+        max-height: 250px;
+        border-radius: 6px;
+    }
+    
+    .product-result-item {
+        padding: 10px 12px;
+    }
+    
+    .product-name {
+        font-size: 14px;
+    }
+    
+    .product-price {
+        font-size: 14px;
+    }
+}
+
+@media (max-width: 480px) {
+    .product-info {
+        flex-direction: column;
+        gap: 6px;
+    }
+    
+    .product-price-sku {
+        text-align: left;
+        width: 100%;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .product-results {
+        position: fixed;
+        left: 10px;
+        right: 10px;
+        top: auto;
+        max-height: 50vh;
+        z-index: 2000;
+    }
+    
+    /* For mobile, show results above keyboard */
+    .product-search-container.mobile-focus .product-results {
+        bottom: 50vh;
+        top: auto;
+    }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+    .product-result-item {
+        padding: 14px 15px;
+    }
+    
+    .product-result-item:active {
+        background-color: #dbeafe;
+    }
+}
         
         /* Toast */
         .toast {
@@ -301,14 +527,14 @@
                 </select>
             </div>
             <div class="form-group">
-    <label class="form-label">Delivery Fee</label>
-    <div style="display: flex; gap: 10px; align-items: center;">
+                 <label class="form-label">Delivery Fee</label>
+                   <div style="display: flex; gap: 10px; align-items: center;">
         <input type="number" id="deliveryFee" class="form-control" value="5000" step="1000" style="flex: 1;">
         <label style="white-space: nowrap;">
             <input type="checkbox" id="freeDelivery"> Free Delivery
         </label>
-    </div>
-</div>
+              </div>
+        </div>
             
             <div id="printerStatus" class="printer-status status-disconnected">
                 <i class="fas fa-print"></i>
@@ -327,23 +553,34 @@
         
         <div class="card">
             <h2 class="card-title"><i class="fas fa-shopping-cart"></i> Items (UGX)</h2>
-            <!-- ADD THIS SECTION -->
-    <div class="form-group">
-        <label class="form-label">Search & Add Products</label>
-        <div style="position: relative;">
-            <input type="text" id="productSearch" class="form-control" 
-                   placeholder="Type to search products..." 
-                   style="padding-right: 40px;">
-            <i class="fas fa-search" style="position: absolute; right: 15px; top: 50%; transform: translateY(-50%); color: #666;"></i>
+
+    <!-- Improved Search Section -->
+    <div class="product-search-container">
+        <div class="form-group">
+            <label class="form-label">Search & Add Products</label>
+            <div class="product-search-wrapper">
+                <input type="text" id="productSearch" class="form-control product-search-input" 
+                       placeholder="Type product name, SKU, or category..." 
+                       autocomplete="off">
+                <i class="fas fa-search product-search-icon"></i>
+            </div>
+            <div id="productResults" class="product-results"></div>
+            
+            <!-- Loading indicator (optional) -->
+            <div id="searchLoading" style="display: none; text-align: center; padding: 10px;">
+                <i class="fas fa-spinner fa-spin"></i> Loading products...
+            </div>
         </div>
-        <div id="productResults" style="display: none; position: absolute; z-index: 100; width: 100%; background: white; border: 1px solid #d1d5db; border-radius: 5px; max-height: 200px; overflow-y: auto; margin-top: 5px;"></div>
     </div>
-    <!-- END OF ADDED SECTION -->
-            <div id="itemsContainer"></div>
-            <button id="addItem" class="btn btn-primary">
-                <i class="fas fa-plus"></i> Add Item
-            </button>
-        </div>
+    <!-- END OF IMPROVED SEARCH SECTION -->
+    
+    <div id="itemsContainer"></div>
+    <button id="addItem" class="btn btn-primary">
+        <i class="fas fa-plus"></i> Add Item
+    </button>
+</div>
+
+            
         
         <div class="card">
             <h2 class="card-title"><i class="fas fa-cogs"></i> Actions</h2>

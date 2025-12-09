@@ -2140,7 +2140,27 @@ if (!document.getElementById('freeDelivery').checked) {
         printReceiptViaBluetooth();
     }
 }
-
+// Function to save receipt to localStorage
+function saveReceiptToLocalStorage(receiptData) {
+    // Get existing receipts
+    const storedReceipts = localStorage.getItem('willstech_receipts');
+    const receipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+    
+    // Add new receipt at the beginning (newest first)
+    receipts.unshift(receiptData);
+    
+    // Save back to localStorage
+    localStorage.setItem('willstech_receipts', JSON.stringify(receipts));
+    
+    // Update receipt counter
+    const counter = (parseInt(localStorage.getItem('willstech_receipt_counter')) || 0) + 1;
+    localStorage.setItem('willstech_receipt_counter', counter.toString());
+    
+    console.log('Receipt saved to localStorage:', receiptData.receiptNumber);
+    
+    // Return the updated receipts array
+    return receipts;
+        }
 // Save receipt to user account
 async function saveReceiptToUserAccount(receiptData) {
     try {

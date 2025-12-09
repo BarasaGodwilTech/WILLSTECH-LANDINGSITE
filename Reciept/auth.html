@@ -1024,22 +1024,27 @@
                 }
                 
                 // Save session
-                saveUserSession({
-                    uid: user.uid,
-                    name: userData.name,
-                    email: email,
-                    storeName: userData.storeName,
-                    storePhone: userData.storePhone
-                });
-                
-                // Load receipts from Firebase
-                await loadReceiptsFromFirebase(user.uid);
-                
-                showToast('Login successful!', 'success');
-                
-                setTimeout(() => {
-                    window.location.href = 'Recieptprinter.html';
-                }, 1000);
+                // Save session with consistent key
+const session = {
+    uid: user.uid,
+    name: userData.name || user.displayName || email.split('@')[0],
+    email: email,
+    storeName: userData.storeName || "Will's Tech Store",
+    storePhone: userData.storePhone || "+256 751 924 844",
+    isGuest: false,
+    createdAt: new Date().toISOString(),
+    lastLogin: new Date().toISOString()
+};
+
+// Use consistent key name
+localStorage.setItem('currentUser', JSON.stringify(session));
+
+showToast('Login successful! Redirecting...', 'success');
+
+// Immediate redirect - no async operations
+setTimeout(() => {
+    window.location.href = 'Recieptprinter.html';
+}, 500);
                 
             } catch (error) {
                 console.error('Login error:', error);

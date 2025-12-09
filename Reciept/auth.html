@@ -1,0 +1,695 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Will's Tech Store</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+        
+        .auth-container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.2);
+            width: 100%;
+            max-width: 450px;
+            overflow: hidden;
+        }
+        
+        .auth-header {
+            background: #2563eb;
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .auth-header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .auth-header p {
+            opacity: 0.9;
+            font-size: 0.9rem;
+        }
+        
+        .auth-tabs {
+            display: flex;
+            background: #f1f5f9;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .auth-tab {
+            flex: 1;
+            padding: 15px;
+            text-align: center;
+            cursor: pointer;
+            font-weight: bold;
+            color: #64748b;
+            transition: all 0.3s;
+        }
+        
+        .auth-tab.active {
+            background: white;
+            color: #2563eb;
+            border-bottom: 3px solid #2563eb;
+        }
+        
+        .auth-content {
+            padding: 30px;
+        }
+        
+        .auth-form {
+            display: none;
+        }
+        
+        .auth-form.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 8px;
+            color: #374151;
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s;
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 10px;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #2563eb;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #1d4ed8;
+        }
+        
+        .btn-secondary {
+            background: #6b7280;
+            color: white;
+            margin-top: 10px;
+        }
+        
+        .btn-secondary:hover {
+            background: #4b5563;
+        }
+        
+        .btn-success {
+            background: #10b981;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #059669;
+        }
+        
+        .divider {
+            display: flex;
+            align-items: center;
+            margin: 30px 0;
+            color: #9ca3af;
+        }
+        
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .divider-text {
+            padding: 0 15px;
+            font-size: 14px;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .forgot-password a {
+            color: #2563eb;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 20px;
+        }
+        
+        .terms {
+            font-size: 12px;
+            color: #6b7280;
+            text-align: center;
+            margin-top: 20px;
+        }
+        
+        .terms a {
+            color: #2563eb;
+            text-decoration: none;
+        }
+        
+        .error-message {
+            background: #fee2e2;
+            color: #991b1b;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .success-message {
+            background: #d1fae5;
+            color: #065f46;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #e5e7eb;
+        }
+        
+        .user-avatar {
+            width: 50px;
+            height: 50px;
+            background: #2563eb;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        
+        .user-info {
+            flex: 1;
+        }
+        
+        .user-email {
+            color: #6b7280;
+            font-size: 14px;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="auth-container">
+        <div class="auth-header">
+            <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
+            <p>Receipt Management System</p>
+        </div>
+        
+        <div class="auth-tabs">
+            <div class="auth-tab active" data-tab="login">Login</div>
+            <div class="auth-tab" data-tab="register">Register</div>
+            <div class="auth-tab" data-tab="guest">Continue as Guest</div>
+        </div>
+        
+        <div class="auth-content">
+            <!-- Login Form -->
+            <div id="loginForm" class="auth-form active">
+                <div id="loginError" class="error-message"></div>
+                <div id="loginSuccess" class="success-message"></div>
+                
+                <form id="loginFormElement">
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="loginEmail" class="form-control" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="loginPassword" class="form-control" placeholder="Enter your password" required>
+                    </div>
+                    
+                    <div class="form-group remember-me">
+                        <input type="checkbox" id="rememberMe">
+                        <label for="rememberMe">Remember me</label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-sign-in-alt"></i> Login to Account
+                    </button>
+                    
+                    <div class="forgot-password">
+                        <a href="#" id="forgotPassword">Forgot your password?</a>
+                    </div>
+                </form>
+                
+                <div class="divider">
+                    <span class="divider-text">Sync your data across devices</span>
+                </div>
+                
+                <button id="continueAsGuest" class="btn btn-secondary">
+                    <i class="fas fa-user-clock"></i> Continue as Guest
+                </button>
+            </div>
+            
+            <!-- Register Form -->
+            <div id="registerForm" class="auth-form">
+                <div id="registerError" class="error-message"></div>
+                <div id="registerSuccess" class="success-message"></div>
+                
+                <form id="registerFormElement">
+                    <div class="form-group">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" id="registerName" class="form-control" placeholder="John Smith" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address</label>
+                        <input type="email" id="registerEmail" class="form-control" placeholder="your@email.com" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password</label>
+                        <input type="password" id="registerPassword" class="form-control" placeholder="Create a password" required>
+                        <small style="color: #6b7280; font-size: 12px;">Minimum 8 characters with letters and numbers</small>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password</label>
+                        <input type="password" id="registerConfirmPassword" class="form-control" placeholder="Confirm your password" required>
+                    </div>
+                    
+                    <div class="form-group remember-me">
+                        <input type="checkbox" id="agreeTerms" required>
+                        <label for="agreeTerms">I agree to the <a href="#">Terms of Service</a> and <a href="#">Privacy Policy</a></label>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-user-plus"></i> Create Account
+                    </button>
+                </form>
+                
+                <div class="terms">
+                    By creating an account, your receipts will be safely stored in the cloud
+                </div>
+            </div>
+            
+            <!-- Guest Mode -->
+            <div id="guestForm" class="auth-form">
+                <div class="user-profile">
+                    <div class="user-avatar">
+                        <i class="fas fa-user"></i>
+                    </div>
+                    <div class="user-info">
+                        <div style="font-weight: bold;">Guest Mode</div>
+                        <div class="user-email">Local storage only</div>
+                    </div>
+                </div>
+                
+                <div style="margin-bottom: 20px;">
+                    <p>Continue without an account. Your receipts will be saved locally on this device only.</p>
+                    <p style="color: #ef4444; font-size: 14px;"><i class="fas fa-exclamation-triangle"></i> Data may be lost if you clear browser data</p>
+                </div>
+                
+                <button id="startAsGuest" class="btn btn-primary">
+                    <i class="fas fa-play"></i> Start as Guest
+                </button>
+                
+                <div class="divider">
+                    <span class="divider-text">Create account for cloud backup</span>
+                </div>
+                
+                <button id="createAccountFromGuest" class="btn btn-success">
+                    <i class="fas fa-cloud-upload-alt"></i> Create Account for Cloud Backup
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Storage keys
+        const AUTH_STORAGE_KEY = 'willstech_auth';
+        const USERS_STORAGE_KEY = 'willstech_users';
+        const RECEIPTS_STORAGE_KEY = 'willstech_receipts';
+        const CURRENT_USER_KEY = 'willstech_current_user';
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            setupEventListeners();
+            checkExistingSession();
+        });
+        
+        // Setup event listeners
+        function setupEventListeners() {
+            // Tab switching
+            document.querySelectorAll('.auth-tab').forEach(tab => {
+                tab.addEventListener('click', function() {
+                    const tabId = this.dataset.tab;
+                    
+                    // Update active tab
+                    document.querySelectorAll('.auth-tab').forEach(t => {
+                        t.classList.remove('active');
+                    });
+                    this.classList.add('active');
+                    
+                    // Show corresponding form
+                    document.querySelectorAll('.auth-form').forEach(form => {
+                        form.classList.remove('active');
+                    });
+                    document.getElementById(`${tabId}Form`).classList.add('active');
+                });
+            });
+            
+            // Login form
+            document.getElementById('loginFormElement').addEventListener('submit', function(e) {
+                e.preventDefault();
+                loginUser();
+            });
+            
+            // Register form
+            document.getElementById('registerFormElement').addEventListener('submit', function(e) {
+                e.preventDefault();
+                registerUser();
+            });
+            
+            // Continue as guest
+            document.getElementById('continueAsGuest').addEventListener('click', startGuestSession);
+            document.getElementById('startAsGuest').addEventListener('click', startGuestSession);
+            
+            // Forgot password
+            document.getElementById('forgotPassword').addEventListener('click', function(e) {
+                e.preventDefault();
+                resetPassword();
+            });
+            
+            // Create account from guest
+            document.getElementById('createAccountFromGuest').addEventListener('click', function() {
+                document.querySelector('.auth-tab[data-tab="register"]').click();
+            });
+        }
+        
+        // Check if user is already logged in
+        function checkExistingSession() {
+            const currentUser = localStorage.getItem(CURRENT_USER_KEY);
+            
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                if (user.email && user.isGuest !== true) {
+                    // Redirect to main app
+                    window.location.href = 'Recieptprinter.html';
+                }
+            }
+        }
+        
+        // Login user
+        function loginUser() {
+            const email = document.getElementById('loginEmail').value.trim();
+            const password = document.getElementById('loginPassword').value;
+            const rememberMe = document.getElementById('rememberMe').checked;
+            
+            const errorDiv = document.getElementById('loginError');
+            const successDiv = document.getElementById('loginSuccess');
+            
+            // Validation
+            if (!email || !password) {
+                showError(errorDiv, 'Please fill in all fields');
+                return;
+            }
+            
+            // Get stored users
+            const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+            const users = storedUsers ? JSON.parse(storedUsers) : [];
+            
+            // Find user
+            const user = users.find(u => u.email === email && u.password === btoa(password));
+            
+            if (!user) {
+                showError(errorDiv, 'Invalid email or password');
+                return;
+            }
+            
+            // Create session
+            const session = {
+                id: user.id,
+                name: user.name,
+                email: user.email,
+                createdAt: new Date().toISOString(),
+                rememberMe: rememberMe
+            };
+            
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
+            
+            // Sync local receipts to user account
+            syncLocalReceiptsToAccount(user.id);
+            
+            // Show success and redirect
+            showSuccess(successDiv, 'Login successful! Redirecting...');
+            
+            setTimeout(() => {
+                window.location.href = 'Recieptprinter.html';
+            }, 1500);
+        }
+        
+        // Register new user
+        function registerUser() {
+            const name = document.getElementById('registerName').value.trim();
+            const email = document.getElementById('registerEmail').value.trim();
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('registerConfirmPassword').value;
+            
+            const errorDiv = document.getElementById('registerError');
+            const successDiv = document.getElementById('registerSuccess');
+            
+            // Validation
+            if (!name || !email || !password || !confirmPassword) {
+                showError(errorDiv, 'Please fill in all fields');
+                return;
+            }
+            
+            if (!validateEmail(email)) {
+                showError(errorDiv, 'Please enter a valid email address');
+                return;
+            }
+            
+            if (password.length < 8) {
+                showError(errorDiv, 'Password must be at least 8 characters long');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showError(errorDiv, 'Passwords do not match');
+                return;
+            }
+            
+            // Check if user already exists
+            const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+            const users = storedUsers ? JSON.parse(storedUsers) : [];
+            
+            if (users.find(u => u.email === email)) {
+                showError(errorDiv, 'An account with this email already exists');
+                return;
+            }
+            
+            // Create new user
+            const newUser = {
+                id: generateUserId(),
+                name: name,
+                email: email,
+                password: btoa(password), // Simple encoding (not secure for production)
+                createdAt: new Date().toISOString(),
+                receipts: []
+            };
+            
+            // Save user
+            users.push(newUser);
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+            
+            // Auto login
+            const session = {
+                id: newUser.id,
+                name: newUser.name,
+                email: newUser.email,
+                createdAt: new Date().toISOString(),
+                rememberMe: false
+            };
+            
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
+            
+            // Sync local receipts to new account
+            syncLocalReceiptsToAccount(newUser.id);
+            
+            // Show success
+            showSuccess(successDiv, 'Account created successfully! Redirecting...');
+            
+            setTimeout(() => {
+                window.location.href = 'Recieptprinter.html';
+            }, 1500);
+        }
+        
+        // Start guest session
+        function startGuestSession() {
+            const session = {
+                id: 'guest_' + Date.now(),
+                name: 'Guest User',
+                email: null,
+                isGuest: true,
+                createdAt: new Date().toISOString()
+            };
+            
+            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
+            
+            // Show loading message
+            const successDiv = document.getElementById('loginSuccess');
+            showSuccess(successDiv, 'Starting guest session...');
+            
+            setTimeout(() => {
+                window.location.href = 'Recieptprinter.html';
+            }, 1000);
+        }
+        
+        // Sync local receipts to user account
+        function syncLocalReceiptsToAccount(userId) {
+            try {
+                // Get local receipts
+                const localReceipts = localStorage.getItem(RECEIPTS_STORAGE_KEY);
+                
+                if (localReceipts) {
+                    const receipts = JSON.parse(localReceipts);
+                    
+                    // Get user
+                    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+                    const users = storedUsers ? JSON.parse(storedUsers) : [];
+                    const userIndex = users.findIndex(u => u.id === userId);
+                    
+                    if (userIndex !== -1) {
+                        // Add receipts to user account
+                        if (!users[userIndex].receipts) {
+                            users[userIndex].receipts = [];
+                        }
+                        
+                        // Merge receipts (avoid duplicates)
+                        receipts.forEach(receipt => {
+                            const exists = users[userIndex].receipts.find(r => r.id === receipt.id);
+                            if (!exists) {
+                                users[userIndex].receipts.push({
+                                    ...receipt,
+                                    syncedAt: new Date().toISOString()
+                                });
+                            }
+                        });
+                        
+                        // Save updated user
+                        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+                        
+                        console.log(`Synced ${receipts.length} receipts to account`);
+                    }
+                }
+            } catch (error) {
+                console.error('Error syncing receipts:', error);
+            }
+        }
+        
+        // Reset password (simplified)
+        function resetPassword() {
+            const email = prompt('Enter your email address to reset password:');
+            
+            if (email && validateEmail(email)) {
+                const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+                const users = storedUsers ? JSON.parse(storedUsers) : [];
+                
+                if (users.find(u => u.email === email)) {
+                    alert('Password reset instructions sent to ' + email + '\n\n(Note: This is a demo. In production, you would send an email.)');
+                } else {
+                    alert('No account found with that email address.');
+                }
+            }
+        }
+        
+        // Helper functions
+        function showError(div, message) {
+            div.textContent = message;
+            div.style.display = 'block';
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 5000);
+        }
+        
+        function showSuccess(div, message) {
+            div.textContent = message;
+            div.style.display = 'block';
+        }
+        
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        function generateUserId() {
+            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+        }
+    </script>
+</body>
+</html>

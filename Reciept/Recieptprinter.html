@@ -542,6 +542,117 @@
                 gap: 10px;
             }
         }
+
+        /* Add to existing CSS */
+.user-menu {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    z-index: 100;
+}
+
+#userDropdown {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+    width: 250px;
+    z-index: 1000;
+    overflow: hidden;
+}
+
+#userDropdown.show {
+    display: block;
+    animation: fadeIn 0.3s ease;
+}
+
+.user-dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 15px;
+    cursor: pointer;
+    transition: background-color 0.2s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-size: 14px;
+    color: #374151;
+}
+
+.user-dropdown-item:hover {
+    background-color: #f3f4f6;
+}
+
+.user-dropdown-item i {
+    width: 20px;
+    color: #6b7280;
+}
+
+.user-dropdown-divider {
+    height: 1px;
+    background: #e5e7eb;
+    margin: 5px 0;
+}
+
+/* Profile modal */
+#profileModal .modal-content {
+    max-width: 500px;
+}
+
+.profile-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 15px;
+    margin: 20px 0;
+}
+
+.profile-stat-card {
+    background: #f9fafb;
+    padding: 15px;
+    border-radius: 8px;
+    text-align: center;
+}
+
+.profile-stat-value {
+    font-size: 24px;
+    font-weight: bold;
+    color: #2563eb;
+    margin-bottom: 5px;
+}
+
+.profile-stat-label {
+    font-size: 12px;
+    color: #6b7280;
+}
+
+.account-type-badge {
+    display: inline-block;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: bold;
+    margin-left: 10px;
+}
+
+.badge-guest {
+    background: #f3f4f6;
+    color: #6b7280;
+}
+
+.badge-premium {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-free {
+    background: #d1fae5;
+    color: #065f46;
+}
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -551,6 +662,44 @@
             <h1><i class="fas fa-store"></i> Will's Tech Store</h1>
             <p>Receipt Printing System - willstech.store</p>
         </div>
+        <!-- Add this right after the header div -->
+<div class="user-menu" style="position: absolute; top: 20px; right: 20px;">
+    <button id="userMenuBtn" class="btn" style="background: white; color: #2563eb; padding: 8px 15px; border-radius: 20px;">
+        <i class="fas fa-user"></i> <span id="userName">Guest</span>
+    </button>
+    <div id="userDropdown" style="display: none; position: absolute; top: 100%; right: 0; background: white; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.1); width: 200px; z-index: 1000;">
+        <div style="padding: 15px; border-bottom: 1px solid #e5e7eb;">
+            <div id="userEmail" style="font-size: 12px; color: #6b7280;"></div>
+        </div>
+        <button id="viewProfile" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #374151;">
+            <i class="fas fa-user-circle"></i> Profile
+        </button>
+        <button id="syncReceipts" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #374151;">
+            <i class="fas fa-sync"></i> Sync Receipts
+        </button>
+        <button id="backupData" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #374151;">
+            <i class="fas fa-cloud-upload-alt"></i> Backup to Cloud
+        </button>
+        <div style="border-top: 1px solid #e5e7eb;">
+            <button id="logoutBtn" class="btn" style="width: 100%; text-align: left; padding: 10px 15px; background: none; color: #ef4444;">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Add this modal for user profile -->
+<div id="profileModal" class="modal">
+    <div class="modal-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+            <h3><i class="fas fa-user-circle"></i> User Profile</h3>
+            <button class="close-profile-modal" style="background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
+        </div>
+        <div id="profileContent">
+            <!-- Profile content will be loaded here -->
+        </div>
+    </div>
+</div>
         
         <div class="card">
             <h2 class="card-title"><i class="fas fa-store-alt"></i> Store Info</h2>
@@ -690,6 +839,511 @@
     <div id="toast" class="toast"></div>
 
     <script>
+        // Add to the beginning of your JavaScript
+// User Management Functions
+const CURRENT_USER_KEY = 'willstech_current_user';
+const USERS_STORAGE_KEY = 'willstech_users';
+
+// Check if user is logged in
+function checkUserSession() {
+    const currentUser = localStorage.getItem(CURRENT_USER_KEY);
+    
+    if (!currentUser) {
+        // Redirect to auth page if no session
+        window.location.href = 'auth.html';
+        return null;
+    }
+    
+    return JSON.parse(currentUser);
+}
+
+// Get current user
+function getCurrentUser() {
+    return checkUserSession();
+}
+
+// Update user menu
+function updateUserMenu() {
+    const user = getCurrentUser();
+    if (!user) return;
+    
+    const userName = document.getElementById('userName');
+    const userEmail = document.getElementById('userEmail');
+    
+    if (userName) {
+        userName.textContent = user.isGuest ? 'Guest' : user.name.split(' ')[0];
+    }
+    
+    if (userEmail) {
+        userEmail.textContent = user.isGuest ? 'Guest Mode' : user.email;
+    }
+    
+    // Show backup option only for logged in users
+    const backupBtn = document.getElementById('backupData');
+    if (backupBtn) {
+        backupBtn.style.display = user.isGuest ? 'none' : 'block';
+    }
+}
+
+// Sync receipts to cloud (for logged in users)
+async function syncReceiptsToCloud() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Please create an account to sync receipts', 'error');
+        return;
+    }
+    
+    showToast('Syncing receipts to cloud...', 'success');
+    
+    // Get local receipts
+    const localReceipts = localStorage.getItem('willstech_receipts');
+    
+    if (localReceipts) {
+        const receipts = JSON.parse(localReceipts);
+        
+        // Get user from storage
+        const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+        const users = storedUsers ? JSON.parse(storedUsers) : [];
+        const userIndex = users.findIndex(u => u.id === user.id);
+        
+        if (userIndex !== -1) {
+            // Update user's receipts
+            if (!users[userIndex].receipts) {
+                users[userIndex].receipts = [];
+            }
+            
+            let syncedCount = 0;
+            receipts.forEach(receipt => {
+                const exists = users[userIndex].receipts.find(r => r.id === receipt.id);
+                if (!exists) {
+                    users[userIndex].receipts.push({
+                        ...receipt,
+                        syncedAt: new Date().toISOString()
+                    });
+                    syncedCount++;
+                }
+            });
+            
+            // Save updated user
+            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+            
+            showToast(`Synced ${syncedCount} receipts to your account`, 'success');
+        }
+    }
+}
+
+// Backup data (export to file)
+function backupData() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Create an account to enable cloud backup', 'error');
+        return;
+    }
+    
+    // Get user data
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userData = users.find(u => u.id === user.id);
+    
+    if (!userData) {
+        showToast('User data not found', 'error');
+        return;
+    }
+    
+    // Create backup file
+    const backup = {
+        version: '1.0',
+        backupDate: new Date().toISOString(),
+        user: {
+            name: userData.name,
+            email: userData.email,
+            createdAt: userData.createdAt
+        },
+        receipts: userData.receipts || [],
+        settings: {
+            storeName: localStorage.getItem('storeName') || "Will's Tech Store",
+            storePhone: localStorage.getItem('storePhone') || '+256 751 924 844'
+        }
+    };
+    
+    const dataStr = JSON.stringify(backup, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileName = `willstech_backup_${user.email}_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    showToast('Backup file downloaded!', 'success');
+}
+
+// Restore data from backup
+function restoreData(file) {
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const backup = JSON.parse(e.target.result);
+            
+            // Validate backup format
+            if (!backup.user || !backup.receipts) {
+                showToast('Invalid backup file format', 'error');
+                return;
+            }
+            
+            // Restore receipts
+            const user = getCurrentUser();
+            if (!user.isGuest) {
+                // Update user's receipts in storage
+                const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+                const users = storedUsers ? JSON.parse(storedUsers) : [];
+                const userIndex = users.findIndex(u => u.id === user.id);
+                
+                if (userIndex !== -1) {
+                    users[userIndex].receipts = backup.receipts;
+                    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+                }
+            }
+            
+            // Restore local receipts
+            localStorage.setItem('willstech_receipts', JSON.stringify(backup.receipts));
+            
+            // Restore settings if available
+            if (backup.settings) {
+                if (backup.settings.storeName) {
+                    localStorage.setItem('storeName', backup.settings.storeName);
+                }
+                if (backup.settings.storePhone) {
+                    localStorage.setItem('storePhone', backup.settings.storePhone);
+                }
+            }
+            
+            showToast(`Restored ${backup.receipts.length} receipts from backup`, 'success');
+            location.reload();
+            
+        } catch (error) {
+            showToast('Error reading backup file', 'error');
+            console.error(error);
+        }
+    };
+    
+    reader.readAsText(file);
+}
+
+// Show user profile
+function showUserProfile() {
+    const user = getCurrentUser();
+    const modal = document.getElementById('profileModal');
+    const content = document.getElementById('profileContent');
+    
+    // Get user stats
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userData = users.find(u => u.id === user.id);
+    
+    const receiptCount = userData?.receipts?.length || 0;
+    const totalRevenue = userData?.receipts?.reduce((sum, r) => sum + r.totalAmount, 0) || 0;
+    const today = new Date().toDateString();
+    const todayReceipts = userData?.receipts?.filter(r => 
+        new Date(r.timestamp).toDateString() === today
+    ).length || 0;
+    
+    content.innerHTML = `
+        <div style="text-align: center; margin-bottom: 20px;">
+            <div style="width: 80px; height: 80px; background: #2563eb; border-radius: 50%; display: inline-flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+                <i class="fas fa-user" style="font-size: 36px; color: white;"></i>
+            </div>
+            <h3>${user.name || 'Guest User'}</h3>
+            <div style="color: #6b7280; margin-bottom: 5px;">${user.email || 'No email (Guest Mode)'}</div>
+            <span class="account-type-badge ${user.isGuest ? 'badge-guest' : 'badge-free'}">
+                ${user.isGuest ? 'Guest Account' : 'Free Account'}
+            </span>
+        </div>
+        
+        <div class="profile-stats">
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">${receiptCount}</div>
+                <div class="profile-stat-label">Total Receipts</div>
+            </div>
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">${todayReceipts}</div>
+                <div class="profile-stat-label">Today's Receipts</div>
+            </div>
+            <div class="profile-stat-card">
+                <div class="profile-stat-value">UGX ${totalRevenue.toLocaleString()}</div>
+                <div class="profile-stat-label">Total Revenue</div>
+            </div>
+        </div>
+        
+        <div style="margin-top: 20px;">
+            <h4 style="margin-bottom: 10px;">Account Actions</h4>
+            <div style="display: grid; gap: 10px;">
+                <button onclick="syncReceiptsToCloud()" class="btn btn-primary">
+                    <i class="fas fa-sync"></i> Sync Receipts to Cloud
+                </button>
+                <button onclick="backupData()" class="btn btn-success">
+                    <i class="fas fa-download"></i> Download Backup
+                </button>
+                <label class="btn btn-secondary" style="text-align: center; cursor: pointer;">
+                    <i class="fas fa-upload"></i> Restore from Backup
+                    <input type="file" accept=".json" style="display: none;" 
+                           onchange="restoreData(this.files[0])">
+                </label>
+            </div>
+        </div>
+        
+        ${!user.isGuest ? `
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb;">
+            <h4 style="margin-bottom: 10px;">Account Settings</h4>
+            <div style="display: grid; gap: 10px;">
+                <button onclick="changePassword()" class="btn" style="background: #f3f4f6; color: #374151;">
+                    <i class="fas fa-key"></i> Change Password
+                </button>
+                <button onclick="exportAllData()" class="btn" style="background: #f3f4f6; color: #374151;">
+                    <i class="fas fa-file-export"></i> Export All Data
+                </button>
+            </div>
+        </div>
+        ` : ''}
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e5e7eb; color: #6b7280; font-size: 12px;">
+            <div><strong>Account Created:</strong> ${new Date(user.createdAt).toLocaleDateString()}</div>
+            <div><strong>Storage Used:</strong> ${receiptCount * 0.5} KB (approx)</div>
+            <div><strong>Sync Status:</strong> ${user.isGuest ? 'Local only' : 'Cloud enabled'}</div>
+        </div>
+    `;
+    
+    modal.style.display = 'block';
+}
+
+// Logout user
+function logoutUser() {
+    if (confirm('Are you sure you want to logout?')) {
+        localStorage.removeItem(CURRENT_USER_KEY);
+        window.location.href = 'auth.html';
+    }
+}
+
+// Change password
+function changePassword() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Guest users cannot change password', 'error');
+        return;
+    }
+    
+    const oldPassword = prompt('Enter your current password:');
+    if (!oldPassword) return;
+    
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userIndex = users.findIndex(u => u.id === user.id);
+    
+    if (userIndex === -1) {
+        showToast('User not found', 'error');
+        return;
+    }
+    
+    if (users[userIndex].password !== btoa(oldPassword)) {
+        showToast('Incorrect current password', 'error');
+        return;
+    }
+    
+    const newPassword = prompt('Enter new password (min 8 characters):');
+    if (!newPassword || newPassword.length < 8) {
+        showToast('Password must be at least 8 characters', 'error');
+        return;
+    }
+    
+    const confirmPassword = prompt('Confirm new password:');
+    if (newPassword !== confirmPassword) {
+        showToast('Passwords do not match', 'error');
+        return;
+    }
+    
+    users[userIndex].password = btoa(newPassword);
+    localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+    
+    showToast('Password changed successfully!', 'success');
+}
+
+// Export all user data
+function exportAllData() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) {
+        showToast('Create an account to export data', 'error');
+        return;
+    }
+    
+    // Get all user data
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userData = users.find(u => u.id === user.id);
+    
+    if (!userData) {
+        showToast('User data not found', 'error');
+        return;
+    }
+    
+    // Create comprehensive export
+    const exportData = {
+        version: '2.0',
+        exportDate: new Date().toISOString(),
+        user: {
+            id: userData.id,
+            name: userData.name,
+            email: userData.email,
+            createdAt: userData.createdAt
+        },
+        receipts: userData.receipts || [],
+        preferences: {
+            storeName: document.getElementById('storeName').value,
+            storePhone: document.getElementById('storePhone').value
+        },
+        products: allProducts || []
+    };
+    
+    const dataStr = JSON.stringify(exportData, null, 2);
+    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+    
+    const exportFileName = `willstech_export_${user.email}_${new Date().toISOString().split('T')[0]}.json`;
+    
+    const linkElement = document.createElement('a');
+    linkElement.setAttribute('href', dataUri);
+    linkElement.setAttribute('download', exportFileName);
+    linkElement.click();
+    
+    showToast('All data exported successfully!', 'success');
+}
+
+// Add user menu event listeners
+function setupUserMenu() {
+    const userMenuBtn = document.getElementById('userMenuBtn');
+    const userDropdown = document.getElementById('userDropdown');
+    const logoutBtn = document.getElementById('logoutBtn');
+    const viewProfileBtn = document.getElementById('viewProfile');
+    const syncBtn = document.getElementById('syncReceipts');
+    const backupBtn = document.getElementById('backupData');
+    const closeProfileModal = document.querySelector('.close-profile-modal');
+    const profileModal = document.getElementById('profileModal');
+    
+    if (userMenuBtn) {
+        userMenuBtn.addEventListener('click', function() {
+            userDropdown.classList.toggle('show');
+        });
+        
+        // Close dropdown when clicking outside
+        document.addEventListener('click', function(event) {
+            if (!userMenuBtn.contains(event.target) && !userDropdown.contains(event.target)) {
+                userDropdown.classList.remove('show');
+            }
+        });
+    }
+    
+    if (logoutBtn) {
+        logoutBtn.addEventListener('click', logoutUser);
+    }
+    
+    if (viewProfileBtn) {
+        viewProfileBtn.addEventListener('click', function() {
+            userDropdown.classList.remove('show');
+            showUserProfile();
+        });
+    }
+    
+    if (syncBtn) {
+        syncBtn.addEventListener('click', function() {
+            userDropdown.classList.remove('show');
+            syncReceiptsToCloud();
+        });
+    }
+    
+    if (backupBtn) {
+        backupBtn.addEventListener('click', function() {
+            userDropdown.classList.remove('show');
+            backupData();
+        });
+    }
+    
+    if (closeProfileModal) {
+        closeProfileModal.addEventListener('click', function() {
+            profileModal.style.display = 'none';
+        });
+    }
+    
+    if (profileModal) {
+        profileModal.addEventListener('click', function(event) {
+            if (event.target === profileModal) {
+                profileModal.style.display = 'none';
+            }
+        });
+    }
+}
+
+// Initialize user system when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    // Check user session
+    const user = checkUserSession();
+    
+    if (user) {
+        // Update user menu
+        updateUserMenu();
+        // Setup user menu events
+        setupUserMenu();
+        
+        // Load user receipts if logged in
+        if (!user.isGuest) {
+            loadUserReceipts();
+        }
+    }
+});
+
+// Load user receipts into local storage
+function loadUserReceipts() {
+    const user = getCurrentUser();
+    
+    if (user.isGuest) return;
+    
+    // Get user from storage
+    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+    const users = storedUsers ? JSON.parse(storedUsers) : [];
+    const userData = users.find(u => u.id === user.id);
+    
+    if (userData && userData.receipts && userData.receipts.length > 0) {
+        // Merge user receipts with local receipts
+        const localReceipts = localStorage.getItem('willstech_receipts');
+        const localReceiptsArray = localReceipts ? JSON.parse(localReceipts) : [];
+        
+        // Create map to avoid duplicates
+        const receiptMap = new Map();
+        
+        // Add local receipts
+        localReceiptsArray.forEach(receipt => {
+            receiptMap.set(receipt.id, receipt);
+        });
+        
+        // Add user receipts
+        userData.receipts.forEach(receipt => {
+            if (!receiptMap.has(receipt.id)) {
+                receiptMap.set(receipt.id, receipt);
+            }
+        });
+        
+        // Convert back to array
+        const mergedReceipts = Array.from(receiptMap.values());
+        
+        // Save merged receipts
+        localStorage.setItem('willstech_receipts', JSON.stringify(mergedReceipts));
+        
+        console.log(`Loaded ${userData.receipts.length} receipts from user account`);
+    }
+}
         // Toast function
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
@@ -1323,13 +1977,21 @@ if (!document.getElementById('freeDelivery').checked) {
     
     console.log('Valid items found:', validItems.length);
     
-    // ========== NEW: SAVE RECEIPT TO STORAGE ==========
+    // ========== SAVE RECEIPT ==========
     const receiptData = prepareReceiptData();
     if (receiptData) {
-        saveReceiptToStorage(receiptData);
+        // Save to local storage
+        saveReceiptToLocalStorage(receiptData);
+        
+        // Save to user account if logged in
+        const user = getCurrentUser();
+        if (user && !user.isGuest) {
+            saveReceiptToUserAccount(receiptData);
+        }
+        
         showSavedReceiptToast(receiptData.receiptNumber);
     }
-    // ========== END NEW CODE ==========
+    // ========== END SAVE CODE ==========
     
     if (selectedPrinterMethod === 'usb-network') {
         printReceiptViaSystem();
@@ -1337,7 +1999,43 @@ if (!document.getElementById('freeDelivery').checked) {
         printReceiptViaBluetooth();
     }
 }
+
+// Save receipt to user account
+function saveReceiptToUserAccount(receiptData) {
+    try {
+        const user = getCurrentUser();
+        if (user.isGuest) return;
         
+        // Get users from storage
+        const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
+        const users = storedUsers ? JSON.parse(storedUsers) : [];
+        const userIndex = users.findIndex(u => u.id === user.id);
+        
+        if (userIndex !== -1) {
+            // Initialize receipts array if not exists
+            if (!users[userIndex].receipts) {
+                users[userIndex].receipts = [];
+            }
+            
+            // Check if receipt already exists
+            const exists = users[userIndex].receipts.find(r => r.id === receiptData.id);
+            if (!exists) {
+                // Add sync timestamp
+                const receiptWithSync = {
+                    ...receiptData,
+                    syncedAt: new Date().toISOString()
+                };
+                
+                users[userIndex].receipts.push(receiptWithSync);
+                localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+                
+                console.log('Receipt saved to user account:', receiptData.receiptNumber);
+            }
+        }
+    } catch (error) {
+        console.error('Error saving receipt to user account:', error);
+    }
+}        
         
         function printReceiptViaSystem() {
             const now = new Date();

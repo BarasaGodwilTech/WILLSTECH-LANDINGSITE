@@ -873,6 +873,7 @@
 
 
 // Check if user is logged in
+// Check if user is logged in
 function checkUserSession() {
     const currentUser = localStorage.getItem('currentUser');
     
@@ -881,20 +882,7 @@ function checkUserSession() {
         return null;
     }
     
-    const user = JSON.parse(currentUser);
-    
-    // Check if user is authenticated with Firebase (for non-guests)
-    if (!user.isGuest) {
-        const firebaseUser = auth.currentUser;
-        if (!firebaseUser) {
-            // Firebase session expired
-            localStorage.removeItem('currentUser');
-            window.location.href = 'auth.html';
-            return null;
-        }
-    }
-    
-    return user;
+    return JSON.parse(currentUser); // Just return the user
 }
 // Get current user
 function getCurrentUser() {
@@ -1656,8 +1644,8 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Check user session
-    const user = getCurrentUser();
+    // Check user session (simplified - no Firebase check)
+    const user = checkUserSession();
     
     if (user) {
         // Update user menu
@@ -1665,11 +1653,19 @@ document.addEventListener('DOMContentLoaded', async function() {
         // Setup user menu events
         setupUserMenu();
         
+        // Setup Firebase auth state listener for session management
+        auth.onAuthStateChanged((firebaseUser) => {
+            if (!user.isGuest && !firebaseUser) {
+                // Firebase session expired - notify user but don't redirect immediately
+                console.log('Firebase session expired');
+                // You can show a toast message here if needed
+                // showToast('Session expired, please login again', 'error');
+            }
+        });
+        
         // Load user receipts if logged in
         if (!user.isGuest) {
             await loadUserReceipts();
-            
-            // Sync any backup receipts
             await syncBackupReceiptsToFirebase();
         }
     }

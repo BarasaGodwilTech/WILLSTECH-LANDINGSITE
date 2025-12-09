@@ -395,7 +395,7 @@ body.modal-open {
     <script>
         // Check user session
 function checkUserSession() {
-    const currentUser = localStorage.getItem('willstech_current_user');
+    const currentUser = localStorage.getItem('currentUser');
     
     if (!currentUser) {
         // No session, continue with local storage only

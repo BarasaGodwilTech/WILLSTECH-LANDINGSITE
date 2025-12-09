@@ -5,14 +5,68 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Will's Tech Store</title>
     <style>
-        * {
+        /* Add these styles for Google Sign-In */
+        .google-signin-btn {
+            background: white;
+            color: #757575;
+            border: 1px solid #ddd;
+            margin-bottom: 15px;
+        }
+        
+        .google-signin-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        .google-icon {
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNMCAxMC41YTkuOSA5LjkgMCAwIDAgNS4zIDEuNXYzLjFDMi42IDE1LjQgMSAxMy4yIDEgMTB6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjFjMS4xIDAgMi4xLjIgMyAuNkwyMSA0LjJhOSA5IDAgMCAwLTctM2MtMi43IDAtNS4xIDEtNi45IDIuN2wtMi41IDIuMkE4LjggOC44IDAgMCAwIDAgOS42YzAgMS40LjMgMi44LjggNHoiIGZpbGw9IiNFRkEyMjgiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik0wIDE4YzMgMCA1LjYtMSA3LjUtMi42TDUuMiAxNS40Yy0xLjEuNy0yLjQgMS4xLTMuOCAxLjEtMyAwLTUuNi0xLjktNi44LTQuNkwwIDkuNnYzLjRjMS4zIDIuOSA0LjEgNSA3LjUgNXoiIGZpbGw9IiMyMkJDRDQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjwvZz48L3N2Zz4=') no-repeat center;
+            background-size: 18px 18px;
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            margin-right: 10px;
+        }
+        
+        /* Toast notification styles */
+        .toast {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            padding: 12px 20px;
+            background: #10b981;
+            color: white;
+            border-radius: 5px;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        .toast.warning {
+            background: #f59e0b;
+        }
+        
+        /* Add to your existing styles */
+        .social-login {
+            margin: 20px 0;
+        }
+        
+        .auth-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
         }
         
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             display: flex;
@@ -40,6 +94,7 @@
         .auth-header h1 {
             font-size: 2rem;
             margin-bottom: 10px;
+            font-weight: 700;
         }
         
         .auth-header p {
@@ -58,15 +113,20 @@
             padding: 15px;
             text-align: center;
             cursor: pointer;
-            font-weight: bold;
+            font-weight: 600;
             color: #64748b;
             transition: all 0.3s;
+            font-size: 15px;
         }
         
         .auth-tab.active {
             background: white;
             color: #2563eb;
             border-bottom: 3px solid #2563eb;
+        }
+        
+        .auth-tab:hover {
+            background: #e2e8f0;
         }
         
         .auth-content {
@@ -93,32 +153,42 @@
         
         .form-label {
             display: block;
-            font-weight: bold;
+            font-weight: 600;
             margin-bottom: 8px;
             color: #374151;
+            font-size: 14px;
         }
         
         .form-control {
             width: 100%;
-            padding: 12px 15px;
+            padding: 14px 16px;
             border: 2px solid #d1d5db;
-            border-radius: 8px;
+            border-radius: 10px;
             font-size: 16px;
-            transition: border-color 0.3s;
+            transition: all 0.3s;
+            background: #f9fafb;
         }
         
         .form-control:focus {
             outline: none;
             border-color: #2563eb;
+            background: white;
             box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
         }
         
+        .form-control::placeholder {
+            color: #9ca3af;
+        }
+        
+        /* ============================================= */
+        /* BUTTON STYLES */
+        /* ============================================= */
         .btn {
             width: 100%;
-            padding: 14px;
+            padding: 16px;
             border: none;
-            border-radius: 8px;
-            font-weight: bold;
+            border-radius: 10px;
+            font-weight: 600;
             font-size: 16px;
             cursor: pointer;
             display: flex;
@@ -126,6 +196,7 @@
             align-items: center;
             gap: 10px;
             transition: all 0.3s;
+            margin-bottom: 12px;
         }
         
         .btn-primary {
@@ -135,16 +206,22 @@
         
         .btn-primary:hover {
             background: #1d4ed8;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+        }
+        
+        .btn-primary:active {
+            transform: translateY(0);
         }
         
         .btn-secondary {
             background: #6b7280;
             color: white;
-            margin-top: 10px;
         }
         
         .btn-secondary:hover {
             background: #4b5563;
+            transform: translateY(-1px);
         }
         
         .btn-success {
@@ -154,13 +231,70 @@
         
         .btn-success:hover {
             background: #059669;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
         }
         
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+        
+        /* ============================================= */
+        /* GOOGLE SIGN-IN BUTTON */
+        /* ============================================= */
+        .google-signin-btn {
+            background: white;
+            color: #3c4043;
+            border: 1px solid #dadce0;
+            font-weight: 500;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 16px;
+            transition: all 0.3s;
+        }
+        
+        .google-signin-btn:hover {
+            background: #f8f9fa;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            transform: translateY(-1px);
+            border-color: #c4c7cc;
+        }
+        
+        .google-icon {
+            background: url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMTgiIGhlaWdodD0iMTgiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGcgZmlsbD0ibm9uZSIgZmlsbC1ydWxlPSJldmVub2RkIj48cGF0aCBkPSJNMTcuNiA5LjJsLS4xLTEuOEg5djMuNGg0LjhDMTMuNiAxMiAxMyAxMyAxMiAxMy42djIuMmgzYTguOCA4LjggMCAwIDAgMi42LTYuNnoiIGZpbGw9IiM0Mjg1RjQiIGZpbGwtcnVsZT0ibm9uemVybyIvPjxwYXRoIGQ9Ik05IDE4YzIuNCAwIDQuNS0uOCA2LTIuMmwtMy0yLjJhNS40IDUuNCAwIDAgMS04LTIuOUgxVjEzYTkgOSAwIDAgMCA4IDV6IiBmaWxsPSIjMzRBODUzIiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNMCAxMC41YTkuOSA5LjkgMCAwIDAgNS4zIDEuNXYzLjFDMi42IDE1LjQgMSAxMy4yIDEgMTB6IiBmaWxsPSIjRkJCQzA1IiBmaWxsLXJ1bGU9Im5vbnplcm8iLz48cGF0aCBkPSJNOSAzLjFjMS4xIDAgMi4xLjIgMyAuNkwyMSA0LjJhOSA5IDAgMCAwLTctM2MtMi43IDAtNS4xIDEtNi45IDIuN2wtMi41IDIuMkE4LjggOC44IDAwIDAgMCA5LjZjMCAxLjQuMyAyLjguOCA0eiIgZmlsbD0iI0VGQTIyOCIgZmlsbC1ydWxlPSJub256ZXJvIi8+PHBhdGggZD0iTTAgMThjMyAwIDUuNi0xIDcuNS0yLjZMNSUyIDE1LjRjLTEuMS43LTIuNCAxLjEtMy44IDEuMS0zIDAtNS42LTEuOS02LjgtNC42TDAgOS42djMuNGMxLjMgMi45IDQuMSA1IDcuNSA1eiIgZmlsbD0iIzIyQkNENCIgZmlsbC1ydWxlPSJub256ZXJvIi8+PC9nPjwvc3ZnPg==') no-repeat center;
+            background-size: 18px 18px;
+            width: 18px;
+            height: 18px;
+            display: inline-block;
+            margin-right: 12px;
+        }
+        
+        /* ============================================= */
+        /* SOCIAL LOGIN SECTION */
+        /* ============================================= */
+        .social-login {
+            margin: 20px 0;
+        }
+        
+        .auth-methods {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        
+        /* ============================================= */
+        /* DIVIDER STYLES */
+        /* ============================================= */
         .divider {
             display: flex;
             align-items: center;
-            margin: 30px 0;
-            color: #9ca3af;
+            margin: 24px 0;
+            color: #6b7280;
         }
         
         .divider::before,
@@ -171,19 +305,25 @@
         }
         
         .divider-text {
-            padding: 0 15px;
+            padding: 0 16px;
             font-size: 14px;
+            color: #6b7280;
+            font-weight: 500;
         }
         
+        /* ============================================= */
+        /* FORM ELEMENTS */
+        /* ============================================= */
         .forgot-password {
-            text-align: right;
-            margin-top: 10px;
+            text-align: center;
+            margin-top: 15px;
         }
         
         .forgot-password a {
             color: #2563eb;
             text-decoration: none;
             font-size: 14px;
+            font-weight: 500;
         }
         
         .forgot-password a:hover {
@@ -193,71 +333,353 @@
         .remember-me {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 10px;
             margin-bottom: 20px;
+            font-size: 14px;
+        }
+        
+        .remember-me input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #2563eb;
+            cursor: pointer;
+        }
+        
+        .remember-me label {
+            cursor: pointer;
+            color: #4b5563;
         }
         
         .terms {
-            font-size: 12px;
+            font-size: 13px;
             color: #6b7280;
             text-align: center;
             margin-top: 20px;
+            line-height: 1.5;
         }
         
         .terms a {
             color: #2563eb;
             text-decoration: none;
+            font-weight: 500;
         }
         
+        .terms a:hover {
+            text-decoration: underline;
+        }
+        
+        /* ============================================= */
+        /* MESSAGE STYLES */
+        /* ============================================= */
         .error-message {
             background: #fee2e2;
             color: #991b1b;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             font-size: 14px;
             display: none;
+            border-left: 4px solid #ef4444;
+            animation: slideIn 0.3s ease;
         }
         
         .success-message {
             background: #d1fae5;
             color: #065f46;
-            padding: 10px;
-            border-radius: 5px;
-            margin-bottom: 15px;
+            padding: 14px;
+            border-radius: 10px;
+            margin-bottom: 20px;
             font-size: 14px;
             display: none;
+            border-left: 4px solid #10b981;
+            animation: slideIn 0.3s ease;
         }
         
+        @keyframes slideIn {
+            from { opacity: 0; transform: translateX(-10px); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        /* ============================================= */
+        /* USER PROFILE (GUEST MODE) */
+        /* ============================================= */
         .user-profile {
             display: flex;
             align-items: center;
             gap: 15px;
-            margin-bottom: 20px;
+            margin-bottom: 25px;
             padding-bottom: 20px;
             border-bottom: 1px solid #e5e7eb;
         }
         
         .user-avatar {
-            width: 50px;
-            height: 50px;
-            background: #2563eb;
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: 20px;
+            font-size: 24px;
             font-weight: bold;
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
         }
         
         .user-info {
             flex: 1;
         }
         
+        .user-info div:first-child {
+            font-weight: 600;
+            font-size: 18px;
+            color: #1f2937;
+            margin-bottom: 4px;
+        }
+        
         .user-email {
             color: #6b7280;
             font-size: 14px;
+        }
+        
+        /* ============================================= */
+        /* TOAST NOTIFICATION */
+        /* ============================================= */
+        .toast {
+            position: fixed;
+            top: 25px;
+            right: 25px;
+            padding: 16px 24px;
+            background: #10b981;
+            color: white;
+            border-radius: 12px;
+            z-index: 1001;
+            display: none;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            animation: toastSlideIn 0.3s ease;
+            max-width: 350px;
+            font-weight: 500;
+        }
+        
+        @keyframes toastSlideIn {
+            from { opacity: 0; transform: translateX(100%); }
+            to { opacity: 1; transform: translateX(0); }
+        }
+        
+        .toast.error {
+            background: #ef4444;
+        }
+        
+        .toast.warning {
+            background: #f59e0b;
+        }
+        
+        .toast.info {
+            background: #3b82f6;
+        }
+        
+        /* ============================================= */
+        /* WARNING MESSAGES */
+        /* ============================================= */
+        .warning-text {
+            background: #fffbeb;
+            border: 1px solid #fde68a;
+            border-radius: 10px;
+            padding: 16px;
+            margin-bottom: 20px;
+            color: #92400e;
+            font-size: 14px;
+        }
+        
+        .warning-text i {
+            color: #f59e0b;
+            margin-right: 8px;
+        }
+        
+        /* ============================================= */
+        /* RESPONSIVE DESIGN */
+        /* ============================================= */
+        @media (max-width: 480px) {
+            body {
+                padding: 15px;
+            }
+            
+            .auth-container {
+                border-radius: 16px;
+            }
+            
+            .auth-header {
+                padding: 24px;
+            }
+            
+            .auth-header h1 {
+                font-size: 1.75rem;
+            }
+            
+            .auth-content {
+                padding: 24px;
+            }
+            
+            .auth-tab {
+                padding: 12px;
+                font-size: 14px;
+            }
+            
+            .form-control {
+                padding: 16px;
+                font-size: 16px; /* Prevents iOS zoom */
+            }
+            
+            .btn {
+                padding: 16px;
+                font-size: 16px;
+            }
+            
+            .toast {
+                left: 15px;
+                right: 15px;
+                max-width: none;
+                text-align: center;
+            }
+        }
+        
+        @media (max-width: 360px) {
+            .auth-tabs {
+                flex-direction: column;
+            }
+            
+            .auth-tab {
+                padding: 12px;
+            }
+        }
+        
+        /* ============================================= */
+        /* LOADING STATES */
+        /* ============================================= */
+        .btn.loading {
+            position: relative;
+            color: transparent;
+        }
+        
+        .btn.loading::after {
+            content: "";
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid white;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 0.8s linear infinite;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* ============================================= */
+        /* PASSWORD STRENGTH INDICATOR */
+        /* ============================================= */
+        .password-strength {
+            margin-top: 8px;
+            font-size: 12px;
+        }
+        
+        .strength-bar {
+            height: 4px;
+            background: #e5e7eb;
+            border-radius: 2px;
+            margin-top: 4px;
+            overflow: hidden;
+        }
+        
+        .strength-fill {
+            height: 100%;
+            width: 0%;
+            background: #ef4444;
+            transition: all 0.3s;
+        }
+        
+        .strength-fill.weak { width: 33%; background: #ef4444; }
+        .strength-fill.medium { width: 66%; background: #f59e0b; }
+        .strength-fill.strong { width: 100%; background: #10b981; }
+        
+        /* ============================================= */
+        /* CHECKBOX STYLES */
+        /* ============================================= */
+        input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            border-radius: 4px;
+            border: 2px solid #d1d5db;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        input[type="checkbox"]:checked {
+            background-color: #2563eb;
+            border-color: #2563eb;
+        }
+        
+        input[type="checkbox"]:focus {
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+        
+        /* ============================================= */
+        /* LINK STYLES */
+        /* ============================================= */
+        a {
+            color: #2563eb;
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+        
+        a:hover {
+            color: #1d4ed8;
+            text-decoration: underline;
+        }
+        
+        /* ============================================= */
+        /* UTILITY CLASSES */
+        /* ============================================= */
+        .text-center {
+            text-align: center;
+        }
+        
+        .mt-10 {
+            margin-top: 10px;
+        }
+        
+        .mt-20 {
+            margin-top: 20px;
+        }
+        
+        .mb-10 {
+            margin-bottom: 10px;
+        }
+        
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+        
+        .text-sm {
+            font-size: 14px;
+        }
+        
+        .text-xs {
+            font-size: 12px;
+        }
+        
+        .text-gray-600 {
+            color: #6b7280;
+        }
+        
+        .font-semibold {
+            font-weight: 600;
+        }
+        
+        .hidden {
+            display: none;
         }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -280,6 +702,17 @@
             <div id="loginForm" class="auth-form active">
                 <div id="loginError" class="error-message"></div>
                 <div id="loginSuccess" class="success-message"></div>
+                
+                <div class="social-login">
+                    <button id="googleSignIn" class="btn google-signin-btn">
+                        <span class="google-icon"></span>
+                        Sign in with Google
+                    </button>
+                    
+                    <div class="divider">
+                        <span class="divider-text">or continue with email</span>
+                    </div>
+                </div>
                 
                 <form id="loginFormElement">
                     <div class="form-group">
@@ -319,6 +752,17 @@
             <div id="registerForm" class="auth-form">
                 <div id="registerError" class="error-message"></div>
                 <div id="registerSuccess" class="success-message"></div>
+                
+                <div class="social-login">
+                    <button id="googleSignUp" class="btn google-signin-btn">
+                        <span class="google-icon"></span>
+                        Sign up with Google
+                    </button>
+                    
+                    <div class="divider">
+                        <span class="divider-text">or sign up with email</span>
+                    </div>
+                </div>
                 
                 <form id="registerFormElement">
                     <div class="form-group">
@@ -389,21 +833,449 @@
         </div>
     </div>
 
+    <!-- Toast Notification -->
+    <div id="toast" class="toast"></div>
+
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
     <script>
-        // Storage keys
-        const AUTH_STORAGE_KEY = 'willstech_auth';
-        const USERS_STORAGE_KEY = 'willstech_users';
-        const RECEIPTS_STORAGE_KEY = 'willstech_receipts';
-        const CURRENT_USER_KEY = 'willstech_current_user';
+        // =============================================
+        // FIREBASE CONFIGURATION
+        // =============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
+            authDomain: "willstechstore-reciept.firebaseapp.com",
+            projectId: "willstechstore-reciept",
+            storageBucket: "willstechstore-reciept.firebasestorage.app",
+            messagingSenderId: "218930027222",
+            appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
+            measurementId: "G-0K2H44N77D"
+        };
+
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.firestore();
         
-        // Initialize
+        // =============================================
+        // HELPER FUNCTIONS
+        // =============================================
+        
+        // Toast notification function
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.className = 'toast ' + type;
+            toast.style.display = 'block';
+            
+            setTimeout(() => {
+                toast.style.display = 'none';
+            }, 4000);
+        }
+        
+        // Show error in form
+        function showError(divId, message) {
+            const div = document.getElementById(divId);
+            div.textContent = message;
+            div.style.display = 'block';
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 5000);
+        }
+        
+        // Show success in form
+        function showSuccess(divId, message) {
+            const div = document.getElementById(divId);
+            div.textContent = message;
+            div.style.display = 'block';
+            setTimeout(() => {
+                div.style.display = 'none';
+            }, 3000);
+        }
+        
+        // Validate email
+        function validateEmail(email) {
+            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            return re.test(email);
+        }
+        
+        // Save user session
+        function saveUserSession(userData, isGuest = false) {
+            const session = {
+                uid: userData.uid || userData.id,
+                name: userData.name || userData.displayName || 'User',
+                email: userData.email,
+                storeName: userData.storeName || "Will's Tech Store",
+                storePhone: userData.storePhone || "+256 751 924 844",
+                isGuest: isGuest,
+                createdAt: userData.createdAt || new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(session));
+            return session;
+        }
+        
+        // =============================================
+        // FIREBASE AUTH FUNCTIONS
+        // =============================================
+        
+        // 1. REGISTER WITH EMAIL/PASSWORD
+        async function registerUserFirebase(name, email, password) {
+            try {
+                showToast('Creating account...', 'success');
+                
+                // Create user in Firebase Authentication
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Update display name
+                await user.updateProfile({
+                    displayName: name
+                });
+                
+                // Create user document in Firestore
+                await db.collection('users').doc(user.uid).set({
+                    uid: user.uid,
+                    name: name,
+                    email: email,
+                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                    storeName: "Will's Tech Store",
+                    storePhone: "+256 751 924 844",
+                    settings: {
+                        currency: "UGX",
+                        receiptCounter: 0,
+                        timezone: "Africa/Kampala"
+                    },
+                    lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                    provider: 'email'
+                });
+                
+                // Save session
+                saveUserSession({
+                    uid: user.uid,
+                    name: name,
+                    email: email
+                });
+                
+                // Sync local receipts to Firebase
+                await syncLocalReceiptsToFirebase(user.uid);
+                
+                showToast('Account created! Syncing data...', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'Recieptprinter.html';
+                }, 1500);
+                
+            } catch (error) {
+                console.error('Registration error:', error);
+                let errorMessage = 'Registration failed. ';
+                
+                if (error.code === 'auth/email-already-in-use') {
+                    errorMessage = 'This email is already registered. Please login instead.';
+                } else if (error.code === 'auth/weak-password') {
+                    errorMessage = 'Password should be at least 6 characters.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Please enter a valid email address.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showError('registerError', errorMessage);
+            }
+        }
+        
+        // 2. LOGIN WITH EMAIL/PASSWORD
+        async function loginUserFirebase(email, password) {
+            try {
+                showToast('Logging in...', 'success');
+                
+                // Sign in
+                const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                const user = userCredential.user;
+                
+                // Get or create user document
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                let userData = userDoc.data();
+                
+                if (!userData) {
+                    // Create user document if it doesn't exist
+                    userData = {
+                        name: user.displayName || email.split('@')[0],
+                        email: email,
+                        storeName: "Will's Tech Store",
+                        storePhone: "+256 751 924 844"
+                    };
+                    await db.collection('users').doc(user.uid).set({
+                        ...userData,
+                        uid: user.uid,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                        provider: 'email'
+                    });
+                } else {
+                    // Update last login
+                    await db.collection('users').doc(user.uid).update({
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                }
+                
+                // Save session
+                saveUserSession({
+                    uid: user.uid,
+                    name: userData.name,
+                    email: email,
+                    storeName: userData.storeName,
+                    storePhone: userData.storePhone
+                });
+                
+                // Load receipts from Firebase
+                await loadReceiptsFromFirebase(user.uid);
+                
+                showToast('Login successful!', 'success');
+                
+                setTimeout(() => {
+                    window.location.href = 'Recieptprinter.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Login error:', error);
+                let errorMessage = 'Login failed. ';
+                
+                if (error.code === 'auth/user-not-found') {
+                    errorMessage = 'No account found with this email. Please register first.';
+                } else if (error.code === 'auth/wrong-password') {
+                    errorMessage = 'Incorrect password. Please try again.';
+                } else if (error.code === 'auth/invalid-email') {
+                    errorMessage = 'Please enter a valid email address.';
+                } else if (error.code === 'auth/user-disabled') {
+                    errorMessage = 'This account has been disabled.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showError('loginError', errorMessage);
+            }
+        }
+        
+        // 3. GOOGLE SIGN-IN/SIGN-UP
+        async function signInWithGoogle() {
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                // Add scopes if needed
+                provider.addScope('profile');
+                provider.addScope('email');
+                
+                showToast('Connecting to Google...', 'success');
+                
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                // Check if user document exists
+                const userDoc = await db.collection('users').doc(user.uid).get();
+                
+                if (!userDoc.exists) {
+                    // First time Google login - create user document
+                    await db.collection('users').doc(user.uid).set({
+                        uid: user.uid,
+                        name: user.displayName,
+                        email: user.email,
+                        photoURL: user.photoURL,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        storeName: "Will's Tech Store",
+                        storePhone: "+256 751 924 844",
+                        settings: {
+                            currency: "UGX",
+                            receiptCounter: 0,
+                            timezone: "Africa/Kampala"
+                        },
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
+                        provider: 'google'
+                    });
+                    
+                    showToast('Welcome! Account created with Google.', 'success');
+                } else {
+                    // Update last login
+                    await db.collection('users').doc(user.uid).update({
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    });
+                    
+                    showToast('Welcome back!', 'success');
+                }
+                
+                // Save session
+                saveUserSession({
+                    uid: user.uid,
+                    name: user.displayName,
+                    email: user.email,
+                    photoURL: user.photoURL
+                });
+                
+                // Load receipts from Firebase
+                await loadReceiptsFromFirebase(user.uid);
+                
+                setTimeout(() => {
+                    window.location.href = 'Recieptprinter.html';
+                }, 1000);
+                
+            } catch (error) {
+                console.error('Google Sign-In error:', error);
+                
+                let errorMessage = 'Google Sign-In failed. ';
+                if (error.code === 'auth/popup-closed-by-user') {
+                    errorMessage = 'Sign-in was cancelled.';
+                } else if (error.code === 'auth/popup-blocked') {
+                    errorMessage = 'Popup was blocked. Please allow popups for this site.';
+                } else {
+                    errorMessage += error.message;
+                }
+                
+                showToast(errorMessage, 'error');
+            }
+        }
+        
+        // 4. GUEST MODE
+        function startGuestSession() {
+            const guestId = 'guest_' + Date.now();
+            const session = {
+                uid: guestId,
+                name: 'Guest User',
+                email: null,
+                storeName: "Will's Tech Store",
+                storePhone: "+256 751 924 844",
+                isGuest: true,
+                createdAt: new Date().toISOString(),
+                lastLogin: new Date().toISOString()
+            };
+            
+            localStorage.setItem('currentUser', JSON.stringify(session));
+            
+            showToast('Starting guest session...', 'success');
+            
+            setTimeout(() => {
+                window.location.href = 'Recieptprinter.html';
+            }, 1000);
+        }
+        
+        // 5. SYNC FUNCTIONS
+        async function syncLocalReceiptsToFirebase(userId) {
+            try {
+                const localReceipts = localStorage.getItem('willstech_receipts');
+                if (!localReceipts) return;
+                
+                const receipts = JSON.parse(localReceipts);
+                let syncedCount = 0;
+                
+                for (const receipt of receipts) {
+                    const existingDoc = await db.collection('users')
+                        .doc(userId)
+                        .collection('receipts')
+                        .doc(receipt.id)
+                        .get();
+                    
+                    if (!existingDoc.exists) {
+                        await db.collection('users')
+                            .doc(userId)
+                            .collection('receipts')
+                            .doc(receipt.id)
+                            .set({
+                                ...receipt,
+                                userId: userId,
+                                syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                            });
+                        syncedCount++;
+                    }
+                }
+                
+                if (syncedCount > 0) {
+                    console.log(`Synced ${syncedCount} receipts to Firebase`);
+                }
+                
+            } catch (error) {
+                console.error('Sync error:', error);
+            }
+        }
+        
+        async function loadReceiptsFromFirebase(userId) {
+            try {
+                const receiptsSnapshot = await db.collection('users')
+                    .doc(userId)
+                    .collection('receipts')
+                    .orderBy('timestamp', 'desc')
+                    .limit(500)
+                    .get();
+                
+                const cloudReceipts = receiptsSnapshot.docs.map(doc => {
+                    const data = doc.data();
+                    // Convert Firestore Timestamp to ISO string
+                    if (data.timestamp && data.timestamp.toDate) {
+                        data.timestamp = data.timestamp.toDate().toISOString();
+                    }
+                    if (data.syncedAt && data.syncedAt.toDate) {
+                        data.syncedAt = data.syncedAt.toDate().toISOString();
+                    }
+                    return data;
+                });
+                
+                // Merge with local receipts
+                const localReceipts = localStorage.getItem('willstech_receipts');
+                const localReceiptsArray = localReceipts ? JSON.parse(localReceipts) : [];
+                
+                // Create map (cloud receipts overwrite local ones)
+                const receiptMap = new Map();
+                
+                // Add cloud receipts first
+                cloudReceipts.forEach(receipt => {
+                    receiptMap.set(receipt.id, receipt);
+                });
+                
+                // Add local receipts if not in cloud
+                localReceiptsArray.forEach(receipt => {
+                    if (!receiptMap.has(receipt.id)) {
+                        receiptMap.set(receipt.id, receipt);
+                    }
+                });
+                
+                // Save merged list
+                const mergedReceipts = Array.from(receiptMap.values());
+                localStorage.setItem('willstech_receipts', JSON.stringify(mergedReceipts));
+                
+                console.log(`Loaded ${cloudReceipts.length} from cloud, ${mergedReceipts.length} total`);
+                
+            } catch (error) {
+                console.error('Error loading from Firebase:', error);
+                // Continue with local storage
+            }
+        }
+        
+        // 6. PASSWORD RESET
+        async function resetPassword(email) {
+            try {
+                await auth.sendPasswordResetEmail(email);
+                showToast('Password reset email sent! Check your inbox.', 'success');
+            } catch (error) {
+                console.error('Password reset error:', error);
+                showToast('Error sending reset email: ' + error.message, 'error');
+            }
+        }
+        
+        // =============================================
+        // EVENT LISTENERS & INITIALIZATION
+        // =============================================
         document.addEventListener('DOMContentLoaded', function() {
-            setupEventListeners();
-            checkExistingSession();
-        });
-        
-        // Setup event listeners
-        function setupEventListeners() {
+            // Check if user is already logged in
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                if (!user.isGuest) {
+                    // Auto-redirect if remember me was checked
+                    window.location.href = 'Recieptprinter.html';
+                }
+            }
+            
             // Tab switching
             document.querySelectorAll('.auth-tab').forEach(tab => {
                 tab.addEventListener('click', function() {
@@ -423,538 +1295,86 @@
                 });
             });
             
+            // Google Sign-In buttons
+            document.getElementById('googleSignIn')?.addEventListener('click', signInWithGoogle);
+            document.getElementById('googleSignUp')?.addEventListener('click', signInWithGoogle);
+            
             // Login form
-            document.getElementById('loginFormElement').addEventListener('submit', function(e) {
+            document.getElementById('loginFormElement')?.addEventListener('submit', function(e) {
                 e.preventDefault();
-                loginUser();
+                const email = document.getElementById('loginEmail').value.trim();
+                const password = document.getElementById('loginPassword').value;
+                
+                if (!email || !password) {
+                    showError('loginError', 'Please fill in all fields');
+                    return;
+                }
+                
+                if (!validateEmail(email)) {
+                    showError('loginError', 'Please enter a valid email address');
+                    return;
+                }
+                
+                loginUserFirebase(email, password);
             });
             
             // Register form
-            document.getElementById('registerFormElement').addEventListener('submit', function(e) {
+            document.getElementById('registerFormElement')?.addEventListener('submit', function(e) {
                 e.preventDefault();
-                registerUser();
+                const name = document.getElementById('registerName').value.trim();
+                const email = document.getElementById('registerEmail').value.trim();
+                const password = document.getElementById('registerPassword').value;
+                const confirmPassword = document.getElementById('registerConfirmPassword').value;
+                
+                // Validation
+                if (!name || !email || !password || !confirmPassword) {
+                    showError('registerError', 'Please fill in all fields');
+                    return;
+                }
+                
+                if (!validateEmail(email)) {
+                    showError('registerError', 'Please enter a valid email address');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showError('registerError', 'Password must be at least 6 characters');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showError('registerError', 'Passwords do not match');
+                    return;
+                }
+                
+                if (!document.getElementById('agreeTerms').checked) {
+                    showError('registerError', 'Please agree to the Terms of Service');
+                    return;
+                }
+                
+                registerUserFirebase(name, email, password);
             });
             
-            // Continue as guest
-            document.getElementById('continueAsGuest').addEventListener('click', startGuestSession);
-            document.getElementById('startAsGuest').addEventListener('click', startGuestSession);
+            // Guest mode
+            document.getElementById('continueAsGuest')?.addEventListener('click', startGuestSession);
+            document.getElementById('startAsGuest')?.addEventListener('click', startGuestSession);
             
             // Forgot password
-            document.getElementById('forgotPassword').addEventListener('click', function(e) {
+            document.getElementById('forgotPassword')?.addEventListener('click', function(e) {
                 e.preventDefault();
-                resetPassword();
+                const email = prompt('Enter your email address to reset password:');
+                if (email && validateEmail(email)) {
+                    resetPassword(email);
+                } else if (email) {
+                    showToast('Please enter a valid email address', 'error');
+                }
             });
             
             // Create account from guest
-            document.getElementById('createAccountFromGuest').addEventListener('click', function() {
+            document.getElementById('createAccountFromGuest')?.addEventListener('click', function() {
                 document.querySelector('.auth-tab[data-tab="register"]').click();
             });
-        }
-        
-        // Check if user is already logged in
-        function checkExistingSession() {
-            const currentUser = localStorage.getItem(CURRENT_USER_KEY);
-            
-            if (currentUser) {
-                const user = JSON.parse(currentUser);
-                if (user.email && user.isGuest !== true) {
-                    // Redirect to main app
-                    window.location.href = 'Recieptprinter.html';
-                }
-            }
-        }
-        
-        // Login user
-        function loginUser() {
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-            const rememberMe = document.getElementById('rememberMe').checked;
-            
-            const errorDiv = document.getElementById('loginError');
-            const successDiv = document.getElementById('loginSuccess');
-            
-            // Validation
-            if (!email || !password) {
-                showError(errorDiv, 'Please fill in all fields');
-                return;
-            }
-            
-            // Get stored users
-            const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-            const users = storedUsers ? JSON.parse(storedUsers) : [];
-            
-            // Find user
-            const user = users.find(u => u.email === email && u.password === btoa(password));
-            
-            if (!user) {
-                showError(errorDiv, 'Invalid email or password');
-                return;
-            }
-            
-            // Create session
-            const session = {
-                id: user.id,
-                name: user.name,
-                email: user.email,
-                createdAt: new Date().toISOString(),
-                rememberMe: rememberMe
-            };
-            
-            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
-            
-            // Sync local receipts to user account
-            syncLocalReceiptsToAccount(user.id);
-            
-            // Show success and redirect
-            showSuccess(successDiv, 'Login successful! Redirecting...');
-            
-            setTimeout(() => {
-                window.location.href = 'Recieptprinter.html';
-            }, 1500);
-        }
-        
-        // Register new user
-        function registerUser() {
-            const name = document.getElementById('registerName').value.trim();
-            const email = document.getElementById('registerEmail').value.trim();
-            const password = document.getElementById('registerPassword').value;
-            const confirmPassword = document.getElementById('registerConfirmPassword').value;
-            
-            const errorDiv = document.getElementById('registerError');
-            const successDiv = document.getElementById('registerSuccess');
-            
-            // Validation
-            if (!name || !email || !password || !confirmPassword) {
-                showError(errorDiv, 'Please fill in all fields');
-                return;
-            }
-            
-            if (!validateEmail(email)) {
-                showError(errorDiv, 'Please enter a valid email address');
-                return;
-            }
-            
-            if (password.length < 8) {
-                showError(errorDiv, 'Password must be at least 8 characters long');
-                return;
-            }
-            
-            if (password !== confirmPassword) {
-                showError(errorDiv, 'Passwords do not match');
-                return;
-            }
-            
-            // Check if user already exists
-            const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-            const users = storedUsers ? JSON.parse(storedUsers) : [];
-            
-            if (users.find(u => u.email === email)) {
-                showError(errorDiv, 'An account with this email already exists');
-                return;
-            }
-            
-            // Create new user
-            const newUser = {
-                id: generateUserId(),
-                name: name,
-                email: email,
-                password: btoa(password), // Simple encoding (not secure for production)
-                createdAt: new Date().toISOString(),
-                receipts: []
-            };
-            
-            // Save user
-            users.push(newUser);
-            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-            
-            // Auto login
-            const session = {
-                id: newUser.id,
-                name: newUser.name,
-                email: newUser.email,
-                createdAt: new Date().toISOString(),
-                rememberMe: false
-            };
-            
-            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
-            
-            // Sync local receipts to new account
-            syncLocalReceiptsToAccount(newUser.id);
-            
-            // Show success
-            showSuccess(successDiv, 'Account created successfully! Redirecting...');
-            
-            setTimeout(() => {
-                window.location.href = 'Recieptprinter.html';
-            }, 1500);
-        }
-        
-        // Start guest session
-        function startGuestSession() {
-            const session = {
-                id: 'guest_' + Date.now(),
-                name: 'Guest User',
-                email: null,
-                isGuest: true,
-                createdAt: new Date().toISOString()
-            };
-            
-            localStorage.setItem(CURRENT_USER_KEY, JSON.stringify(session));
-            
-            // Show loading message
-            const successDiv = document.getElementById('loginSuccess');
-            showSuccess(successDiv, 'Starting guest session...');
-            
-            setTimeout(() => {
-                window.location.href = 'Recieptprinter.html';
-            }, 1000);
-        }
-        
-        // Sync local receipts to user account
-        function syncLocalReceiptsToAccount(userId) {
-            try {
-                // Get local receipts
-                const localReceipts = localStorage.getItem(RECEIPTS_STORAGE_KEY);
-                
-                if (localReceipts) {
-                    const receipts = JSON.parse(localReceipts);
-                    
-                    // Get user
-                    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-                    const users = storedUsers ? JSON.parse(storedUsers) : [];
-                    const userIndex = users.findIndex(u => u.id === userId);
-                    
-                    if (userIndex !== -1) {
-                        // Add receipts to user account
-                        if (!users[userIndex].receipts) {
-                            users[userIndex].receipts = [];
-                        }
-                        
-                        // Merge receipts (avoid duplicates)
-                        receipts.forEach(receipt => {
-                            const exists = users[userIndex].receipts.find(r => r.id === receipt.id);
-                            if (!exists) {
-                                users[userIndex].receipts.push({
-                                    ...receipt,
-                                    syncedAt: new Date().toISOString()
-                                });
-                            }
-                        });
-                        
-                        // Save updated user
-                        localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-                        
-                        console.log(`Synced ${receipts.length} receipts to account`);
-                    }
-                }
-            } catch (error) {
-                console.error('Error syncing receipts:', error);
-            }
-        }
-        
-        // Reset password (simplified)
-        function resetPassword() {
-            const email = prompt('Enter your email address to reset password:');
-            
-            if (email && validateEmail(email)) {
-                const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-                const users = storedUsers ? JSON.parse(storedUsers) : [];
-                
-                if (users.find(u => u.email === email)) {
-                    alert('Password reset instructions sent to ' + email + '\n\n(Note: This is a demo. In production, you would send an email.)');
-                } else {
-                    alert('No account found with that email address.');
-                }
-            }
-        }
-        
-        // Helper functions
-        function showError(div, message) {
-            div.textContent = message;
-            div.style.display = 'block';
-            setTimeout(() => {
-                div.style.display = 'none';
-            }, 5000);
-        }
-        
-        function showSuccess(div, message) {
-            div.textContent = message;
-            div.style.display = 'block';
-        }
-        
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-        
-        function generateUserId() {
-            return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
-        }
+        });
     </script>
-    <!-- Firebase SDKs -->
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-<script>
-  // Firebase Config
-  const firebaseConfig = {
-    apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
-    authDomain: "willstechstore-reciept.firebaseapp.com",
-    projectId: "willstechstore-reciept",
-    storageBucket: "willstechstore-reciept.firebasestorage.app",
-    messagingSenderId: "218930027222",
-    appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
-    measurementId: "G-0K2H44N77D"
-  };
-
-  // Initialize Firebase
-  firebase.initializeApp(firebaseConfig);
-  const auth = firebase.auth();
-  const db = firebase.firestore();
-  
-  // Replace your existing auth functions with these Firebase versions
-  
-  // Register with Firebase
-  async function registerUserFirebase(name, email, password) {
-    try {
-      // 1. Create user in Firebase Authentication
-      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
-      const user = userCredential.user;
-      
-      // 2. Update display name
-      await user.updateProfile({
-        displayName: name
-      });
-      
-      // 3. Create user document in Firestore
-      await db.collection('users').doc(user.uid).set({
-        uid: user.uid,
-        name: name,
-        email: email,
-        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-        storeName: "Will's Tech Store",
-        storePhone: "+256 751 924 844",
-        settings: {
-          currency: "UGX",
-          receiptCounter: 0,
-          timezone: "Africa/Kampala"
-        },
-        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      
-      // 4. Save to localStorage for session
-      localStorage.setItem('currentUser', JSON.stringify({
-        uid: user.uid,
-        name: name,
-        email: email,
-        storeName: "Will's Tech Store",
-        storePhone: "+256 751 924 844",
-        isGuest: false
-      }));
-      
-      // 5. Sync any existing local receipts to Firebase
-      await syncLocalReceiptsToFirebase(user.uid);
-      
-      showToast('Account created! Data synced to cloud.', 'success');
-      
-      setTimeout(() => {
-        window.location.href = 'Recieptprinter.html';
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Registration error:', error);
-      let errorMessage = 'Registration failed. ';
-      
-      if (error.code === 'auth/email-already-in-use') {
-        errorMessage += 'Email already registered.';
-      } else if (error.code === 'auth/weak-password') {
-        errorMessage += 'Password should be at least 6 characters.';
-      } else {
-        errorMessage += error.message;
-      }
-      
-      showToast(errorMessage, 'error');
-    }
-  }
-  
-  // Login with Firebase
-  async function loginUserFirebase(email, password) {
-    try {
-      // 1. Sign in
-      const userCredential = await auth.signInWithEmailAndPassword(email, password);
-      const user = userCredential.user;
-      
-      // 2. Get user data from Firestore
-      const userDoc = await db.collection('users').doc(user.uid).get();
-      let userData = userDoc.data();
-      
-      if (!userData) {
-        // Create user document if it doesn't exist (for backward compatibility)
-        userData = {
-          name: user.displayName || email.split('@')[0],
-          email: email,
-          storeName: "Will's Tech Store",
-          storePhone: "+256 751 924 844"
-        };
-        await db.collection('users').doc(user.uid).set({
-          ...userData,
-          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      } else {
-        // Update last login
-        await db.collection('users').doc(user.uid).update({
-          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-        });
-      }
-      
-      // 3. Save session
-      localStorage.setItem('currentUser', JSON.stringify({
-        uid: user.uid,
-        name: userData.name,
-        email: email,
-        storeName: userData.storeName || "Will's Tech Store",
-        storePhone: userData.storePhone || "+256 751 924 844",
-        isGuest: false
-      }));
-      
-      // 4. Load receipts from Firebase
-      await loadReceiptsFromFirebase(user.uid);
-      
-      showToast('Login successful! Loading receipts...', 'success');
-      
-      setTimeout(() => {
-        window.location.href = 'Recieptprinter.html';
-      }, 1500);
-      
-    } catch (error) {
-      console.error('Login error:', error);
-      let errorMessage = 'Login failed. ';
-      
-      if (error.code === 'auth/user-not-found') {
-        errorMessage += 'No account found with this email.';
-      } else if (error.code === 'auth/wrong-password') {
-        errorMessage += 'Incorrect password.';
-      } else {
-        errorMessage += error.message;
-      }
-      
-      showToast(errorMessage, 'error');
-    }
-  }
-  
-  // Sync local receipts to Firebase
-  async function syncLocalReceiptsToFirebase(userId) {
-    try {
-      const localReceipts = localStorage.getItem('willstech_receipts');
-      if (!localReceipts) return;
-      
-      const receipts = JSON.parse(localReceipts);
-      let syncedCount = 0;
-      
-      // Upload each receipt
-      for (const receipt of receipts) {
-        // Check if already exists
-        const existingDoc = await db.collection('users')
-          .doc(userId)
-          .collection('receipts')
-          .doc(receipt.id)
-          .get();
-        
-        if (!existingDoc.exists) {
-          await db.collection('users')
-            .doc(userId)
-            .collection('receipts')
-            .doc(receipt.id)
-            .set({
-              ...receipt,
-              userId: userId,
-              syncedAt: firebase.firestore.FieldValue.serverTimestamp()
-            });
-          syncedCount++;
-        }
-      }
-      
-      if (syncedCount > 0) {
-        console.log(`Synced ${syncedCount} receipts to Firebase`);
-      }
-      
-    } catch (error) {
-      console.error('Sync error:', error);
-    }
-  }
-  
-  // Load receipts from Firebase
-  async function loadReceiptsFromFirebase(userId) {
-    try {
-      const receiptsSnapshot = await db.collection('users')
-        .doc(userId)
-        .collection('receipts')
-        .orderBy('timestamp', 'desc')
-        .limit(1000) // Limit for performance
-        .get();
-      
-      const cloudReceipts = receiptsSnapshot.docs.map(doc => doc.data());
-      
-      // Merge with local receipts
-      const localReceipts = localStorage.getItem('willstech_receipts');
-      const localReceiptsArray = localReceipts ? JSON.parse(localReceipts) : [];
-      
-      // Create map to avoid duplicates (cloud wins)
-      const receiptMap = new Map();
-      
-      // Add cloud receipts first (authoritative)
-      cloudReceipts.forEach(receipt => {
-        receiptMap.set(receipt.id, receipt);
-      });
-      
-      // Add local receipts if not in cloud
-      localReceiptsArray.forEach(receipt => {
-        if (!receiptMap.has(receipt.id)) {
-          receiptMap.set(receipt.id, receipt);
-        }
-      });
-      
-      // Save merged list
-      const mergedReceipts = Array.from(receiptMap.values());
-      localStorage.setItem('willstech_receipts', JSON.stringify(mergedReceipts));
-      
-      console.log(`Loaded ${cloudReceipts.length} receipts from cloud, ${mergedReceipts.length} total`);
-      
-    } catch (error) {
-      console.error('Error loading from Firebase:', error);
-      // Continue with local storage only
-    }
-  }
-  
-  // Update your form submissions to use Firebase functions
-  document.addEventListener('DOMContentLoaded', function() {
-    // Replace your existing form handlers
-    
-    // Login form
-    const loginForm = document.getElementById('loginFormElement');
-    if (loginForm) {
-      loginForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const email = document.getElementById('loginEmail').value;
-        const password = document.getElementById('loginPassword').value;
-        await loginUserFirebase(email, password);
-      });
-    }
-    
-    // Register form
-    const registerForm = document.getElementById('registerFormElement');
-    if (registerForm) {
-      registerForm.addEventListener('submit', async function(e) {
-        e.preventDefault();
-        const name = document.getElementById('registerName').value;
-        const email = document.getElementById('registerEmail').value;
-        const password = document.getElementById('registerPassword').value;
-        await registerUserFirebase(name, email, password);
-      });
-    }
-  });
-</script>
 </body>
 </html>

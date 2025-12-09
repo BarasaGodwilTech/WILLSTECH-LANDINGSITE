@@ -1374,5 +1374,122 @@ function showToast(message, type = 'success') {
     </script>
     <!-- Add this right before </body> -->
 <div id="toast" style="position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: #10b981; color: white; border-radius: 5px; z-index: 1001; display: none;"></div>
+
+<!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Firebase Config (same as above)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
+    authDomain: "willstechstore-reciept.firebaseapp.com",
+    projectId: "willstechstore-reciept",
+    storageBucket: "willstechstore-reciept.firebasestorage.app",
+    messagingSenderId: "218930027222",
+    appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
+    measurementId: "G-0K2H44N77D"
+  };
+
+  // Initialize Firebase
+  if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+  }
+  
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  
+  // Update loadReceipts function
+  const originalLoadReceipts = window.loadReceipts;
+  
+  window.loadReceipts = async function() {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (user && !user.isGuest) {
+      // Load from Firebase
+      await loadReceiptsFromFirebase(user.uid);
+    } else {
+      // Load from local storage
+      const storedReceipts = localStorage.getItem(RECEIPTS_STORAGE_KEY);
+      allReceipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+    }
+    
+    filteredReceipts = [...allReceipts];
+    displayReceipts();
+    updateStats();
+  };
+  
+  // Load receipts from Firebase
+  async function loadReceiptsFromFirebase(userId) {
+    try {
+      showToast('Loading receipts from cloud...', 'success');
+      
+      const receiptsSnapshot = await db.collection('users')
+        .doc(userId)
+        .collection('receipts')
+        .orderBy('timestamp', 'desc')
+        .get();
+      
+      allReceipts = receiptsSnapshot.docs.map(doc => {
+        const data = doc.data();
+        // Ensure proper date format
+        if (data.timestamp && typeof data.timestamp.toDate === 'function') {
+          data.timestamp = data.timestamp.toDate().toISOString();
+        }
+        return data;
+      });
+      
+      // Save to localStorage for offline access
+      localStorage.setItem(RECEIPTS_STORAGE_KEY, JSON.stringify(allReceipts));
+      
+      showToast(`Loaded ${allReceipts.length} receipts from cloud`, 'success');
+      
+    } catch (error) {
+      console.error('Error loading from Firebase:', error);
+      showToast('Using local cache, cloud sync failed', 'error');
+      
+      // Fallback to local storage
+      const storedReceipts = localStorage.getItem(RECEIPTS_STORAGE_KEY);
+      allReceipts = storedReceipts ? JSON.parse(storedReceipts) : [];
+    }
+  }
+  
+  // Add sync button
+  document.addEventListener('DOMContentLoaded', function() {
+    const user = JSON.parse(localStorage.getItem('currentUser'));
+    
+    if (user && !user.isGuest) {
+      // Add sync button to controls
+      const controls = document.querySelector('.controls');
+      if (controls) {
+        const syncBtn = document.createElement('button');
+        syncBtn.className = 'btn btn-print';
+        syncBtn.id = 'syncCloud';
+        syncBtn.innerHTML = '<i class="fas fa-sync"></i> Sync Cloud';
+        syncBtn.onclick = async function() {
+          await loadReceiptsFromFirebase(user.uid);
+          displayReceipts();
+          updateStats();
+        };
+        controls.appendChild(syncBtn);
+      }
+      
+      // Add user info to header
+      const header = document.querySelector('.header');
+      if (header) {
+        const userInfo = document.createElement('div');
+        userInfo.style.cssText = 'margin-top: 10px; font-size: 14px;';
+        userInfo.innerHTML = `
+          <i class="fas fa-user"></i> ${user.name} 
+          <span style="background: #10b981; color: white; padding: 2px 8px; border-radius: 10px; font-size: 12px; margin-left: 10px;">
+            Cloud Sync
+          </span>
+        `;
+        header.appendChild(userInfo);
+      }
+    }
+  });
+</script>
 </body>
 </html>

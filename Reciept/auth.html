@@ -691,5 +691,270 @@
             return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
         }
     </script>
+    <!-- Firebase SDKs -->
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Firebase Config
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
+    authDomain: "willstechstore-reciept.firebaseapp.com",
+    projectId: "willstechstore-reciept",
+    storageBucket: "willstechstore-reciept.firebasestorage.app",
+    messagingSenderId: "218930027222",
+    appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
+    measurementId: "G-0K2H44N77D"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  
+  // Replace your existing auth functions with these Firebase versions
+  
+  // Register with Firebase
+  async function registerUserFirebase(name, email, password) {
+    try {
+      // 1. Create user in Firebase Authentication
+      const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      
+      // 2. Update display name
+      await user.updateProfile({
+        displayName: name
+      });
+      
+      // 3. Create user document in Firestore
+      await db.collection('users').doc(user.uid).set({
+        uid: user.uid,
+        name: name,
+        email: email,
+        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+        storeName: "Will's Tech Store",
+        storePhone: "+256 751 924 844",
+        settings: {
+          currency: "UGX",
+          receiptCounter: 0,
+          timezone: "Africa/Kampala"
+        },
+        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      
+      // 4. Save to localStorage for session
+      localStorage.setItem('currentUser', JSON.stringify({
+        uid: user.uid,
+        name: name,
+        email: email,
+        storeName: "Will's Tech Store",
+        storePhone: "+256 751 924 844",
+        isGuest: false
+      }));
+      
+      // 5. Sync any existing local receipts to Firebase
+      await syncLocalReceiptsToFirebase(user.uid);
+      
+      showToast('Account created! Data synced to cloud.', 'success');
+      
+      setTimeout(() => {
+        window.location.href = 'Recieptprinter.html';
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Registration error:', error);
+      let errorMessage = 'Registration failed. ';
+      
+      if (error.code === 'auth/email-already-in-use') {
+        errorMessage += 'Email already registered.';
+      } else if (error.code === 'auth/weak-password') {
+        errorMessage += 'Password should be at least 6 characters.';
+      } else {
+        errorMessage += error.message;
+      }
+      
+      showToast(errorMessage, 'error');
+    }
+  }
+  
+  // Login with Firebase
+  async function loginUserFirebase(email, password) {
+    try {
+      // 1. Sign in
+      const userCredential = await auth.signInWithEmailAndPassword(email, password);
+      const user = userCredential.user;
+      
+      // 2. Get user data from Firestore
+      const userDoc = await db.collection('users').doc(user.uid).get();
+      let userData = userDoc.data();
+      
+      if (!userData) {
+        // Create user document if it doesn't exist (for backward compatibility)
+        userData = {
+          name: user.displayName || email.split('@')[0],
+          email: email,
+          storeName: "Will's Tech Store",
+          storePhone: "+256 751 924 844"
+        };
+        await db.collection('users').doc(user.uid).set({
+          ...userData,
+          createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      } else {
+        // Update last login
+        await db.collection('users').doc(user.uid).update({
+          lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+        });
+      }
+      
+      // 3. Save session
+      localStorage.setItem('currentUser', JSON.stringify({
+        uid: user.uid,
+        name: userData.name,
+        email: email,
+        storeName: userData.storeName || "Will's Tech Store",
+        storePhone: userData.storePhone || "+256 751 924 844",
+        isGuest: false
+      }));
+      
+      // 4. Load receipts from Firebase
+      await loadReceiptsFromFirebase(user.uid);
+      
+      showToast('Login successful! Loading receipts...', 'success');
+      
+      setTimeout(() => {
+        window.location.href = 'Recieptprinter.html';
+      }, 1500);
+      
+    } catch (error) {
+      console.error('Login error:', error);
+      let errorMessage = 'Login failed. ';
+      
+      if (error.code === 'auth/user-not-found') {
+        errorMessage += 'No account found with this email.';
+      } else if (error.code === 'auth/wrong-password') {
+        errorMessage += 'Incorrect password.';
+      } else {
+        errorMessage += error.message;
+      }
+      
+      showToast(errorMessage, 'error');
+    }
+  }
+  
+  // Sync local receipts to Firebase
+  async function syncLocalReceiptsToFirebase(userId) {
+    try {
+      const localReceipts = localStorage.getItem('willstech_receipts');
+      if (!localReceipts) return;
+      
+      const receipts = JSON.parse(localReceipts);
+      let syncedCount = 0;
+      
+      // Upload each receipt
+      for (const receipt of receipts) {
+        // Check if already exists
+        const existingDoc = await db.collection('users')
+          .doc(userId)
+          .collection('receipts')
+          .doc(receipt.id)
+          .get();
+        
+        if (!existingDoc.exists) {
+          await db.collection('users')
+            .doc(userId)
+            .collection('receipts')
+            .doc(receipt.id)
+            .set({
+              ...receipt,
+              userId: userId,
+              syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
+          syncedCount++;
+        }
+      }
+      
+      if (syncedCount > 0) {
+        console.log(`Synced ${syncedCount} receipts to Firebase`);
+      }
+      
+    } catch (error) {
+      console.error('Sync error:', error);
+    }
+  }
+  
+  // Load receipts from Firebase
+  async function loadReceiptsFromFirebase(userId) {
+    try {
+      const receiptsSnapshot = await db.collection('users')
+        .doc(userId)
+        .collection('receipts')
+        .orderBy('timestamp', 'desc')
+        .limit(1000) // Limit for performance
+        .get();
+      
+      const cloudReceipts = receiptsSnapshot.docs.map(doc => doc.data());
+      
+      // Merge with local receipts
+      const localReceipts = localStorage.getItem('willstech_receipts');
+      const localReceiptsArray = localReceipts ? JSON.parse(localReceipts) : [];
+      
+      // Create map to avoid duplicates (cloud wins)
+      const receiptMap = new Map();
+      
+      // Add cloud receipts first (authoritative)
+      cloudReceipts.forEach(receipt => {
+        receiptMap.set(receipt.id, receipt);
+      });
+      
+      // Add local receipts if not in cloud
+      localReceiptsArray.forEach(receipt => {
+        if (!receiptMap.has(receipt.id)) {
+          receiptMap.set(receipt.id, receipt);
+        }
+      });
+      
+      // Save merged list
+      const mergedReceipts = Array.from(receiptMap.values());
+      localStorage.setItem('willstech_receipts', JSON.stringify(mergedReceipts));
+      
+      console.log(`Loaded ${cloudReceipts.length} receipts from cloud, ${mergedReceipts.length} total`);
+      
+    } catch (error) {
+      console.error('Error loading from Firebase:', error);
+      // Continue with local storage only
+    }
+  }
+  
+  // Update your form submissions to use Firebase functions
+  document.addEventListener('DOMContentLoaded', function() {
+    // Replace your existing form handlers
+    
+    // Login form
+    const loginForm = document.getElementById('loginFormElement');
+    if (loginForm) {
+      loginForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const email = document.getElementById('loginEmail').value;
+        const password = document.getElementById('loginPassword').value;
+        await loginUserFirebase(email, password);
+      });
+    }
+    
+    // Register form
+    const registerForm = document.getElementById('registerFormElement');
+    if (registerForm) {
+      registerForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        const name = document.getElementById('registerName').value;
+        const email = document.getElementById('registerEmail').value;
+        const password = document.getElementById('registerPassword').value;
+        await registerUserFirebase(name, email, password);
+      });
+    }
+  });
+</script>
 </body>
 </html>

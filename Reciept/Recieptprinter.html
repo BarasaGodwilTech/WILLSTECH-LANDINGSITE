@@ -655,6 +655,38 @@
 }
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    // In your HTML files (auth.html, Recieptprinter.html, receipts.html)
+// Add this in the <head> or before </body>
+
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Your Firebase configuration (use what you have)
+  const firebaseConfig = {
+    apiKey: "AIzaSyBTa8LsNopZ7CrJOKF05R8OU1L94toLP7I",
+    authDomain: "willstechstore-reciept.firebaseapp.com",
+    projectId: "willstechstore-reciept",
+    storageBucket: "willstechstore-reciept.firebasestorage.app",
+    messagingSenderId: "218930027222",
+    appId: "1:218930027222:web:44a92a8c16eaff93b4c777",
+    measurementId: "G-0K2H44N77D"
+  };
+
+  // Initialize Firebase
+  firebase.initializeApp(firebaseConfig);
+  
+  // Get services
+  const auth = firebase.auth();
+  const db = firebase.firestore();
+  // analytics is optional for receipts
+  
+  // Now you can use:
+  // auth.signInWithEmailAndPassword()
+  // db.collection().add()
+  // etc.
+</script>
 </head>
 <body>
     <div class="container">

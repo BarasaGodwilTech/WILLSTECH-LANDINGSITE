@@ -859,6 +859,20 @@
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
+
+        // =============================================
+// AUTH STATE LISTENER - ADD THIS NEW FUNCTION
+// =============================================
+function setupAuthStateListener() {
+    auth.onAuthStateChanged((user) => {
+        if (user) {
+            console.log('User signed in:', user.email);
+            // You can add any pre-redirect logic here
+        } else {
+            console.log('User signed out');
+        }
+    });
+}
         
         // =============================================
         // HELPER FUNCTIONS
@@ -1025,6 +1039,7 @@
                 
                 // Save session
                 // Save session with consistent key
+// Save session
 const session = {
     uid: user.uid,
     name: userData.name || user.displayName || email.split('@')[0],
@@ -1032,19 +1047,22 @@ const session = {
     storeName: userData.storeName || "Will's Tech Store",
     storePhone: userData.storePhone || "+256 751 924 844",
     isGuest: false,
-    createdAt: new Date().toISOString(),
+    createdAt: userData.createdAt ? (userData.createdAt.toDate ? userData.createdAt.toDate().toISOString() : userData.createdAt) : new Date().toISOString(),
     lastLogin: new Date().toISOString()
 };
 
-// Use consistent key name
+// Save to localStorage
 localStorage.setItem('currentUser', JSON.stringify(session));
+
+// Set auth persistence to LOCAL before redirecting
+await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
 
 showToast('Login successful! Redirecting...', 'success');
 
-// Immediate redirect - no async operations
+// Use window.location.replace() for a clean redirect
 setTimeout(() => {
-    window.location.href = 'Recieptprinter.html';
-}, 500);
+    window.location.replace('Recieptprinter.html');
+}, 1000);
                 
             } catch (error) {
                 console.error('Login error:', error);
@@ -1280,6 +1298,9 @@ setTimeout(() => {
                     window.location.href = 'Recieptprinter.html';
                 }
             }
+
+            // ADD THIS LINE - Setup auth state listener
+    setupAuthStateListener();
             
             // Tab switching
             document.querySelectorAll('.auth-tab').forEach(tab => {

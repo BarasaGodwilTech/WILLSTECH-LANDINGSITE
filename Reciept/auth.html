@@ -855,24 +855,41 @@
             measurementId: "G-0K2H44N77D"
         };
 
-        // Initialize Firebase
+                // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
 
         // =============================================
-// AUTH STATE LISTENER - ADD THIS NEW FUNCTION
-// =============================================
-function setupAuthStateListener() {
-    auth.onAuthStateChanged((user) => {
-        if (user) {
-            console.log('User signed in:', user.email);
-            // You can add any pre-redirect logic here
-        } else {
-            console.log('User signed out');
+        // DEBUG FUNCTION - ADD THIS
+        // =============================================
+        function debugRedirect() {
+            console.log('Current location:', window.location.href);
+            console.log('localStorage currentUser:', localStorage.getItem('currentUser'));
+            
+            // Test if we can redirect
+            setTimeout(() => {
+                console.log('Testing redirect...');
+                window.location.href = 'Recieptprinter.html';
+            }, 2000);
         }
-    });
-}
+
+        // =============================================
+        // AUTH STATE LISTENER
+        // =============================================
+        function setupAuthStateListener() {
+            auth.onAuthStateChanged((user) => {
+                console.log('Auth state changed. User:', user ? user.email : 'No user');
+                
+                if (user) {
+                    console.log('Firebase user authenticated:', user.uid);
+                    // You can optionally redirect here too
+                    // window.location.href = 'Recieptprinter.html';
+                } else {
+                    console.log('No Firebase user found');
+                }
+            });
+        }
         
         // =============================================
         // HELPER FUNCTIONS
@@ -1003,17 +1020,25 @@ function setupAuthStateListener() {
         }
         
         // 2. LOGIN WITH EMAIL/PASSWORD
+                // 2. LOGIN WITH EMAIL/PASSWORD - FIXED VERSION
         async function loginUserFirebase(email, password) {
             try {
                 showToast('Logging in...', 'success');
+                console.log('Starting login for:', email);
+                
+                // Set persistence FIRST
+                await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
+                console.log('Persistence set to LOCAL');
                 
                 // Sign in
                 const userCredential = await auth.signInWithEmailAndPassword(email, password);
                 const user = userCredential.user;
+                console.log('Firebase login successful:', user.uid, user.email);
                 
-                // Get or create user document
+                // Get user document
                 const userDoc = await db.collection('users').doc(user.uid).get();
                 let userData = userDoc.data();
+                console.log('User document found:', !!userData);
                 
                 if (!userData) {
                     // Create user document if it doesn't exist
@@ -1030,39 +1055,58 @@ function setupAuthStateListener() {
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp(),
                         provider: 'email'
                     });
+                    console.log('Created new user document');
                 } else {
                     // Update last login
                     await db.collection('users').doc(user.uid).update({
                         lastLogin: firebase.firestore.FieldValue.serverTimestamp()
                     });
+                    console.log('Updated last login');
                 }
                 
                 // Save session
-                // Save session with consistent key
-// Save session
-const session = {
-    uid: user.uid,
-    name: userData.name || user.displayName || email.split('@')[0],
-    email: email,
-    storeName: userData.storeName || "Will's Tech Store",
-    storePhone: userData.storePhone || "+256 751 924 844",
-    isGuest: false,
-    createdAt: userData.createdAt ? (userData.createdAt.toDate ? userData.createdAt.toDate().toISOString() : userData.createdAt) : new Date().toISOString(),
-    lastLogin: new Date().toISOString()
-};
-
-// Save to localStorage
-localStorage.setItem('currentUser', JSON.stringify(session));
-
-// Set auth persistence to LOCAL before redirecting
-await auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL);
-
-showToast('Login successful! Redirecting...', 'success');
-
-// Use window.location.replace() for a clean redirect
-setTimeout(() => {
-    window.location.replace('Recieptprinter.html');
-}, 1000);
+                const session = {
+                    uid: user.uid,
+                    name: userData.name || user.displayName || email.split('@')[0],
+                    email: email,
+                    storeName: userData.storeName || "Will's Tech Store",
+                    storePhone: userData.storePhone || "+256 751 924 844",
+                    isGuest: false,
+                    createdAt: userData.createdAt ? (userData.createdAt.toDate ? userData.createdAt.toDate().toISOString() : userData.createdAt) : new Date().toISOString(),
+                    lastLogin: new Date().toISOString()
+                };
+                
+                localStorage.setItem('currentUser', JSON.stringify(session));
+                console.log('Session saved to localStorage:', session);
+                
+                showToast('Login successful! Redirecting...', 'success');
+                
+                // Force immediate redirect with fallback
+                console.log('Starting redirect sequence...');
+                
+                setTimeout(() => {
+                    console.log('Attempting redirect...');
+                    // Method 1
+                    window.location.href = 'Recieptprinter.html';
+                    
+                    // Method 2 as backup
+                    setTimeout(() => {
+                        console.log('Checking if still on auth page...');
+                        if (window.location.pathname.includes('auth.html')) {
+                            console.log('Still on auth page, using replace...');
+                            window.location.replace('Recieptprinter.html');
+                        }
+                    }, 500);
+                    
+                    // Method 3 as final backup
+                    setTimeout(() => {
+                        if (window.location.pathname.includes('auth.html')) {
+                            console.log('Using last resort redirect...');
+                            window.location = 'Recieptprinter.html';
+                        }
+                    }, 1000);
+                    
+                }, 1000);
                 
             } catch (error) {
                 console.error('Login error:', error);
@@ -1285,22 +1329,36 @@ setTimeout(() => {
             }
         }
         
-        // =============================================
+                // =============================================
         // EVENT LISTENERS & INITIALIZATION
         // =============================================
         document.addEventListener('DOMContentLoaded', function() {
+            console.log('Auth page loaded');
+            
             // Check if user is already logged in
             const currentUser = localStorage.getItem('currentUser');
+            console.log('Current user in localStorage:', currentUser);
+            
             if (currentUser) {
-                const user = JSON.parse(currentUser);
-                if (!user.isGuest) {
-                    // Auto-redirect if remember me was checked
-                    window.location.href = 'Recieptprinter.html';
+                try {
+                    const user = JSON.parse(currentUser);
+                    console.log('Parsed user data:', user);
+                    
+                    if (!user.isGuest) {
+                        console.log('User found, redirecting to main page...');
+                        // Force immediate redirect
+                        window.location.replace('Recieptprinter.html');
+                        return; // Stop execution
+                    }
+                } catch (e) {
+                    console.error('Error parsing user data:', e);
                 }
+            } else {
+                console.log('No user session found');
             }
 
-            // ADD THIS LINE - Setup auth state listener
-    setupAuthStateListener();
+            // Setup auth state listener
+            setupAuthStateListener();
             
             // Tab switching
             document.querySelectorAll('.auth-tab').forEach(tab => {
@@ -1402,5 +1460,18 @@ setTimeout(() => {
             });
         });
     </script>
+        <!-- TEMPORARY DEBUG BUTTON - REMOVE LATER -->
+    <div style="position: fixed; bottom: 10px; right: 10px; z-index: 10000; background: white; padding: 10px; border-radius: 5px; box-shadow: 0 2px 10px rgba(0,0,0,0.2);">
+        <div style="font-size: 12px; color: #666; margin-bottom: 5px;">Debug Tools</div>
+        <button onclick="window.location.href='Recieptprinter.html'" 
+                style="background: red; color: white; padding: 8px 12px; border: none; border-radius: 3px; cursor: pointer; margin-right: 5px;">
+            Force Redirect
+        </button>
+        <button onclick="console.log('localStorage:', localStorage.getItem('currentUser'))" 
+                style="background: blue; color: white; padding: 8px 12px; border: none; border-radius: 3px; cursor: pointer;">
+            Check Session
+        </button>
+    </div>
+</body>
 </body>
 </html>

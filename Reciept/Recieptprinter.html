@@ -870,23 +870,32 @@
 
     <script>
         // Add to the beginning of your JavaScript
-// User Management Functions
-const CURRENT_USER_KEY = 'willstech_current_user';
-const USERS_STORAGE_KEY = 'willstech_users';
+
 
 // Check if user is logged in
 function checkUserSession() {
-    const currentUser = localStorage.getItem(CURRENT_USER_KEY);
+    const currentUser = localStorage.getItem('currentUser');
     
     if (!currentUser) {
-        // Redirect to auth page if no session
         window.location.href = 'auth.html';
         return null;
     }
     
-    return JSON.parse(currentUser);
+    const user = JSON.parse(currentUser);
+    
+    // Check if user is authenticated with Firebase (for non-guests)
+    if (!user.isGuest) {
+        const firebaseUser = auth.currentUser;
+        if (!firebaseUser) {
+            // Firebase session expired
+            localStorage.removeItem('currentUser');
+            window.location.href = 'auth.html';
+            return null;
+        }
+    }
+    
+    return user;
 }
-
 // Get current user
 function getCurrentUser() {
     return checkUserSession();
@@ -924,47 +933,52 @@ async function syncReceiptsToCloud() {
         return;
     }
     
-    showToast('Syncing receipts to cloud...', 'success');
+    showToast('Syncing receipts to Firebase...', 'success');
     
-    // Get local receipts
-    const localReceipts = localStorage.getItem('willstech_receipts');
-    
-    if (localReceipts) {
-        const receipts = JSON.parse(localReceipts);
+    try {
+        // Get local receipts
+        const localReceipts = localStorage.getItem('willstech_receipts');
         
-        // Get user from storage
-        const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-        const users = storedUsers ? JSON.parse(storedUsers) : [];
-        const userIndex = users.findIndex(u => u.id === user.id);
-        
-        if (userIndex !== -1) {
-            // Update user's receipts
-            if (!users[userIndex].receipts) {
-                users[userIndex].receipts = [];
-            }
-            
+        if (localReceipts) {
+            const receipts = JSON.parse(localReceipts);
             let syncedCount = 0;
-            receipts.forEach(receipt => {
-                const exists = users[userIndex].receipts.find(r => r.id === receipt.id);
-                if (!exists) {
-                    users[userIndex].receipts.push({
-                        ...receipt,
-                        syncedAt: new Date().toISOString()
-                    });
+            
+            // Upload each receipt to Firebase
+            for (const receipt of receipts) {
+                // Check if receipt already exists in Firebase
+                const receiptDoc = await db.collection('users')
+                    .doc(user.uid)
+                    .collection('receipts')
+                    .doc(receipt.id)
+                    .get();
+                
+                if (!receiptDoc.exists) {
+                    await db.collection('users')
+                        .doc(user.uid)
+                        .collection('receipts')
+                        .doc(receipt.id)
+                        .set({
+                            ...receipt,
+                            userId: user.uid,
+                            syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                        });
                     syncedCount++;
                 }
-            });
+            }
             
-            // Save updated user
-            localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
+            // Also sync any backup receipts
+            await syncBackupReceiptsToFirebase();
             
-            showToast(`Synced ${syncedCount} receipts to your account`, 'success');
+            showToast(`Synced ${syncedCount} receipts to cloud`, 'success');
         }
+        
+    } catch (error) {
+        console.error('Cloud sync error:', error);
+        showToast('Cloud sync failed. Check connection.', 'error');
     }
 }
-
 // Backup data (export to file)
-function backupData() {
+async function backupData() {
     const user = getCurrentUser();
     
     if (user.isGuest) {
@@ -972,45 +986,66 @@ function backupData() {
         return;
     }
     
-    // Get user data
-    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    const userData = users.find(u => u.id === user.id);
-    
-    if (!userData) {
-        showToast('User data not found', 'error');
-        return;
+    try {
+        showToast('Creating backup from Firebase...', 'success');
+        
+        // Get receipts from Firebase
+        const receiptsSnapshot = await db.collection('users')
+            .doc(user.uid)
+            .collection('receipts')
+            .get();
+        
+        const cloudReceipts = receiptsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // Convert Firestore timestamps to ISO strings
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate().toISOString();
+            }
+            if (data.syncedAt && data.syncedAt.toDate) {
+                data.syncedAt = data.syncedAt.toDate().toISOString();
+            }
+            return data;
+        });
+        
+        // Get user info from Firebase
+        const userDoc = await db.collection('users').doc(user.uid).get();
+        const userData = userDoc.data();
+        
+        // Create backup file
+        const backup = {
+            version: '2.0',
+            backupDate: new Date().toISOString(),
+            user: {
+                uid: user.uid,
+                name: userData?.name || user.name,
+                email: userData?.email || user.email,
+                createdAt: userData?.createdAt?.toDate?.()?.toISOString() || user.createdAt
+            },
+            receipts: cloudReceipts,
+            settings: {
+                storeName: document.getElementById('storeName').value,
+                storePhone: document.getElementById('storePhone').value
+            },
+            exportDate: new Date().toISOString()
+        };
+        
+        const dataStr = JSON.stringify(backup, null, 2);
+        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+        
+        const exportFileName = `willstech_firebase_backup_${user.email}_${new Date().toISOString().split('T')[0]}.json`;
+        
+        const linkElement = document.createElement('a');
+        linkElement.setAttribute('href', dataUri);
+        linkElement.setAttribute('download', exportFileName);
+        linkElement.click();
+        
+        showToast('Backup file downloaded from Firebase!', 'success');
+        
+    } catch (error) {
+        console.error('Backup error:', error);
+        showToast('Failed to create backup from Firebase', 'error');
     }
-    
-    // Create backup file
-    const backup = {
-        version: '1.0',
-        backupDate: new Date().toISOString(),
-        user: {
-            name: userData.name,
-            email: userData.email,
-            createdAt: userData.createdAt
-        },
-        receipts: userData.receipts || [],
-        settings: {
-            storeName: localStorage.getItem('storeName') || "Will's Tech Store",
-            storePhone: localStorage.getItem('storePhone') || '+256 751 924 844'
-        }
-    };
-    
-    const dataStr = JSON.stringify(backup, null, 2);
-    const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-    
-    const exportFileName = `willstech_backup_${user.email}_${new Date().toISOString().split('T')[0]}.json`;
-    
-    const linkElement = document.createElement('a');
-    linkElement.setAttribute('href', dataUri);
-    linkElement.setAttribute('download', exportFileName);
-    linkElement.click();
-    
-    showToast('Backup file downloaded!', 'success');
 }
-
 // Restore data from backup
 function restoreData(file) {
     const reader = new FileReader();
@@ -1065,22 +1100,40 @@ function restoreData(file) {
 }
 
 // Show user profile
-function showUserProfile() {
+async function showUserProfile() {
     const user = getCurrentUser();
     const modal = document.getElementById('profileModal');
     const content = document.getElementById('profileContent');
     
     // Get user stats
-    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    const userData = users.find(u => u.id === user.id);
+    // Get user stats from Firebase
+    let receiptCount = 0;
+    let totalRevenue = 0;
+    let todayReceipts = 0;
     
-    const receiptCount = userData?.receipts?.length || 0;
-    const totalRevenue = userData?.receipts?.reduce((sum, r) => sum + r.totalAmount, 0) || 0;
-    const today = new Date().toDateString();
-    const todayReceipts = userData?.receipts?.filter(r => 
-        new Date(r.timestamp).toDateString() === today
-    ).length || 0;
+    if (!user.isGuest) {
+        try {
+            const receiptsSnapshot = await db.collection('users')
+                .doc(user.uid)
+                .collection('receipts')
+                .get();
+            
+            const receipts = receiptsSnapshot.docs.map(doc => doc.data());
+            receiptCount = receipts.length;
+            totalRevenue = receipts.reduce((sum, r) => sum + (r.totalAmount || 0), 0);
+            
+            const today = new Date().toDateString();
+            todayReceipts = receipts.filter(r => {
+                const receiptDate = r.timestamp?.toDate ? 
+                    r.timestamp.toDate().toDateString() : 
+                    new Date(r.timestamp).toDateString();
+                return receiptDate === today;
+            }).length;
+            
+        } catch (error) {
+            console.error('Error loading user stats:', error);
+        }
+    }
     
     content.innerHTML = `
         <div style="text-align: center; margin-bottom: 20px;">
@@ -1151,10 +1204,30 @@ function showUserProfile() {
 }
 
 // Logout user
+
 function logoutUser() {
     if (confirm('Are you sure you want to logout?')) {
-        localStorage.removeItem(CURRENT_USER_KEY);
-        window.location.href = 'auth.html';
+        const user = getCurrentUser();
+        if (user && !user.isGuest) {
+            firebaseLogout();
+        } else {
+            localStorage.removeItem('currentUser');
+            window.location.href = 'auth.html';
+        }
+    }
+}
+
+async function firebaseLogout() {
+    try {
+        await auth.signOut();
+        localStorage.removeItem('currentUser');
+        showToast('Logged out successfully', 'success');
+        setTimeout(() => {
+            window.location.href = 'auth.html';
+        }, 1000);
+    } catch (error) {
+        console.error('Logout error:', error);
+        showToast('Logout failed: ' + error.message, 'error');
     }
 }
 
@@ -1335,46 +1408,63 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // Load user receipts into local storage
-function loadUserReceipts() {
+async function loadUserReceipts() {
     const user = getCurrentUser();
     
     if (user.isGuest) return;
     
-    // Get user from storage
-    const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-    const users = storedUsers ? JSON.parse(storedUsers) : [];
-    const userData = users.find(u => u.id === user.id);
-    
-    if (userData && userData.receipts && userData.receipts.length > 0) {
-        // Merge user receipts with local receipts
+    try {
+        showToast('Loading receipts from Firebase...', 'success');
+        
+        // Load receipts from Firebase
+        const receiptsSnapshot = await db.collection('users')
+            .doc(user.uid)
+            .collection('receipts')
+            .orderBy('timestamp', 'desc')
+            .get();
+        
+        const cloudReceipts = receiptsSnapshot.docs.map(doc => {
+            const data = doc.data();
+            // Convert Firestore Timestamp to ISO string
+            if (data.timestamp && data.timestamp.toDate) {
+                data.timestamp = data.timestamp.toDate().toISOString();
+            }
+            return data;
+        });
+        
+        // Merge with local receipts
         const localReceipts = localStorage.getItem('willstech_receipts');
         const localReceiptsArray = localReceipts ? JSON.parse(localReceipts) : [];
         
-        // Create map to avoid duplicates
+        // Create map (cloud receipts take priority)
         const receiptMap = new Map();
         
-        // Add local receipts
-        localReceiptsArray.forEach(receipt => {
+        // Add cloud receipts first
+        cloudReceipts.forEach(receipt => {
             receiptMap.set(receipt.id, receipt);
         });
         
-        // Add user receipts
-        userData.receipts.forEach(receipt => {
+        // Add local receipts if not in cloud
+        localReceiptsArray.forEach(receipt => {
             if (!receiptMap.has(receipt.id)) {
                 receiptMap.set(receipt.id, receipt);
             }
         });
         
-        // Convert back to array
+        // Save merged list
         const mergedReceipts = Array.from(receiptMap.values());
-        
-        // Save merged receipts
         localStorage.setItem('willstech_receipts', JSON.stringify(mergedReceipts));
         
-        console.log(`Loaded ${userData.receipts.length} receipts from user account`);
+        console.log(`Loaded ${cloudReceipts.length} receipts from Firebase`);
+        showToast(`Loaded ${cloudReceipts.length} receipts from cloud`, 'success');
+        
+    } catch (error) {
+        console.error('Error loading receipts from Firebase:', error);
+        showToast('Using local cache, cloud sync failed', 'error');
     }
 }
-        // Toast function
+
+// Toast function
         function showToast(message, type = 'success') {
             const toast = document.getElementById('toast');
             toast.textContent = message;
@@ -1563,6 +1653,31 @@ document.addEventListener('DOMContentLoaded', function() {
     initializeReceipt();
     setupEventListeners();
     loadProducts(); // Add this line
+});
+
+document.addEventListener('DOMContentLoaded', async function() {
+    // Check user session
+    const user = getCurrentUser();
+    
+    if (user) {
+        // Update user menu
+        updateUserMenu();
+        // Setup user menu events
+        setupUserMenu();
+        
+        // Load user receipts if logged in
+        if (!user.isGuest) {
+            await loadUserReceipts();
+            
+            // Sync any backup receipts
+            await syncBackupReceiptsToFirebase();
+        }
+    }
+    
+    // Initialize receipt system
+    initializeReceipt();
+    setupEventListeners();
+    loadProducts();
 });
 
         // ========== NEW FUNCTIONS FOR SAVING RECEIPTS ==========
@@ -2031,41 +2146,81 @@ if (!document.getElementById('freeDelivery').checked) {
 }
 
 // Save receipt to user account
-function saveReceiptToUserAccount(receiptData) {
+async function saveReceiptToUserAccount(receiptData) {
     try {
         const user = getCurrentUser();
         if (user.isGuest) return;
         
-        // Get users from storage
-        const storedUsers = localStorage.getItem(USERS_STORAGE_KEY);
-        const users = storedUsers ? JSON.parse(storedUsers) : [];
-        const userIndex = users.findIndex(u => u.id === user.id);
+        // Save to Firebase Firestore
+        await db.collection('users')
+            .doc(user.uid)
+            .collection('receipts')
+            .doc(receiptData.id)
+            .set({
+                ...receiptData,
+                userId: user.uid,
+                syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+            });
         
-        if (userIndex !== -1) {
-            // Initialize receipts array if not exists
-            if (!users[userIndex].receipts) {
-                users[userIndex].receipts = [];
-            }
-            
-            // Check if receipt already exists
-            const exists = users[userIndex].receipts.find(r => r.id === receiptData.id);
-            if (!exists) {
-                // Add sync timestamp
-                const receiptWithSync = {
-                    ...receiptData,
-                    syncedAt: new Date().toISOString()
-                };
-                
-                users[userIndex].receipts.push(receiptWithSync);
-                localStorage.setItem(USERS_STORAGE_KEY, JSON.stringify(users));
-                
-                console.log('Receipt saved to user account:', receiptData.receiptNumber);
-            }
-        }
+        console.log('Receipt saved to Firebase:', receiptData.receiptNumber);
+        
     } catch (error) {
-        console.error('Error saving receipt to user account:', error);
+        console.error('Error saving receipt to Firebase:', error);
+        // Fallback to localStorage
+        saveReceiptToLocalStorageBackup(receiptData);
     }
-}        
+}
+
+// Add this helper function
+function saveReceiptToLocalStorageBackup(receiptData) {
+    const user = getCurrentUser();
+    const backupKey = `firebase_backup_${user.uid}`;
+    const backupReceipts = JSON.parse(localStorage.getItem(backupKey) || '[]');
+    
+    // Check if receipt already exists
+    const exists = backupReceipts.find(r => r.id === receiptData.id);
+    if (!exists) {
+        backupReceipts.push({
+            ...receiptData,
+            backupSavedAt: new Date().toISOString()
+        });
+        localStorage.setItem(backupKey, JSON.stringify(backupReceipts));
+        console.log('Saved to localStorage backup due to Firebase error');
+    }
+}
+// ADD THIS FUNCTION AFTER saveReceiptToUserAccount:
+async function syncBackupReceiptsToFirebase() {
+    const user = getCurrentUser();
+    if (user.isGuest) return;
+    
+    const backupKey = `firebase_backup_${user.uid}`;
+    const backupReceipts = JSON.parse(localStorage.getItem(backupKey) || '[]');
+    
+    if (backupReceipts.length === 0) return;
+    
+    try {
+        showToast('Syncing backup receipts to cloud...', 'success');
+        
+        for (const receipt of backupReceipts) {
+            await db.collection('users')
+                .doc(user.uid)
+                .collection('receipts')
+                .doc(receipt.id)
+                .set({
+                    ...receipt,
+                    userId: user.uid,
+                    syncedAt: firebase.firestore.FieldValue.serverTimestamp()
+                });
+        }
+        
+        // Clear backup after successful sync
+        localStorage.removeItem(backupKey);
+        showToast(`Synced ${backupReceipts.length} backup receipts to cloud`, 'success');
+        
+    } catch (error) {
+        console.error('Failed to sync backup receipts:', error);
+    }
+}      
         
         function printReceiptViaSystem() {
             const now = new Date();

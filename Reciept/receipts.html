@@ -289,6 +289,45 @@
                 flex-direction: column;
             }
         }
+
+        /* Printer Modal Styles for Reprint */
+.printer-option {
+    padding: 15px;
+    border: 2px solid #d1d5db;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.printer-option:hover {
+    background: #f3f4f6;
+}
+
+.printer-option.selected {
+    border-color: #2563eb;
+    background: #dbeafe;
+}
+/* Add this to your existing CSS */
+#printerModal {
+    z-index: 10000 !important;
+}
+
+#printerModal > div {
+    z-index: 10001 !important;
+}
+
+/* Ensure buttons are clickable */
+#printerModal button,
+#printerModal .printer-option {
+    cursor: pointer !important;
+    pointer-events: auto !important;
+}
+
+/* Prevent body scroll when modal is open */
+body.modal-open {
+    overflow: hidden;
+}
     </style>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
 </head>
@@ -455,8 +494,9 @@
                             <i class="fas fa-eye"></i> View
                         </button>
                         <button class="btn btn-print reprint-receipt" data-id="${receipt.id}">
-                            <i class="fas fa-print"></i> Print
-                        </button>
+    <i class="fas fa-print"></i> Print
+</button>
+                        
                         <button class="btn btn-delete delete-receipt" data-id="${receipt.id}">
                             <i class="fas fa-trash"></i>
                         </button>
@@ -673,21 +713,379 @@
         }
         
         // Reprint receipt
-        function reprintReceipt(receiptId) {
-            const receipt = allReceipts.find(r => r.id === receiptId);
-            if (!receipt) return;
-            
-            // Open print window with receipt data
-            const printContent = createPrintContent(receipt);
-            const printWindow = window.open('', '_blank');
-            printWindow.document.write(printContent);
-            printWindow.document.close();
-            
-            showToast('Opening receipt for printing...', 'success');
+        // Reprint receipt with Bluetooth or system printer
+// Reprint receipt with Bluetooth or system printer
+function reprintReceipt(receiptId) {
+    const receipt = allReceipts.find(r => r.id === receiptId);
+    if (!receipt) return;
+    
+    // Show printer selection modal
+    showPrinterSelectionModal(receipt);
+}
+
+// Show printer selection modal
+document.body.classList.add('modal-open');
+// And add this to clean up when closing
+const closeModal = () => {
+    modal.remove();
+    document.body.classList.remove('modal-open');
+};
+// Show printer selection modal
+// Simplified version that always works
+function showPrinterSelectionModal(receipt) {
+    // Ask user for printer type
+    const choice = confirm('Select printer type:\n\nClick OK for Bluetooth Printer\nClick Cancel for System Printer');
+    
+    if (choice === true) {
+        // Bluetooth
+        connectBluetoothForReprint(receipt).catch(error => {
+            console.error('Bluetooth error:', error);
+            showToast('Bluetooth failed, using system printer', 'error');
+            // Fallback to system printer
+            setTimeout(() => printReceiptViaSystemForReprint(receipt), 1000);
+        });
+    } else {
+        // System printer
+        printReceiptViaSystemForReprint(receipt);
+    }
+}
+// Print receipt via system printer (reprint version)
+function printReceiptViaSystemForReprint(receipt) {
+    const printContent = createPrintContentForReprint(receipt);
+    const printWindow = window.open('', '_blank', 'width=300,height=600');
+    
+    if (!printWindow) {
+        showToast('Popup blocked! Please allow popups for this site.', 'error');
+        return;
+    }
+    
+    printWindow.document.write(printContent);
+    printWindow.document.close();
+    
+    showToast('Opening receipt for printing...', 'success');
+}
+
+// Connect Bluetooth for reprint
+async function connectBluetoothForReprint(receipt) {
+    try {
+        if (!navigator.bluetooth) {
+            showToast('Bluetooth not supported on this device', 'error');
+            return;
         }
         
+        showToast('Searching for Bluetooth printers...', 'success');
+        
+        // Request Bluetooth device
+        const bluetoothDevice = await navigator.bluetooth.requestDevice({
+            acceptAllDevices: true,
+            optionalServices: ['000018f0-0000-1000-8000-00805f9b34fb']
+        });
+        
+        showToast('Connecting to printer...', 'success');
+        
+        // Connect to GATT server
+        const server = await bluetoothDevice.gatt.connect();
+        
+        showToast('Connected! Printing receipt...', 'success');
+        
+        // Print the receipt via Bluetooth
+        await printReceiptViaBluetoothForReprint(receipt, bluetoothDevice);
+        
+    } catch (error) {
+        console.error('Bluetooth error:', error);
+        if (error.name === 'NotFoundError') {
+            showToast('No Bluetooth printer found', 'error');
+        } else if (error.name === 'SecurityError') {
+            showToast('Bluetooth permission denied', 'error');
+        } else {
+            showToast('Bluetooth connection failed', 'error');
+        }
+        throw error;
+    }
+}
+
+// Create print content with EXACT same alignment as main printer
+function createPrintContentForReprint(receipt) {
+    const date = new Date(receipt.timestamp);
+    
+    // Format date exactly like in main printer
+    const formattedDate = date.toLocaleDateString('en-GB', { 
+        day: 'numeric', 
+        month: 'short', 
+        year: 'numeric' 
+    });
+    const formattedTime = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+    
+    // Create items HTML with exact same column widths
+    let itemsHTML = '';
+    if (receipt.items && receipt.items.length > 0) {
+        itemsHTML = receipt.items.map(item => {
+            let displayName = item.name;
+            if (displayName.length > 22) {
+                displayName = displayName.substring(0, 19) + '...';
+            }
+            
+            return `
+            <div style="margin-bottom: 1px;">
+                <span style="font-size: 8px; font-family: 'Courier New', monospace;">
+                    <span style="display: inline-block; width: 22ch; text-align: left; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
+                    <span style="display: inline-block; width: 3ch; text-align: right;">${item.quantity}</span>
+                    <span style="display: inline-block; width: 10ch; text-align: right;">UGX ${item.total.toLocaleString()}</span>
+                </span>
+            </div>
+            `;
+        }).join('');
+    }
+    
+    return `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <title>Reprint Receipt</title>
+            <style>
+                @media print {
+                    @page {
+                        size: 58mm auto;
+                        margin: 0;
+                        padding: 0;
+                    }
+                    body {
+                        margin: 0;
+                        padding: 2mm 1mm;
+                        font-family: 'Courier New', monospace;
+                        font-size: 8px;
+                        line-height: 1.1;
+                        width: 56mm;
+                        max-width: 56mm;
+                    }
+                }
+                body {
+                    font-family: 'Courier New', monospace;
+                    font-size: 8px;
+                    line-height: 1.1;
+                    margin: 2mm 1mm;
+                    padding: 0;
+                    width: 56mm;
+                    max-width: 56mm;
+                }
+                .center { text-align: center; }
+                .bold { font-weight: bold; }
+                .dashed { border-bottom: 1px dashed #000; margin: 2px 0; }
+            </style>
+        </head>
+        <body>
+            <div style="text-align: center; margin-bottom: 5px;">
+                <div style="font-weight: bold; font-size: 11px; margin-bottom: 1px;">${receipt.storeName ? receipt.storeName.substring(0, 20) : "Will's Tech Store"}</div>
+                <div style="font-size: 7px; margin-bottom: 1px;">Elevate Your Lifestyle<br>With Authentic Tech</div>
+                <div style="font-size: 7px; margin-bottom: 1px;">www.willstech.store</div>
+                <div style="font-size: 7px;">${receipt.storePhone || '+256 751 924 844'}</div>
+            </div>
+            
+            <div style="border-top: 1px dashed #000; margin: 3px 0; padding-top: 3px;">
+                <div style="text-align: center; font-size: 10px; font-weight: bold;">SALES RECEIPT (REPRINT)</div>
+            </div>
+            
+            <div style="font-size: 8px; margin: 4px 0; line-height: 1.2;">
+                <div><strong>Date:</strong> ${formattedDate}</div>
+                <div><strong>Time:</strong> ${formattedTime}</div>
+                <div><strong>Receipt:</strong> ${receipt.receiptNumber.substring(0, 15)}</div>
+                <div><strong>Customer:</strong> ${receipt.customerName.substring(0, 15) || 'Walk-in'}</div>
+            </div>
+            
+            <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+            
+            <div style="font-size: 8px; margin-bottom: 2px;">
+                <div style="font-weight: bold; margin-bottom: 1px;">
+                    <span style="font-size: 8px; font-family: 'Courier New', monospace;">
+                        <span style="display: inline-block; width: 22ch; text-align: left;">ITEM</span>
+                        <span style="display: inline-block; width: 3ch; text-align: right;">QTY</span>
+                        <span style="display: inline-block; width: 10ch; text-align: right;">AMOUNT</span>
+                    </span>
+                </div>
+            </div>
+            
+            <div style="font-size: 8px; margin-bottom: 4px;">
+                ${itemsHTML}
+            </div>
+            
+            <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+            
+            <div style="font-size: 9px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Subtotal:</span>
+                    <span>UGX ${receipt.subtotal.toLocaleString()}</span>
+                </div>
+                ${receipt.deliveryFee > 0 ? `
+                <div style="display: flex; justify-content: space-between; margin-bottom: 2px;">
+                    <span>Delivery Fee:</span>
+                    <span>UGX ${receipt.deliveryFee.toLocaleString()}</span>
+                </div>
+                ` : ''}
+                <div style="display: flex; justify-content: space-between; margin-top: 3px; padding-top: 3px; border-top: 1px solid #000; font-weight: bold;">
+                    <span>TOTAL:</span>
+                    <span style="font-size: 10px;">UGX ${receipt.totalAmount.toLocaleString()}</span>
+                </div>
+            </div>
+            
+            <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
+            
+            <div style="text-align: center; font-size: 8px; margin-top: 6px; line-height: 1.2;">
+                <div><strong>Payment:</strong> ${receipt.paymentMethod}</div>
+                <div style="color: green; font-weight: bold; margin: 2px 0;">✓ Payment received.</div>
+                <div style="font-weight: bold; margin: 2px 0; font-size: 7px;">(REPRINT) THANKS FOR YOUR PURCHASE!</div>
+                <div>${receipt.storeName ? receipt.storeName.substring(0, 20) : "Will's Tech Store"}</div>
+            </div>
+            
+            <div style="text-align: center; margin-top: 8px; font-size: 7px; color: #666; line-height: 1.1;">
+                <div>For inquiries: ${receipt.storePhone || '+256 751 924 844'}</div>
+                <div>Email: info@willstech.store</div>
+                <div>Website: willstech.store</div>
+                <div style="margin-top: 2px;">*************************</div>
+            </div>
+            
+            <script>
+                window.onload = function() {
+                    setTimeout(function() {
+                        window.print();
+                        setTimeout(function() {
+                            window.close();
+                        }, 100);
+                    }, 100);
+                }
+            <\/script>
+        </body>
+        </html>
+    `;
+}
+
+// Print receipt via Bluetooth (reprint version)
+async function printReceiptViaBluetoothForReprint(receipt, device) {
+    try {
+        const date = new Date(receipt.timestamp);
+        const formattedDate = date.toLocaleDateString('en-GB', { 
+            day: 'numeric', 
+            month: 'short', 
+            year: 'numeric' 
+        });
+        const formattedTime = date.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+        
+        // Create ESC/POS commands with EXACT same format
+        let escpos = "\x1B\x40"; // Initialize
+        escpos += "\x1B\x61\x01"; // Center align
+        escpos += "\x1B\x21\x08"; // Emphasized
+        escpos += "WILL'S TECH STORE\n";
+        escpos += "\x1B\x21\x00"; // Normal
+        escpos += "Elevate Your Lifestyle With\nAuthentic Tech\n";
+        escpos += "www.willstech.store\n";
+        escpos += "Tel: +256 751 924 844\n";
+        escpos += "-------------------------------\n";
+        escpos += "\x1B\x21\x08"; // Emphasized
+        escpos += "SALES RECEIPT (REPRINT)\n";
+        escpos += "\x1B\x21\x00"; // Normal
+        escpos += "-------------------------------\n";
+        escpos += "\x1B\x61\x00"; // Left align
+        
+        // Receipt details
+        escpos += `Date: ${formattedDate}\n`;
+        escpos += `Time: ${formattedTime}\n`;
+        escpos += `Receipt: ${receipt.receiptNumber.substring(0, 15)}\n`;
+        escpos += `Customer: ${receipt.customerName.substring(0, 15) || 'Walk-in'}\n`;
+        escpos += "-------------------------------\n";
+        
+        // Items header
+        escpos += "\x1B\x21\x08"; // Emphasized
+        escpos += "ITEM".padEnd(17, ' ');
+        escpos += "QTY".padStart(3, ' ');
+        escpos += " AMOUNT".padStart(10, ' ');
+        escpos += "\n";
+        escpos += "\x1B\x21\x00"; // Normal
+        
+        // Items
+        if (receipt.items && receipt.items.length > 0) {
+            receipt.items.forEach(item => {
+                let displayName = item.name;
+                if (displayName.length > 17) {
+                    displayName = displayName.substring(0, 14) + '...';
+                }
+                
+                escpos += displayName.padEnd(17, ' ');
+                escpos += item.quantity.toString().padStart(3, ' ');
+                escpos += `UGX ${item.total.toLocaleString()}`.padStart(10, ' ');
+                escpos += "\n";
+            });
+        }
+        
+        escpos += "-------------------------------\n";
+        
+        // Totals
+        escpos += `Subtotal:       UGX ${receipt.subtotal.toLocaleString()}\n`;
+        if (receipt.deliveryFee > 0) {
+            escpos += `Delivery Fee:   UGX ${receipt.deliveryFee.toLocaleString()}\n`;
+        }
+        escpos += "-------------------------------\n";
+        escpos += "\x1B\x21\x10"; // Double height
+        escpos += `TOTAL:          UGX ${receipt.totalAmount.toLocaleString()}\n`;
+        escpos += "\x1B\x21\x00"; // Normal
+        escpos += "-------------------------------\n";
+        
+        // Payment info
+        escpos += `Payment: ${receipt.paymentMethod}\n`;
+        escpos += "\x1B\x61\x01"; // Center align
+        escpos += "\x1B\x21\x08"; // Emphasized
+        escpos += "✓ Payment received.\n";
+        escpos += "\x1B\x21\x00"; // Normal
+        escpos += "(REPRINT) THANK YOU FOR\nSHOPPING WITH US!\n\n";
+        
+        // Footer
+        escpos += "For inquiries call:\n";
+        escpos += "+256 751 924 844\n";
+        escpos += "Email: info@willstech.store\n";
+        escpos += "Website: willstech.store\n";
+        escpos += "**************************\n\n\n\n\n";
+        
+        // Cut paper
+        escpos += "\x1D\x56\x41\x00"; // Partial cut
+        
+        // Connect to GATT server if not connected
+        if (!device.gatt.connected) {
+            await device.gatt.connect();
+        }
+        
+        const server = await device.gatt.connect();
+        const service = await server.getPrimaryService('000018f0-0000-1000-8000-00805f9b34fb');
+        const characteristic = await service.getCharacteristic('00002af1-0000-1000-8000-00805f9b34fb');
+        
+        // Split into chunks for reliable transmission
+        const encoder = new TextEncoder();
+        const chunks = splitStringForBluetooth(escpos, 100);
+        
+        for (let i = 0; i < chunks.length; i++) {
+            await characteristic.writeValue(encoder.encode(chunks[i]));
+            if (i < chunks.length - 1) {
+                await new Promise(resolve => setTimeout(resolve, 20));
+            }
+        }
+        
+        showToast('Receipt reprinted via Bluetooth!', 'success');
+        
+    } catch (error) {
+        console.error('Bluetooth print error:', error);
+        showToast('Bluetooth printing failed: ' + error.message, 'error');
+        throw error;
+    }
+}
+
+// Helper function to split string for Bluetooth
+function splitStringForBluetooth(str, maxLength) {
+    const chunks = [];
+    for (let i = 0; i < str.length; i += maxLength) {
+        chunks.push(str.substring(i, i + maxLength));
+    }
+    return chunks;
+}
+        
         // Create print content for reprint
-        function createPrintContent(receipt) {
+        /*function createPrintContent(receipt) {
             return `
                 <!DOCTYPE html>
                 <html>
@@ -806,7 +1204,7 @@
                 </body>
                 </html>
             `;
-        }
+        }*/
         
         // Delete receipt
         function deleteReceipt(receiptId) {
@@ -878,34 +1276,21 @@
         }
         
         // Toast function
-        function showToast(message, type = 'success') {
-            // Create toast element if it doesn't exist
-            let toast = document.getElementById('toast');
-            if (!toast) {
-                toast = document.createElement('div');
-                toast.id = 'toast';
-                toast.style.cssText = `
-                    position: fixed;
-                    top: 20px;
-                    right: 20px;
-                    padding: 12px 20px;
-                    background: ${type === 'success' ? '#10b981' : '#ef4444'};
-                    color: white;
-                    border-radius: 5px;
-                    z-index: 1001;
-                    display: none;
-                `;
-                document.body.appendChild(toast);
-            }
-            
-            toast.textContent = message;
-            toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
-            toast.style.display = 'block';
-            
-            setTimeout(() => {
-                toast.style.display = 'none';
-            }, 3000);
-        }
+        // Toast function
+function showToast(message, type = 'success') {
+    const toast = document.getElementById('toast');
+    if (!toast) return;
+    
+    toast.textContent = message;
+    toast.style.background = type === 'success' ? '#10b981' : '#ef4444';
+    toast.style.display = 'block';
+    
+    setTimeout(() => {
+        toast.style.display = 'none';
+    }, 3000);
+}
     </script>
+    <!-- Add this right before </body> -->
+<div id="toast" style="position: fixed; top: 20px; right: 20px; padding: 12px 20px; background: #10b981; color: white; border-radius: 5px; z-index: 1001; display: none;"></div>
 </body>
 </html>

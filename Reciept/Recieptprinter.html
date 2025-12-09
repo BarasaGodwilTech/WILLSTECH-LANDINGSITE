@@ -1196,12 +1196,18 @@ if (!document.getElementById('freeDelivery').checked) {
             let itemsHTML = '';
             if (validItems.length > 0) {
                 itemsHTML = validItems.map(item => {
-    const itemName = item.name.substring(0, 18).padEnd(18, ' ');
-    const qty = item.quantity.toString().padStart(2, ' ');
-    const amount = formatUGX(item.total).padStart(10, ' ');
+    let displayName = item.name;
+    if (displayName.length > 22) {
+        displayName = displayName.substring(0, 19) + '...';
+    }
+    
     return `
-    <div style="display: flex; justify-content: space-between; margin-bottom: 1px;">
-        <span style="font-size: 8px; font-family: 'Courier New', monospace;">${itemName} ${qty} ${amount}</span>
+    <div style="margin-bottom: 1px;">
+        <span style="font-size: 8px; font-family: 'Courier New', monospace;">
+            <span style="display: inline-block; width: 22ch; text-align: left; overflow: hidden; text-overflow: ellipsis;">${displayName}</span>
+            <span style="display: inline-block; width: 3ch; text-align: right;">${item.quantity}</span>
+            <span style="display: inline-block; width: 10ch; text-align: right;">${formatUGX(item.total)}</span>
+        </span>
     </div>
     `;
 }).join('');
@@ -1231,14 +1237,18 @@ if (!document.getElementById('freeDelivery').checked) {
                 <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
                 
                 <div style="font-size: 8px; margin-bottom: 2px;">
-                    <div style="font-weight: bold; margin-bottom: 1px;">
-    <span style="font-size: 8px; font-family: 'Courier New', monospace;">ITEM               QTY    AMOUNT</span>
+    <div style="font-weight: bold; margin-bottom: 1px;">
+        <span style="font-size: 8px; font-family: 'Courier New', monospace;">
+            <span style="display: inline-block; width: 22ch; text-align: left;">ITEM</span>
+            <span style="display: inline-block; width: 3ch; text-align: right;">QTY</span>
+            <span style="display: inline-block; width: 10ch; text-align: right;">AMOUNT</span>
+        </span>
+    </div>
 </div>
-                </div>
-                
-                <div style="font-size: 8px; margin-bottom: 4px;">
-                    ${itemsHTML}
-                </div>
+
+<div style="font-size: 8px; margin-bottom: 4px;">
+    ${itemsHTML}
+</div>
                 
                 ${validItems.length > 0 ? `
                 <div style="border-top: 1px dashed #000; margin: 4px 0;"></div>
@@ -1611,31 +1621,31 @@ const totalLineWidth = maxNameLength + 3 + maxQtyLength + 3 + maxAmountLength;
 const qtyStartPosition = maxNameLength + Math.floor((totalLineWidth - maxNameLength - maxAmountLength - maxQtyLength) / 2);
 
 // Items header - aligned with data columns
+// Items header - SIMPLIFIED ALIGNMENT
 escpos += "\x1B\x21\x08"; // Emphasized
-escpos += "ITEM".padEnd(maxNameLength, ' ');
-escpos += " ".repeat(qtyStartPosition - maxNameLength);
-escpos += "QTY".padStart(Math.ceil(maxQtyLength/2) + 1, ' ').padEnd(maxQtyLength, ' ');
-escpos += " ".repeat(totalLineWidth - qtyStartPosition - maxQtyLength - maxAmountLength);
-escpos += "AMOUNT".padStart(maxAmountLength, ' ');
+// Fixed column widths (optimized for 58mm paper)
+escpos += "ITEM".padEnd(17, ' ');
+escpos += "QTY".padStart(3, ' ');
+escpos += " AMOUNT".padStart(10, ' ');
 escpos += "\n";
 escpos += "\x1B\x21\x00"; // Normal
 
-// Items
+// Items - SIMPLIFIED WITH FIXED WIDTHS
 itemsToPrint.forEach(item => {
-    // Truncate name if too long, add ellipsis
-    const displayName = item.name.length > maxNameLength 
-        ? item.name.substring(0, maxNameLength - 1) + '…'
-        : item.name;
+    // Truncate item name to fit column
+    let displayName = item.name;
+    if (displayName.length > 17) {
+        displayName = displayName.substring(0, 14) + '...';
+    }
     
-    const name = displayName.padEnd(maxNameLength, ' ');
-    const qty = item.quantity.toString().padStart(maxQtyLength, ' ');
-    const amount = formatUGX(item.total).padStart(maxAmountLength, ' ');
-    
-    // Align QTY in the center
-    const namePadding = name;
-    const qtyPadding = " ".repeat(qtyStartPosition - maxNameLength);
-    
-    escpos += `${namePadding}${qtyPadding}${qty} ${amount}\n`;
+    // Fixed column widths:
+    // Column 1: Item name (22 chars)
+    // Column 2: Quantity (3 chars, right-aligned)
+    // Column 3: Amount (10 chars, right-aligned)
+    escpos += displayName.padEnd(17, ' ');
+    escpos += item.quantity.toString().padStart(3, ' ');
+    escpos += formatUGX(item.total).padStart(10, ' ');
+    escpos += "\n";
 });
                 
                 escpos += "-------------------------------\n";

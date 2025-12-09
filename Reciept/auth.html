@@ -967,7 +967,7 @@
                 showToast('Account created! Syncing data...', 'success');
                 
                 setTimeout(() => {
-                    window.location.href = 'Recieptprinter.html';
+                    window.location.href = 'Reciept/Recieptprinter.html';
                 }, 1500);
                 
             } catch (error) {
@@ -1043,7 +1043,7 @@ showToast('Login successful! Redirecting...', 'success');
 
 // Immediate redirect - no async operations
 setTimeout(() => {
-    window.location.href = 'Recieptprinter.html';
+    window.location.href = 'Reciept/Recieptprinter.html';
 }, 500);
                 
             } catch (error) {
@@ -1123,7 +1123,7 @@ setTimeout(() => {
                 await loadReceiptsFromFirebase(user.uid);
                 
                 setTimeout(() => {
-                    window.location.href = 'Recieptprinter.html';
+                    window.location.href = 'Reciept/Recieptprinter.html';
                 }, 1000);
                 
             } catch (error) {
@@ -1161,7 +1161,7 @@ setTimeout(() => {
             showToast('Starting guest session...', 'success');
             
             setTimeout(() => {
-                window.location.href = 'Recieptprinter.html';
+                window.location.href = 'Reciept/Recieptprinter.html';
             }, 1000);
         }
         
@@ -1277,7 +1277,7 @@ setTimeout(() => {
                 const user = JSON.parse(currentUser);
                 if (!user.isGuest) {
                     // Auto-redirect if remember me was checked
-                    window.location.href = 'Recieptprinter.html';
+                    window.location.href = 'Reciept/Recieptprinter.html';
                 }
             }
             

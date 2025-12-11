@@ -396,11 +396,11 @@
         "bestseller"
       ],
       "features": [
-        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times â ideal for travel, work, or emergencies.*",
+        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times Ã¢ÂÂ ideal for travel, work, or emergencies.*",
         "Type-C Two-Way Charging: Both input and output via Type-C for faster recharging and wider compatibility.",
         "Triple Output Charging: Charge 3 devices simultaneously (USB-A x2 + Type-C).",
         "12W Fast Recharge: Type-C input supports fast recharging in just 8 hours.*",
-        "LED Torch: Provides up to 100 hours of light â perfect for night use or power outages.*",
+        "LED Torch: Provides up to 100 hours of light Ã¢ÂÂ perfect for night use or power outages.*",
         "Universal Compatibility: Works with iPhones, Samsung, Pixel, OnePlus, Xiaomi, tablets, speakers, and more (1000+ devices).",
         "9-Layer Safety Protection: Includes overcharge, short-circuit, temperature, and voltage protections for reliable use.",
         "Smart Power Display: Keep track of remaining power at a glance."
@@ -414,6 +414,42 @@
       "status": "active",
       "dateAdded": "2025-11-18T06:51:45.783Z",
       "dateUpdated": "2025-11-18T06:57:41.972Z"
+    },
+    {
+      "id": 1765455856524,
+      "name": "Monaco MagSafe 20000mAh Power Bank",
+      "sku": "0112",
+      "category": "accessories",
+      "description": "Green Lion Monaco MagSafe 20000mAh Power Bank, compatible, Integrated Type-C Cable,Smart Chip,15W Wireless Charging,Strong Magnetic,LCD Power Indicator,PD 20W,Pocket Sized",
+      "price": "220000",
+      "originalPrice": "312000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1765455793543.jpg"
+      ],
+      "videos": [],
+      "stock": "in-stock",
+      "rating": 3.2,
+      "reviewCount": 168,
+      "badges": [
+        "new"
+      ],
+      "features": [
+        "High Capacity: A powerful 20,000mAh battery ensures your devices stay charged throughout the day, perfect for travel and long outings.",
+        "Integrated Type-C Cable: Built-in Type-C cable eliminates the need for extra cords, making charging more convenient than ever.",
+        "Smart Chip Technology: Automatically detects your device’s power needs, optimizing charging speeds for maximum efficiency.",
+        "15W Wireless Charging: Effortlessly charge compatible devices wirelessly, providing a hassle-free experience.",
+        "Power Delivery (PD) 20W: Enjoy rapid charging capabilities for various devices, including tablets and laptops.",
+        "Pocket-Sized and Lightweight: Despite its high capacity, the compact design makes it easy to carry in your bag or pocket.",
+        "Reason to Buy: The Green Lion Monaco Power Bank is an essential companion for anyone who values convenience and high performance in their charging solutions. Its impressive capacity, smart technology, and portability ensure you stay powered up, no matter where life takes you."
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2025-12-11T12:24:16.667Z"
     }
   ],
   "content": {
@@ -430,5 +466,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-11-18T06:57:42.015Z"
+  "lastUpdated": "2025-12-11T12:24:17.163Z"
 }

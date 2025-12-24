@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Phone to TV Screen Cast</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #3a7bd5);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            padding: 20px 0;
+            margin-bottom: 30px;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .setup-box {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 25px;
+            margin-bottom: 30px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+        }
+        
+        h2 {
+            font-size: 1.8rem;
+            margin-bottom: 20px;
+            color: #4fc3f7;
+        }
+        
+        .steps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        
+        .step {
+            flex: 1;
+            min-width: 250px;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid #4fc3f7;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 35px;
+            height: 35px;
+            background: #4fc3f7;
+            color: #1a2a6c;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 35px;
+            font-weight: bold;
+            margin-bottom: 15px;
+        }
+        
+        .casting-interface {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 30px;
+            margin-bottom: 40px;
+        }
+        
+        .phone-side, .tv-side {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .screen-display {
+            width: 100%;
+            height: 300px;
+            background-color: #000;
+            border-radius: 10px;
+            margin: 20px 0;
+            overflow: hidden;
+            position: relative;
+            border: 2px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        #preview-screen {
+            background: linear-gradient(45deg, #1a1a2e, #16213e);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            color: #4fc3f7;
+            font-size: 1.2rem;
+        }
+        
+        #tv-screen {
+            background-color: #000;
+            color: #fff;
+            font-family: monospace;
+            padding: 20px;
+            font-size: 14px;
+            overflow-y: auto;
+        }
+        
+        .button-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        
+        button {
+            padding: 14px 25px;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        button i {
+            font-size: 1.2rem;
+        }
+        
+        .primary-btn {
+            background: #4fc3f7;
+            color: #1a2a6c;
+        }
+        
+        .primary-btn:hover {
+            background: #29b6f6;
+            transform: translateY(-3px);
+            box-shadow: 0 5px 15px rgba(41, 182, 246, 0.4);
+        }
+        
+        .secondary-btn {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+        
+        .secondary-btn:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: translateY(-3px);
+        }
+        
+        .danger-btn {
+            background: #f44336;
+            color: white;
+        }
+        
+        .danger-btn:hover {
+            background: #d32f2f;
+            transform: translateY(-3px);
+        }
+        
+        .connection-status {
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        
+        .connected {
+            background: rgba(76, 175, 80, 0.2);
+            border-left: 5px solid #4caf50;
+        }
+        
+        .disconnected {
+            background: rgba(244, 67, 54, 0.2);
+            border-left: 5px solid #f44336;
+        }
+        
+        .status-indicator {
+            width: 15px;
+            height: 15px;
+            border-radius: 50%;
+            display: inline-block;
+        }
+        
+        .connected .status-indicator {
+            background-color: #4caf50;
+            box-shadow: 0 0 10px #4caf50;
+        }
+        
+        .disconnected .status-indicator {
+            background-color: #f44336;
+        }
+        
+        .instructions {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 20px;
+            border-radius: 10px;
+            margin-top: 30px;
+            line-height: 1.6;
+        }
+        
+        .instructions h3 {
+            color: #4fc3f7;
+            margin-bottom: 10px;
+        }
+        
+        .instructions ul {
+            padding-left: 20px;
+        }
+        
+        .instructions li {
+            margin-bottom: 8px;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 768px) {
+            .casting-interface {
+                flex-direction: column;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-tv"></i> Phone to TV Screen Cast</h1>
+            <p class="subtitle">Cast your phone screen to your analog TV via laptop connected with VGA. Use this web app on both devices to establish a WiFi connection.</p>
+        </header>
+        
+        <div class="setup-box">
+            <h2><i class="fas fa-cogs"></i> Setup Instructions</h2>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Connect Laptop to TV</h3>
+                    <p>Connect your laptop to your analog TV using a VGA cable. Make sure the TV is set to the correct input source.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Connect to Same WiFi</h3>
+                    <p>Ensure both your phone and laptop are connected to the same WiFi network for screen casting.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Open this Page on Both Devices</h3>
+                    <p>Open this webpage on both your phone and laptop. Follow the instructions below to start casting.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="casting-interface">
+            <div class="phone-side">
+                <h2><i class="fas fa-mobile-alt"></i> Phone (Sender)</h2>
+                <p>Use this section on your phone to share your screen.</p>
+                
+                <div class="screen-display" id="preview-screen">
+                    <i class="fas fa-mobile-alt" style="font-size: 3rem; margin-bottom: 20px;"></i>
+                    <p>Phone Screen Preview</p>
+                    <p id="phone-status" style="margin-top: 20px; font-size: 1rem;">Ready to cast</p>
+                </div>
+                
+                <div class="button-group">
+                    <button id="start-cast-btn" class="primary-btn">
+                        <i class="fas fa-play-circle"></i> Start Casting
+                    </button>
+                    <button id="stop-cast-btn" class="danger-btn">
+                        <i class="fas fa-stop-circle"></i> Stop Casting
+                    </button>
+                </div>
+                
+                <div id="phone-connection" class="connection-status disconnected">
+                    <span class="status-indicator"></span>
+                    <span id="phone-connection-text">Not connected to TV</span>
+                </div>
+            </div>
+            
+            <div class="tv-side">
+                <h2><i class="fas fa-tv"></i> TV via Laptop (Receiver)</h2>
+                <p>Use this section on your laptop connected to the TV.</p>
+                
+                <div class="screen-display" id="tv-screen">
+                    <div id="tv-content">
+                        <div style="text-align: center; margin-top: 100px;">
+                            <i class="fas fa-tv" style="font-size: 3rem; color: #4fc3f7;"></i>
+                            <p style="margin-top: 20px;">TV Display - Waiting for connection...</p>
+                            <p style="font-size: 0.9rem; margin-top: 10px; color: #aaa;">Content from your phone will appear here</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="button-group">
+                    <button id="start-receiver-btn" class="primary-btn">
+                        <i class="fas fa-satellite-dish"></i> Start Receiver
+                    </button>
+                    <button id="clear-screen-btn" class="secondary-btn">
+                        <i class="fas fa-broom"></i> Clear Screen
+                    </button>
+                </div>
+                
+                <div id="tv-connection" class="connection-status disconnected">
+                    <span class="status-indicator"></span>
+                    <span id="tv-connection-text">Receiver not active</span>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h3><i class="fas fa-info-circle"></i> How This Works</h3>
+            <ul>
+                <li>This solution simulates screen casting using WebSocket technology to send data between devices on the same network.</li>
+                <li>In a real implementation, you would need a server to relay messages between devices. For now, this is a simulation.</li>
+                <li>To implement this for real, you would need to:
+                    <ol>
+                        <li>Set up a WebSocket server on your laptop or a local server</li>
+                        <li>Use WebRTC for actual screen sharing from your phone</li>
+                        <li>Ensure both devices are on the same WiFi network</li>
+                    </ol>
+                </li>
+                <li>For now, this demo simulates the casting experience with sample content.</li>
+            </ul>
+        </div>
+        
+        <footer>
+            <p>Phone to TV Casting System | This is a demonstration interface. Real implementation requires additional server setup.</p>
+            <p>Connect your laptop to your analog TV via VGA cable for display.</p>
+        </footer>
+    </div>
+
+    <script>
+        // DOM Elements
+        const startCastBtn = document.getElementById('start-cast-btn');
+        const stopCastBtn = document.getElementById('stop-cast-btn');
+        const startReceiverBtn = document.getElementById('start-receiver-btn');
+        const clearScreenBtn = document.getElementById('clear-screen-btn');
+        const phoneConnection = document.getElementById('phone-connection');
+        const tvConnection = document.getElementById('tv-connection');
+        const phoneConnectionText = document.getElementById('phone-connection-text');
+        const tvConnectionText = document.getElementById('tv-connection-text');
+        const tvContent = document.getElementById('tv-content');
+        const phoneStatus = document.getElementById('phone-status');
+        const previewScreen = document.getElementById('preview-screen');
+        
+        // Casting state
+        let isCasting = false;
+        let isReceiving = false;
+        let castInterval;
+        let sampleContent = [
+            { type: 'text', content: 'Casting from phone to TV...' },
+            { type: 'text', content: 'This is a sample text message.' },
+            { type: 'text', content: 'Phone screen content appears here.' },
+            { type: 'image', content: '📱' },
+            { type: 'text', content: 'You can cast photos, videos, and more!' },
+            { type: 'text', content: 'Current time: ' + new Date().toLocaleTimeString() },
+            { type: 'image', content: '🌅' },
+            { type: 'text', content: 'Imagine your phone screen displayed here...' }
+        ];
+        let contentIndex = 0;
+        
+        // Start casting from phone
+        startCastBtn.addEventListener('click', function() {
+            if (!isReceiving) {
+                alert("Please start the receiver on the laptop first, then start casting from your phone.");
+                return;
+            }
+            
+            isCasting = true;
+            phoneConnection.className = "connection-status connected";
+            phoneConnectionText.textContent = "Casting to TV...";
+            phoneStatus.textContent = "Casting active - sharing screen to TV";
+            previewScreen.style.background = "linear-gradient(45deg, #2e1a5e, #3a7bd5)";
+            
+            // Simulate sending content to TV
+            castInterval = setInterval(() => {
+                if (contentIndex >= sampleContent.length) contentIndex = 0;
+                
+                const content = sampleContent[contentIndex];
+                receiveOnTV(content);
+                contentIndex++;
+            }, 2000);
+            
+            // Show initial content
+            receiveOnTV(sampleContent[0]);
+            contentIndex = 1;
+        });
+        
+        // Stop casting
+        stopCastBtn.addEventListener('click', function() {
+            isCasting = false;
+            clearInterval(castInterval);
+            
+            phoneConnection.className = "connection-status disconnected";
+            phoneConnectionText.textContent = "Not connected to TV";
+            phoneStatus.textContent = "Casting stopped";
+            previewScreen.style.background = "linear-gradient(45deg, #1a1a2e, #16213e)";
+            
+            // Clear TV screen
+            tvContent.innerHTML = `
+                <div style="text-align: center; margin-top: 100px;">
+                    <i class="fas fa-tv" style="font-size: 3rem; color: #4fc3f7;"></i>
+                    <p style="margin-top: 20px;">TV Display - Casting stopped</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px; color: #aaa;">Content from your phone will appear here</p>
+                </div>
+            `;
+        });
+        
+        // Start receiver on laptop
+        startReceiverBtn.addEventListener('click', function() {
+            isReceiving = true;
+            tvConnection.className = "connection-status connected";
+            tvConnectionText.textContent = "Ready to receive cast";
+            
+            tvContent.innerHTML = `
+                <div style="text-align: center; margin-top: 100px;">
+                    <i class="fas fa-satellite-dish" style="font-size: 3rem; color: #4fc3f7;"></i>
+                    <p style="margin-top: 20px;">TV Display - Ready for casting</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px; color: #aaa;">Start casting from your phone to see content here</p>
+                </div>
+            `;
+        });
+        
+        // Clear screen
+        clearScreenBtn.addEventListener('click', function() {
+            tvContent.innerHTML = `
+                <div style="text-align: center; margin-top: 100px;">
+                    <i class="fas fa-tv" style="font-size: 3rem; color: #4fc3f7;"></i>
+                    <p style="margin-top: 20px;">TV Display - Screen cleared</p>
+                    <p style="font-size: 0.9rem; margin-top: 10px; color: #aaa;">Start casting from your phone to see content here</p>
+                </div>
+            `;
+        });
+        
+        // Simulate receiving content on TV
+        function receiveOnTV(content) {
+            if (!isReceiving) return;
+            
+            let newContent;
+            if (content.type === 'text') {
+                newContent = `<div class="tv-message">${content.content}</div>`;
+            } else if (content.type === 'image') {
+                newContent = `<div class="tv-image" style="font-size: 3rem; text-align: center; margin: 10px 0;">${content.content}</div>`;
+            }
+            
+            // Add to TV screen with timestamp
+            const timestamp = new Date().toLocaleTimeString();
+            const messageElement = document.createElement('div');
+            messageElement.innerHTML = `
+                <div style="border-bottom: 1px solid #333; padding: 10px; margin-bottom: 10px;">
+                    <div style="color: #4fc3f7; font-size: 0.8rem; margin-bottom: 5px;">${timestamp}</div>
+                    ${newContent}
+                </div>
+            `;
+            
+            // Add to beginning of content
+            tvContent.insertBefore(messageElement.firstChild, tvContent.firstChild);
+            
+            // Limit number of messages displayed
+            if (tvContent.children.length > 8) {
+                tvContent.removeChild(tvContent.lastChild);
+            }
+        }
+        
+        // Initialize with receiver ready message
+        window.addEventListener('load', function() {
+            // Simulate that receiver is already active for demo purposes
+            setTimeout(() => {
+                startReceiverBtn.click();
+            }, 1000);
+        });
+    </script>
+</body>
+</html>

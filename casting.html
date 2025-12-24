@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cast to TV</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+            background: #f0f0f0;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            border-bottom: 2px solid #4CAF50;
+            padding-bottom: 10px;
+        }
+        .warning {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            color: #856404;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .cast-section {
+            margin: 30px 0;
+        }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #45a049;
+        }
+        button.secondary {
+            background: #008CBA;
+        }
+        button.secondary:hover {
+            background: #007ba7;
+        }
+        .status {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 5px;
+            display: none;
+        }
+        .status.connected {
+            background: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+        .status.disconnected {
+            background: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .video-container {
+            margin: 20px 0;
+        }
+        #localVideo {
+            width: 100%;
+            max-width: 640px;
+            background: #000;
+            border-radius: 5px;
+        }
+        .input-group {
+            margin: 20px 0;
+        }
+        input[type="text"], input[type="file"] {
+            width: 100%;
+            padding: 10px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .url-input {
+            display: flex;
+            gap: 10px;
+        }
+        .url-input input {
+            flex: 1;
+        }
+        .preview-box {
+            width: 100%;
+            height: 300px;
+            border: 2px dashed #ccc;
+            margin: 20px 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: #f8f9fa;
+            border-radius: 5px;
+        }
+        .instructions {
+            background: #e7f3ff;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 30px 0;
+            border-left: 4px solid #2196F3;
+        }
+        .instructions h3 {
+            margin-top: 0;
+            color: #1565C0;
+        }
+        .device-list {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📺 Cast to Analog TV</h1>
+        
+        <div class="warning">
+            <strong>Important:</strong> Your TV needs a WiFi receiver device connected via VGA. 
+            This page alone cannot cast directly to a VGA-only TV. See instructions below.
+        </div>
+        
+        <div class="instructions">
+            <h3>📋 Setup Required:</h3>
+            <ol>
+                <li><strong>For Raspberry Pi:</strong> Install a web browser in kiosk mode pointing to this page</li>
+                <li><strong>For Chromecast/Fire Stick:</strong> Cast your browser tab to the device</li>
+                <li><strong>Alternative:</strong> Use a spare smartphone/tablet connected to TV via HDMI-to-VGA adapter</li>
+            </ol>
+        </div>
+        
+        <div class="cast-section">
+            <h2>Cast Content</h2>
+            
+            <div class="input-group">
+                <h3>Cast Web Content</h3>
+                <div class="url-input">
+                    <input type="text" id="castUrl" placeholder="Enter URL to cast (e.g., https://example.com)">
+                    <button onclick="castURL()">Cast URL</button>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <h3>Cast Images</h3>
+                <input type="file" id="imageInput" accept="image/*" onchange="previewImage(event)">
+                <button onclick="castImage()">Cast Image</button>
+                <div class="preview-box">
+                    <img id="imagePreview" style="max-width: 100%; max-height: 100%; display: none;">
+                    <span id="previewText">Image preview will appear here</span>
+                </div>
+            </div>
+            
+            <div class="input-group">
+                <h3>Cast Video/Webcam</h3>
+                <div class="video-container">
+                    <video id="localVideo" autoplay muted></video>
+                </div>
+                <button onclick="startWebcam()">Start Webcam</button>
+                <button onclick="stopWebcam()" class="secondary">Stop Webcam</button>
+                <button onclick="castVideo()">Cast Video</button>
+            </div>
+            
+            <div class="input-group">
+                <h3>Cast Screen</h3>
+                <button onclick="castScreen()">Cast Entire Screen</button>
+                <button onclick="castWindow()" class="secondary">Cast Application Window</button>
+            </div>
+        </div>
+        
+        <div class="device-list">
+            <h3>Available Devices</h3>
+            <div id="deviceStatus" class="status disconnected">
+                No devices found. Make sure your receiver is on the same WiFi network.
+            </div>
+            <button onclick="discoverDevices()">Scan for Devices</button>
+        </div>
+        
+        <div class="instructions">
+            <h3>⚙️ Hardware Solutions:</h3>
+            <ul>
+                <li><strong>Option A:</strong> Raspberry Pi 3/4 with VGA hat + WiFi ($35-60)</li>
+                <li><strong>Option B:</strong> Chromecast + HDMI-to-VGA converter ($40-50)</li>
+                <li><strong>Option C:</strong> Old Android phone + HDMI adapter + VGA converter</li>
+                <li><strong>Option D:</strong> Wireless HDMI transmitter/receiver kit ($50-100)</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // Simulated device discovery
+        function discoverDevices() {
+            const status = document.getElementById('deviceStatus');
+            status.textContent = "Searching for devices...";
+            status.className = "status";
+            status.style.display = 'block';
+            
+            setTimeout(() => {
+                status.textContent = "Found: Living Room TV (Raspberry Pi)";
+                status.className = "status connected";
+            }, 2000);
+        }
+        
+        function castURL() {
+            const url = document.getElementById('castUrl').value;
+            if (!url) {
+                alert("Please enter a URL");
+                return;
+            }
+            
+            // In a real implementation, this would send to your receiver
+            alert(`Casting URL: ${url}\n\n(Note: This is a demo. Actual casting requires a receiver device.)`);
+            
+            // Open in new window (simulated casting)
+            window.open(url, '_blank', 'width=1024,height=768');
+        }
+        
+        function previewImage(event) {
+            const file = event.target.files[0];
+            const preview = document.getElementById('imagePreview');
+            const previewText = document.getElementById('previewText');
+            
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    preview.src = e.target.result;
+                    preview.style.display = 'block';
+                    previewText.style.display = 'none';
+                }
+                reader.readAsDataURL(file);
+            }
+        }
+        
+        function castImage() {
+            const preview = document.getElementById('imagePreview');
+            if (!preview.src || preview.style.display === 'none') {
+                alert("Please select an image first");
+                return;
+            }
+            alert("Casting image to TV...");
+        }
+        
+        let localStream = null;
+        
+        async function startWebcam() {
+            try {
+                const constraints = {
+                    video: { width: 640, height: 480 },
+                    audio: false
+                };
+                localStream = await navigator.mediaDevices.getUserMedia(constraints);
+                document.getElementById('localVideo').srcObject = localStream;
+            } catch (err) {
+                console.error("Error accessing webcam:", err);
+                alert("Cannot access webcam: " + err.message);
+            }
+        }
+        
+        function stopWebcam() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                document.getElementById('localVideo').srcObject = null;
+            }
+        }
+        
+        function castVideo() {
+            if (!localStream) {
+                alert("Please start webcam first");
+                return;
+            }
+            alert("Casting video feed to TV...");
+        }
+        
+        async function castScreen() {
+            try {
+                const stream = await navigator.mediaDevices.getDisplayMedia({
+                    video: true
+                });
+                alert("Screen sharing active. On a real system, this would be sent to your TV.");
+                // In real implementation: stream would be sent to receiver
+            } catch (err) {
+                console.error("Error sharing screen:", err);
+            }
+        }
+        
+        function castWindow() {
+            alert("Window casting requires browser support. In Chrome, use 'Cast Tab' from menu.");
+        }
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            discoverDevices();
+        });
+    </script>
+</body>
+</html>

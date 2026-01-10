@@ -396,11 +396,11 @@
         "bestseller"
       ],
       "features": [
-        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times Ã¢ÂÂ ideal for travel, work, or emergencies.*",
+        "Massive 20000mAh Capacity: Fully charges your phone up to 4 times ÃÂ¢ÃÂÃÂ ideal for travel, work, or emergencies.*",
         "Type-C Two-Way Charging: Both input and output via Type-C for faster recharging and wider compatibility.",
         "Triple Output Charging: Charge 3 devices simultaneously (USB-A x2 + Type-C).",
         "12W Fast Recharge: Type-C input supports fast recharging in just 8 hours.*",
-        "LED Torch: Provides up to 100 hours of light Ã¢ÂÂ perfect for night use or power outages.*",
+        "LED Torch: Provides up to 100 hours of light ÃÂ¢ÃÂÃÂ perfect for night use or power outages.*",
         "Universal Compatibility: Works with iPhones, Samsung, Pixel, OnePlus, Xiaomi, tablets, speakers, and more (1000+ devices).",
         "9-Layer Safety Protection: Includes overcharge, short-circuit, temperature, and voltage protections for reliable use.",
         "Smart Power Display: Keep track of remaining power at a glance."
@@ -436,7 +436,7 @@
       "features": [
         "High Capacity: A powerful 20,000mAh battery ensures your devices stay charged throughout the day, perfect for travel and long outings.",
         "Integrated Type-C Cable: Built-in Type-C cable eliminates the need for extra cords, making charging more convenient than ever.",
-        "Smart Chip Technology: Automatically detects your device’s power needs, optimizing charging speeds for maximum efficiency.",
+        "Smart Chip Technology: Automatically detects your deviceâs power needs, optimizing charging speeds for maximum efficiency.",
         "15W Wireless Charging: Effortlessly charge compatible devices wirelessly, providing a hassle-free experience.",
         "Power Delivery (PD) 20W: Enjoy rapid charging capabilities for various devices, including tablets and laptops.",
         "Pocket-Sized and Lightweight: Despite its high capacity, the compact design makes it easy to carry in your bag or pocket.",
@@ -450,6 +450,47 @@
       "featured": true,
       "status": "active",
       "dateAdded": "2025-12-11T12:24:16.667Z"
+    },
+    {
+      "id": 1768026137894,
+      "name": "KZ Castor 2DD in Ear monitor Earphones ",
+      "sku": "0113",
+      "category": "accessories",
+      "description": "The KZ Castor 2DD is a premium in-ear earphone delivering HiFi, dynamic sound with dual‑driver technology. It features high‑end tunable audio, excellent noise‑cancellation, and a comfortable fit for professional monitoring or everyday music enjoyment. Ideal for audiophiles seeking clear, balanced sound and versatile performance in a sleek earbud design (compatible with ZSNPRO, ZSX, ESX, and D‑FI setups).",
+      "price": "200000",
+      "originalPrice": "420000",
+      "images": [
+        "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/public/images/products/product-1768025736788.jpg"
+      ],
+      "videos": [],
+      "stock": "pre-order",
+      "rating": 5,
+      "reviewCount": 300,
+      "badges": [
+        "bestseller"
+      ],
+      "features": [
+        " Driver Type: 2 × Dynamic drivers (2DD)",
+        " Impedance: 32 Ω",
+        " Frequency Response: 20 Hz – 40 kHz",
+        " Sensitivity: 108 dB",
+        " Connector: 3.5 mm jack (standard plug)",
+        " Cable: Detachable, high‑purity copper or silver‑plated (depends on variant)",
+        " Noise Cancellation: Passive noise isolation (physical fit)",
+        " Fit: In‑ear earbuds with multiple silicone tip sizes",
+        " Compatibility: Works with ZSNPRO, ZSX, ESX, and D‑FI audio setups",
+        " Sound Profile: Balanced, tunable HiFi audio with enhanced bass and clear highs",
+        " Build: Metal housing for durability & stylish design",
+        " Weight: 6g (earbuds only)"
+      ],
+      "specifications": {
+        "battery": "Up to 6 hours",
+        "charging": "Wireless charging case",
+        "connectivity": "Bluetooth 5.0"
+      },
+      "featured": true,
+      "status": "active",
+      "dateAdded": "2026-01-10T06:22:17.902Z"
     }
   ],
   "content": {
@@ -466,5 +507,5 @@
     "youtube": ""
   },
   "lastSynced": "2025-10-16T13:20:34.197Z",
-  "lastUpdated": "2025-12-11T12:24:17.163Z"
+  "lastUpdated": "2026-01-10T06:22:17.920Z"
 }

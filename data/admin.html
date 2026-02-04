@@ -391,6 +391,7 @@
             border-radius: 8px;
             overflow: hidden;
             box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+            background-color: #f5f5f5;
         }
         
         .photo-container img {
@@ -398,6 +399,7 @@
             height: 200px;
             object-fit: cover;
             display: block;
+            background-color: #eee;
         }
         
         .photo-label {
@@ -406,6 +408,23 @@
             font-weight: 600;
             color: #333;
             text-align: center;
+            border-top: 1px solid #ddd;
+        }
+        
+        .no-image {
+            height: 200px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: #666;
+            background-color: #f9f9f9;
+        }
+        
+        .no-image i {
+            font-size: 40px;
+            margin-bottom: 10px;
+            color: #ccc;
         }
         
         .verification-panel {
@@ -554,11 +573,9 @@
         <div id="dashboardSection">
             <div class="header">
                 <h1>Agent Management Dashboard</h1>
-                <div>
-                    <button class="action-btn verify-btn refresh-btn" onclick="loadAgentData()">
-                        <i class="fas fa-sync-alt"></i> Refresh Data
-                    </button>
-                </div>
+                <button class="action-btn verify-btn refresh-btn" onclick="loadAgentData()">
+                    <i class="fas fa-sync-alt"></i> Refresh Data
+                </button>
             </div>
             
             <div class="stats-cards">
@@ -1043,6 +1060,63 @@
                 day: 'numeric'
             });
             
+            // Create image HTML
+            let imagesHtml = '';
+            
+            if (agent.idFrontUrl || agent.idBackUrl || agent.agentPhotoUrl) {
+                imagesHtml = `
+                    <div class="photo-section">
+                        <h3 style="color: #1e3c72; margin-bottom: 15px;">Photos</h3>
+                        <div class="photos-grid">
+                            ${agent.idFrontUrl ? `
+                            <div class="photo-container">
+                                <img src="${agent.idFrontUrl}" alt="ID Front" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'no-image\\'><i class=\\'fas fa-image\\'></i><span>Image not available</span></div>'">
+                                <div class="photo-label">ID Front / Passport Bio Page</div>
+                            </div>
+                            ` : `
+                            <div class="photo-container">
+                                <div class="no-image">
+                                    <i class="fas fa-id-card"></i>
+                                    <span>No ID Front Image</span>
+                                </div>
+                                <div class="photo-label">ID Front / Passport Bio Page</div>
+                            </div>
+                            `}
+                            
+                            ${agent.idBackUrl ? `
+                            <div class="photo-container">
+                                <img src="${agent.idBackUrl}" alt="ID Back" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'no-image\\'><i class=\\'fas fa-image\\'></i><span>Image not available</span></div>'">
+                                <div class="photo-label">ID Back / Passport Cover</div>
+                            </div>
+                            ` : `
+                            <div class="photo-container">
+                                <div class="no-image">
+                                    <i class="fas fa-id-card"></i>
+                                    <span>No ID Back Image</span>
+                                </div>
+                                <div class="photo-label">ID Back / Passport Cover</div>
+                            </div>
+                            `}
+                            
+                            ${agent.agentPhotoUrl ? `
+                            <div class="photo-container">
+                                <img src="${agent.agentPhotoUrl}" alt="Agent Photo" onerror="this.onerror=null; this.parentElement.innerHTML='<div class=\\'no-image\\'><i class=\\'fas fa-image\\'></i><span>Image not available</span></div>'">
+                                <div class="photo-label">Agent Passport Photo</div>
+                            </div>
+                            ` : `
+                            <div class="photo-container">
+                                <div class="no-image">
+                                    <i class="fas fa-user-circle"></i>
+                                    <span>No Agent Photo</span>
+                                </div>
+                                <div class="photo-label">Agent Passport Photo</div>
+                            </div>
+                            `}
+                        </div>
+                    </div>
+                `;
+            }
+            
             // Create agent details HTML
             agentModalBody.innerHTML = `
                 <div class="agent-details">
@@ -1139,33 +1213,7 @@
                     </div>
                 </div>
                 
-                ${agent.idFront || agent.agentPhoto ? `
-                <div class="photo-section">
-                    <h3 style="color: #1e3c72; margin-bottom: 15px;">Photos</h3>
-                    <div class="photos-grid">
-                        ${agent.idFront ? `
-                        <div class="photo-container">
-                            <img src="${agent.idFront}" alt="ID Front">
-                            <div class="photo-label">ID Front / Passport Bio Page</div>
-                        </div>
-                        ` : ''}
-                        
-                        ${agent.idBack ? `
-                        <div class="photo-container">
-                            <img src="${agent.idBack}" alt="ID Back">
-                            <div class="photo-label">ID Back / Passport Cover</div>
-                        </div>
-                        ` : ''}
-                        
-                        ${agent.agentPhoto ? `
-                        <div class="photo-container">
-                            <img src="${agent.agentPhoto}" alt="Agent Photo">
-                            <div class="photo-label">Agent Passport Photo</div>
-                        </div>
-                        ` : ''}
-                    </div>
-                </div>
-                ` : ''}
+                ${imagesHtml}
                 
                 ${!agent.emailVerified || agent.status === 'pending' ? `
                 <div class="verification-panel">
@@ -1317,7 +1365,7 @@
             localStorage.setItem('dataJson', JSON.stringify(dataJson));
             
             // Try to save to GitHub if configured
-            if (githubConfig.repoOwner && githubConfig.repoName) {
+            if (githubConfig.repoOwner && githubConfig.repoName && githubConfig.accessToken) {
                 try {
                     await saveDataToGitHub(dataJson);
                 } catch (error) {
@@ -1333,6 +1381,10 @@
                 throw new Error('GitHub repository not configured');
             }
             
+            if (!githubConfig.accessToken) {
+                throw new Error('GitHub access token is required to update data');
+            }
+            
             // Convert to JSON
             const jsonContent = JSON.stringify(data, null, 2);
             
@@ -1345,13 +1397,9 @@
             // Prepare headers
             const headers = {
                 'Content-Type': 'application/json',
-                'Accept': 'application/vnd.github.v3+json'
+                'Accept': 'application/vnd.github.v3+json',
+                'Authorization': `token ${githubConfig.accessToken}`
             };
-            
-            // Add authorization if token is provided
-            if (githubConfig.accessToken) {
-                headers['Authorization'] = `token ${githubConfig.accessToken}`;
-            }
             
             // Get the file SHA first
             let sha = null;

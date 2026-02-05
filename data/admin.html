@@ -1663,7 +1663,158 @@ exportStyles.textContent = `
     }
 `;
 document.head.appendChild(exportStyles);
+
+        // =============================
+// MOBILE RESPONSIVENESS SCRIPT
+// =============================
+
+// Create mobile menu toggle button
+const mobileToggleBtn = document.createElement('button');
+mobileToggleBtn.className = 'mobile-menu-toggle';
+mobileToggleBtn.innerHTML = '<i class="fas fa-bars"></i>';
+document.body.appendChild(mobileToggleBtn);
+
+// Create mobile overlay
+const mobileOverlay = document.createElement('div');
+mobileOverlay.className = 'mobile-overlay';
+document.body.appendChild(mobileOverlay);
+
+// Create table scroll indicator
+const tableScrollIndicator = document.createElement('div');
+tableScrollIndicator.className = 'table-scroll-indicator';
+tableScrollIndicator.innerHTML = '<i class="fas fa-arrow-left"></i> Scroll';
+document.body.appendChild(tableScrollIndicator);
+
+// Toggle mobile sidebar
+mobileToggleBtn.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.toggle('active');
+    mobileOverlay.classList.toggle('active');
+    document.body.style.overflow = 'hidden';
+});
+
+// Close sidebar when clicking overlay
+mobileOverlay.addEventListener('click', () => {
+    document.querySelector('.sidebar').classList.remove('active');
+    mobileOverlay.classList.remove('active');
+    document.body.style.overflow = '';
+});
+
+// Close sidebar when clicking a nav item
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+        if (window.innerWidth <= 992) {
+            document.querySelector('.sidebar').classList.remove('active');
+            mobileOverlay.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+    });
+});
+
+// Handle table horizontal scrolling
+const agentsTable = document.querySelector('.agents-table-container');
+if (agentsTable) {
+    agentsTable.addEventListener('scroll', () => {
+        const scrollLeft = agentsTable.scrollLeft;
+        const maxScroll = agentsTable.scrollWidth - agentsTable.clientWidth;
         
+        if (scrollLeft > 10 && scrollLeft < maxScroll - 10) {
+            tableScrollIndicator.style.display = 'block';
+            tableScrollIndicator.innerHTML = '<i class="fas fa-arrow-left"></i> <i class="fas fa-arrow-right"></i> Scroll';
+        } else if (scrollLeft > 10) {
+            tableScrollIndicator.style.display = 'block';
+            tableScrollIndicator.innerHTML = '<i class="fas fa-arrow-left"></i> Scroll';
+        } else if (scrollLeft < maxScroll - 10) {
+            tableScrollIndicator.style.display = 'block';
+            tableScrollIndicator.innerHTML = '<i class="fas fa-arrow-right"></i> Scroll';
+        } else {
+            tableScrollIndicator.style.display = 'none';
+        }
+        
+        // Position indicator
+        const rect = agentsTable.getBoundingClientRect();
+        tableScrollIndicator.style.top = `${rect.top + rect.height / 2}px`;
+    });
+}
+
+// Update table scroll indicator position on resize
+window.addEventListener('resize', () => {
+    if (agentsTable && tableScrollIndicator.style.display === 'block') {
+        const rect = agentsTable.getBoundingClientRect();
+        tableScrollIndicator.style.top = `${rect.top + rect.height / 2}px`;
+    }
+});
+
+// Auto-close sidebar on larger screens
+window.addEventListener('resize', () => {
+    if (window.innerWidth > 992) {
+        document.querySelector('.sidebar').classList.remove('active');
+        mobileOverlay.classList.remove('active');
+        document.body.style.overflow = '';
+        tableScrollIndicator.style.display = 'none';
+    }
+});
+
+// Close modals on Escape key
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+        document.querySelector('.modal').style.display = 'none';
+    }
+});
+
+// Make sure export button is responsive
+document.addEventListener('DOMContentLoaded', () => {
+    // Add export button class if exists
+    const exportBtn = document.querySelector('.action-btn[onclick*="exportToExcel"]');
+    if (exportBtn) {
+        exportBtn.classList.add('export-btn');
+    }
+    
+    // Make all buttons in header responsive
+    const headerActions = document.querySelector('.header > div');
+    if (headerActions) {
+        headerActions.style.display = 'flex';
+        headerActions.style.flexWrap = 'wrap';
+        headerActions.style.gap = '10px';
+        headerActions.style.alignItems = 'center';
+    }
+});
+
+// Add touch swipe support for mobile
+let touchStartX = 0;
+let touchEndX = 0;
+
+agentsTable?.addEventListener('touchstart', (e) => {
+    touchStartX = e.changedTouches[0].screenX;
+});
+
+agentsTable?.addEventListener('touchend', (e) => {
+    touchEndX = e.changedTouches[0].screenX;
+    handleSwipe();
+});
+
+function handleSwipe() {
+    const swipeThreshold = 50;
+    
+    if (touchEndX < touchStartX - swipeThreshold) {
+        // Swipe left - scroll right
+        agentsTable.scrollBy({ left: 200, behavior: 'smooth' });
+    }
+    
+    if (touchEndX > touchStartX + swipeThreshold) {
+        // Swipe right - scroll left
+        agentsTable.scrollBy({ left: -200, behavior: 'smooth' });
+    }
+}
+
+// Initialize on load
+window.addEventListener('load', () => {
+    // Update any existing UI for mobile
+    if (window.innerWidth <= 768) {
+        document.querySelectorAll('.action-btn').forEach(btn => {
+            btn.style.padding = '10px 12px';
+        });
+    }
+});
         // ================= AUTO-SYNC SYSTEM =================
         // Auto-refresh data every 4 seconds
 setInterval(() => {

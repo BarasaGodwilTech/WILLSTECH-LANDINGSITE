@@ -153,7 +153,29 @@
       "idFrontUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770273003954-718_idFront_1770273003958.jpg",
       "idBackUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770273003954-718_idBack_1770273006688.jpg",
       "agentPhotoUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770273003954-718_agentPhoto_1770273008126.jpg"
+    },
+    {
+      "id": "AGENT-1770273447249-175",
+      "fullName": "Barasa will",
+      "personalNumber": "0740165356",
+      "email": "oceanzpaul@gmail.com",
+      "nationalId": "CM03026109LVFA",
+      "dob": "2001-02-04",
+      "gender": "female",
+      "businessAddress": "Musoto",
+      "residentialAddress": "Music",
+      "nextOfKinName": "Mewills",
+      "nextOfKinRelationship": "sibling",
+      "nextOfKinPhone": "0760542056",
+      "tradingName": "Barasa 751924844",
+      "submissionDate": "2026-02-05T06:37:27.249Z",
+      "status": "pending",
+      "emailVerified": false,
+      "adminVerified": false,
+      "idFrontUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770273447249-175_idFront_1770273447253.jpg",
+      "idBackUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770273447249-175_idBack_1770273449310.jpg",
+      "agentPhotoUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770273447249-175_agentPhoto_1770273450721.jpg"
     }
   ],
-  "lastUpdated": "2026-02-05T06:30:10.041Z"
+  "lastUpdated": "2026-02-05T06:37:32.601Z"
 }

@@ -1244,73 +1244,135 @@
         }
         
         // Send verification email
-        async function sendVerificationEmail(agentId) {
-            const agent = agents.find(a => a.id === agentId);
+    
             
-            if (!agent) {
-                alert('Agent not found!');
-                return;
-            }
+            // Send verification email
+async function sendVerificationEmail(agentId) {
+    const agent = agents.find(a => a.id === agentId);
+    
+    if (!agent) {
+        alert('Agent not found!');
+        return;
+    }
+    
+    if (agent.emailVerified) {
+        alert('This agent\'s email is already verified.');
+        return;
+    }
+    
+    // Create email template with the agent's details
+    const subject = `Ezee Money Agent Registration - Email Verification`;
+    
+    const emailBody = `
+Dear ${agent.fullName},
+
+Welcome to Ezee Money!
+
+We have received your agent registration with the following details:
+- Full Name: ${agent.fullName}
+- Personal Number: ${agent.personalNumber}
+- National ID: ${agent.nationalId}
+- Email: ${agent.email}
+
+**About Ezee Money:**
+Ezee Money is an electronic, digital, cashless, and secure method for making fast, on-device payments. As an Ezee Money agent, you will help clients make instant payments and earn commission on every transaction you facilitate.
+
+**Next Steps:**
+1. Please reply to this email confirming that this email address (${agent.email}) is correct and belongs to you.
+2. Once confirmed, your agent account will be activated.
+3. You will receive training materials and login credentials to start earning commissions.
+
+**Benefits of being an Ezee Money Agent:**
+✅ Earn commission on every transaction
+✅ Secure digital payments platform
+✅ Real-time transaction tracking
+✅ 24/7 customer support
+✅ Flexible working hours
+✅ No minimum transaction requirements
+
+**Verification Required:**
+To complete your registration, please reply to this email with "YES" to confirm that:
+1. This email address belongs to you
+2. You have provided accurate information
+3. You agree to the terms of service
+
+If this email was sent in error or if you need to update your information, please reply with the correct details.
+
+We're excited to have you join the Ezee Money family!
+
+Best regards,
+Ezee Money Agent Management Team
+[Your Contact Information]
+    `.trim();
+    
+    // Encode the email content for mailto link
+    const encodedSubject = encodeURIComponent(subject);
+    const encodedBody = encodeURIComponent(emailBody);
+    
+    // Create mailto link
+    const mailtoLink = `mailto:${agent.email}?subject=${encodedSubject}&body=${encodedBody}`;
+    
+    // Ask admin to send the email
+    const confirmSend = confirm(`Send verification email to ${agent.email}?\n\nClick OK to open your email app with a pre-filled message.\n\nAfter sending, wait for the agent to reply confirming their email address.`);
+    
+    if (!confirmSend) {
+        return;
+    }
+    
+    // Open email client
+    window.open(mailtoLink, '_blank');
+    
+    // Ask admin if agent confirmed receipt via reply
+    setTimeout(() => {
+        const agentConfirmed = confirm(`Did the agent REPLY to your email confirming their email address (${agent.email})?\n\nCheck your email inbox for their reply, then:\n- Click OK if they replied confirming\n- Click Cancel if they haven't replied yet`);
+        
+        if (agentConfirmed) {
+            // Mark email as verified
+            agent.emailVerified = true;
             
-            if (agent.emailVerified) {
-                alert('This agent\'s email is already verified.');
-                return;
-            }
-            
-            // Show confirmation dialog
-            const confirmSend = confirm(`Send verification email to ${agent.email}?\n\nAfter sending, ask the agent if they received the email.`);
-            
-            if (!confirmSend) {
-                return;
-            }
-            
-            // In a real system, this would send an actual email
-            // For this demo, we simulate the process
-            
-            // Ask admin if agent confirmed receipt
-            const agentConfirmed = confirm(`Did the agent confirm they received the email at ${agent.email}?\n\nClick OK if YES, Cancel if NO.`);
-            
-            if (agentConfirmed) {
-                // Mark email as verified
-                agent.emailVerified = true;
-                
-                // Update the data in GitHub (if we have write access)
-                await updateAgentData();
-                
+            // Update the data in GitHub (if we have write access)
+            updateAgentData().then(() => {
                 // Update UI
                 loadAgentData();
                 
-                alert(`Email for ${agent.fullName} has been verified successfully!`);
+                alert(`✅ Email for ${agent.fullName} has been verified successfully!\n\nAgent status updated.`);
                 
                 // Refresh modal if open
                 if (agentModal.style.display === 'flex') {
                     viewAgent(agentId);
                 }
-            } else {
+            });
+        } else {
+            // Ask if we need to update email
+            const updateEmail = confirm(`The agent hasn't confirmed yet. Do you want to:\n\n- Click OK to try sending again later\n- Click Cancel to update their email address`);
+            
+            if (!updateEmail) {
                 // Ask for correct email
-                const newEmail = prompt(`The agent did not receive the email at ${agent.email}.\n\nPlease enter the correct email address:`);
+                const newEmail = prompt(`Please enter the correct email address for ${agent.fullName}:`, agent.email);
                 
                 if (newEmail && newEmail.trim() && isValidEmail(newEmail.trim())) {
                     // Update email
                     agent.email = newEmail.trim();
                     
                     // Update the data in GitHub (if we have write access)
-                    await updateAgentData();
-                    
-                    // Update UI
-                    loadAgentData();
-                    
-                    alert(`Email updated to ${newEmail}. You can now send a verification email to the new address.`);
-                    
-                    // Refresh modal if open
-                    if (agentModal.style.display === 'flex') {
-                        viewAgent(agentId);
-                    }
+                    updateAgentData().then(() => {
+                        // Update UI
+                        loadAgentData();
+                        
+                        alert(`Email updated to ${newEmail}. You can now send a verification email to the new address.`);
+                        
+                        // Refresh modal if open
+                        if (agentModal.style.display === 'flex') {
+                            viewAgent(agentId);
+                        }
+                    });
                 } else if (newEmail) {
                     alert('Please enter a valid email address.');
                 }
             }
         }
+    }, 1000); // Small delay to allow email app to open
+}
         
         // Verify agent (mark as verified)
         async function verifyAgent(agentId) {

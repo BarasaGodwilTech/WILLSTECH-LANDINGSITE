@@ -1460,6 +1460,426 @@
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
+        // ================= AUTO-SYNC SYSTEM =================
+// Add this code anywhere in your admin panel JavaScript
+
+// Configuration
+const AUTO_SYNC_CONFIG = {
+    enabled: true,              // Enable/disable auto-sync
+    interval: 30000,            // Sync every 30 seconds (in milliseconds)
+    syncOnTabFocus: true,       // Sync when user returns to tab
+    syncOnVisibilityChange: true, // Sync when page becomes visible
+    showNotifications: true,    // Show sync notifications
+    maxRetries: 3,              // Max retry attempts on failure
+    retryDelay: 5000            // Delay between retries (ms)
+};
+
+// State management
+let syncInterval = null;
+let isSyncing = false;
+let retryCount = 0;
+let lastSyncTime = null;
+
+// DOM Elements for sync UI
+let syncIndicator = null;
+let lastSyncDisplay = null;
+
+// Initialize auto-sync system
+function initAutoSync() {
+    // Create sync UI elements
+    createSyncUI();
+    
+    // Load saved preferences
+    loadSyncPreferences();
+    
+    // Start auto-sync if enabled
+    if (AUTO_SYNC_CONFIG.enabled) {
+        startAutoSync();
+    }
+    
+    // Setup event listeners
+    setupSyncEventListeners();
+    
+    // Perform initial sync
+    setTimeout(() => performSync(), 2000);
+    
+    console.log('Auto-sync system initialized');
+}
+
+// Create sync status UI
+function createSyncUI() {
+    // Create sync indicator in header
+    const headerActions = document.querySelector('.header div');
+    if (headerActions) {
+        const syncContainer = document.createElement('div');
+        syncContainer.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 14px;
+            color: #666;
+        `;
+        
+        // Sync button
+        const syncBtn = document.createElement('button');
+        syncBtn.className = 'action-btn verify-btn';
+        syncBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Sync Now';
+        syncBtn.style.cssText = `
+            padding: 8px 15px;
+            font-size: 14px;
+        `;
+        syncBtn.onclick = () => performSync(true);
+        
+        // Sync indicator
+        syncIndicator = document.createElement('div');
+        syncIndicator.style.cssText = `
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            background: #f8f9fa;
+            font-size: 12px;
+        `;
+        syncIndicator.innerHTML = `
+            <i class="fas fa-circle" style="color: #28a745; font-size: 8px;"></i>
+            <span>Auto-sync: ON</span>
+        `;
+        
+        // Last sync time display
+        lastSyncDisplay = document.createElement('div');
+        lastSyncDisplay.style.cssText = `
+            font-size: 11px;
+            color: #999;
+            white-space: nowrap;
+        `;
+        lastSyncDisplay.textContent = 'Last sync: Never';
+        
+        // Toggle button
+        const toggleBtn = document.createElement('button');
+        toggleBtn.className = 'action-btn';
+        toggleBtn.style.cssText = `
+            padding: 5px 10px;
+            font-size: 11px;
+            background: #6c757d;
+            color: white;
+        `;
+        toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+        toggleBtn.title = 'Pause auto-sync';
+        toggleBtn.onclick = toggleAutoSync;
+        
+        syncContainer.appendChild(syncBtn);
+        syncContainer.appendChild(syncIndicator);
+        syncContainer.appendChild(lastSyncDisplay);
+        syncContainer.appendChild(toggleBtn);
+        
+        headerActions.appendChild(syncContainer);
+    }
+}
+
+// Load saved sync preferences from localStorage
+function loadSyncPreferences() {
+    const savedConfig = localStorage.getItem('autoSyncConfig');
+    if (savedConfig) {
+        Object.assign(AUTO_SYNC_CONFIG, JSON.parse(savedConfig));
+    }
+}
+
+// Save sync preferences to localStorage
+function saveSyncPreferences() {
+    localStorage.setItem('autoSyncConfig', JSON.stringify(AUTO_SYNC_CONFIG));
+}
+
+// Start auto-sync interval
+function startAutoSync() {
+    if (syncInterval) clearInterval(syncInterval);
+    
+    syncInterval = setInterval(() => {
+        if (!isSyncing) {
+            performSync();
+        }
+    }, AUTO_SYNC_CONFIG.interval);
+    
+    updateSyncUI();
+    console.log('Auto-sync started');
+}
+
+// Stop auto-sync interval
+function stopAutoSync() {
+    if (syncInterval) {
+        clearInterval(syncInterval);
+        syncInterval = null;
+    }
+    
+    updateSyncUI();
+    console.log('Auto-sync stopped');
+}
+
+// Toggle auto-sync on/off
+function toggleAutoSync() {
+    AUTO_SYNC_CONFIG.enabled = !AUTO_SYNC_CONFIG.enabled;
+    saveSyncPreferences();
+    
+    if (AUTO_SYNC_CONFIG.enabled) {
+        startAutoSync();
+        showNotification('Auto-sync enabled', 'success');
+    } else {
+        stopAutoSync();
+        showNotification('Auto-sync disabled', 'warning');
+    }
+}
+
+// Perform data sync
+async function performSync(manual = false) {
+    if (isSyncing) return;
+    
+    isSyncing = true;
+    retryCount = 0;
+    
+    updateSyncStatus('syncing');
+    
+    try {
+        // Call your existing loadAgentData function
+        await loadAgentData();
+        
+        // Update last sync time
+        lastSyncTime = new Date();
+        updateLastSyncDisplay();
+        
+        // Show success notification
+        if (manual || AUTO_SYNC_CONFIG.showNotifications) {
+            showNotification('Data synced successfully', 'success');
+        }
+        
+        console.log('Sync completed successfully');
+        
+    } catch (error) {
+        console.error('Sync failed:', error);
+        
+        // Retry logic
+        if (retryCount < AUTO_SYNC_CONFIG.maxRetries) {
+            retryCount++;
+            showNotification(`Sync failed. Retrying... (${retryCount}/${AUTO_SYNC_CONFIG.maxRetries})`, 'warning');
+            
+            setTimeout(() => {
+                performSync(manual);
+            }, AUTO_SYNC_CONFIG.retryDelay);
+            
+            return;
+        }
+        
+        // Final failure
+        if (manual || AUTO_SYNC_CONFIG.showNotifications) {
+            showNotification('Sync failed. Please check connection.', 'error');
+        }
+        
+        updateSyncStatus('error');
+        
+    } finally {
+        isSyncing = false;
+        if (!manual) {
+            updateSyncStatus('idle');
+        }
+    }
+}
+
+// Update sync status UI
+function updateSyncStatus(status) {
+    if (!syncIndicator) return;
+    
+    const icon = syncIndicator.querySelector('i');
+    const text = syncIndicator.querySelector('span');
+    
+    switch (status) {
+        case 'syncing':
+            icon.style.color = '#ffc107';
+            icon.className = 'fas fa-sync-alt fa-spin';
+            text.textContent = 'Syncing...';
+            syncIndicator.style.background = '#fff3cd';
+            break;
+            
+        case 'error':
+            icon.style.color = '#dc3545';
+            icon.className = 'fas fa-exclamation-circle';
+            text.textContent = 'Sync error';
+            syncIndicator.style.background = '#f8d7da';
+            break;
+            
+        case 'idle':
+            icon.style.color = AUTO_SYNC_CONFIG.enabled ? '#28a745' : '#6c757d';
+            icon.className = 'fas fa-circle';
+            text.textContent = AUTO_SYNC_CONFIG.enabled ? 'Auto-sync: ON' : 'Auto-sync: OFF';
+            syncIndicator.style.background = '#f8f9fa';
+            break;
+    }
+}
+
+// Update last sync time display
+function updateLastSyncDisplay() {
+    if (!lastSyncDisplay || !lastSyncTime) return;
+    
+    const now = new Date();
+    const diffMs = now - lastSyncTime;
+    const diffMins = Math.floor(diffMs / 60000);
+    
+    if (diffMins < 1) {
+        lastSyncDisplay.textContent = 'Last sync: Just now';
+    } else if (diffMins === 1) {
+        lastSyncDisplay.textContent = 'Last sync: 1 min ago';
+    } else if (diffMins < 60) {
+        lastSyncDisplay.textContent = `Last sync: ${diffMins} mins ago`;
+    } else {
+        const diffHours = Math.floor(diffMins / 60);
+        lastSyncDisplay.textContent = `Last sync: ${diffHours} hour${diffHours > 1 ? 's' : ''} ago`;
+    }
+}
+
+// Update sync UI based on config
+function updateSyncUI() {
+    if (!syncIndicator) return;
+    
+    updateSyncStatus('idle');
+    
+    // Update toggle button
+    const toggleBtn = syncIndicator.parentElement.querySelector('button[title]');
+    if (toggleBtn) {
+        if (AUTO_SYNC_CONFIG.enabled) {
+            toggleBtn.innerHTML = '<i class="fas fa-pause"></i>';
+            toggleBtn.title = 'Pause auto-sync';
+            toggleBtn.style.background = '#6c757d';
+        } else {
+            toggleBtn.innerHTML = '<i class="fas fa-play"></i>';
+            toggleBtn.title = 'Resume auto-sync';
+            toggleBtn.style.background = '#28a745';
+        }
+    }
+}
+
+// Setup event listeners for auto-sync
+function setupSyncEventListeners() {
+    // Sync when tab becomes visible
+    if (AUTO_SYNC_CONFIG.syncOnVisibilityChange) {
+        document.addEventListener('visibilitychange', () => {
+            if (!document.hidden && AUTO_SYNC_CONFIG.enabled) {
+                setTimeout(() => performSync(), 1000);
+            }
+        });
+    }
+    
+    // Sync when window/tab gets focus
+    if (AUTO_SYNC_CONFIG.syncOnTabFocus) {
+        window.addEventListener('focus', () => {
+            if (AUTO_SYNC_CONFIG.enabled) {
+                setTimeout(() => performSync(), 1000);
+            }
+        });
+    }
+    
+    // Listen for sync requests from other tabs (optional)
+    window.addEventListener('storage', (e) => {
+        if (e.key === 'syncRequested' && e.newValue) {
+            if (AUTO_SYNC_CONFIG.enabled) {
+                performSync();
+            }
+            localStorage.removeItem('syncRequested');
+        }
+    });
+}
+
+// Show notification
+function showNotification(message, type = 'info') {
+    // Create notification element
+    const notification = document.createElement('div');
+    notification.style.cssText = `
+        position: fixed;
+        top: 20px;
+        right: 20px;
+        padding: 12px 20px;
+        border-radius: 8px;
+        color: white;
+        font-size: 14px;
+        z-index: 10000;
+        animation: slideIn 0.3s ease;
+        max-width: 300px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    `;
+    
+    // Set color based on type
+    switch (type) {
+        case 'success':
+            notification.style.background = '#28a745';
+            notification.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+            break;
+        case 'warning':
+            notification.style.background = '#ffc107';
+            notification.style.color = '#212529';
+            notification.innerHTML = `<i class="fas fa-exclamation-triangle"></i> ${message}`;
+            break;
+        case 'error':
+            notification.style.background = '#dc3545';
+            notification.innerHTML = `<i class="fas fa-times-circle"></i> ${message}`;
+            break;
+        default:
+            notification.style.background = '#17a2b8';
+            notification.innerHTML = `<i class="fas fa-info-circle"></i> ${message}`;
+    }
+    
+    // Add to document
+    document.body.appendChild(notification);
+    
+    // Remove after 3 seconds
+    setTimeout(() => {
+        notification.style.animation = 'slideOut 0.3s ease';
+        setTimeout(() => {
+            if (notification.parentNode) {
+                notification.parentNode.removeChild(notification);
+            }
+        }, 300);
+    }, 3000);
+    
+    // Add CSS animations
+    if (!document.querySelector('#sync-animations')) {
+        const style = document.createElement('style');
+        style.id = 'sync-animations';
+        style.textContent = `
+            @keyframes slideIn {
+                from { transform: translateX(100%); opacity: 0; }
+                to { transform: translateX(0); opacity: 1; }
+            }
+            @keyframes slideOut {
+                from { transform: translateX(0); opacity: 1; }
+                to { transform: translateX(100%); opacity: 0; }
+            }
+        `;
+        document.head.appendChild(style);
+    }
+}
+
+// Request sync from other tabs
+function requestCrossTabSync() {
+    localStorage.setItem('syncRequested', Date.now().toString());
+}
+
+// Export sync function for manual use
+window.manualSync = () => performSync(true);
+window.toggleAutoSync = toggleAutoSync;
+window.getSyncStatus = () => ({
+    enabled: AUTO_SYNC_CONFIG.enabled,
+    isSyncing,
+    lastSync: lastSyncTime,
+    nextSync: syncInterval ? new Date(Date.now() + AUTO_SYNC_CONFIG.interval) : null
+});
+
+// Initialize on page load
+document.addEventListener('DOMContentLoaded', () => {
+    // Wait a bit for other initialization
+    setTimeout(initAutoSync, 1000);
+});
+
+// ================= END AUTO-SYNC SYSTEM =================
     </script>
 </body>
 </html>

@@ -1,27 +1,4 @@
 {
-  "agents": [
-    {
-      "id": "AGENT-1770284152518-193",
-      "fullName": "Barasa will",
-      "personalNumber": "0740165356",
-      "email": "oceanzpaul@gmail.com",
-      "nationalId": "CM03026109LVFA",
-      "dob": "2001-02-04",
-      "gender": "male",
-      "businessAddress": "Musoto",
-      "residentialAddress": "Gdjbsjs",
-      "nextOfKinName": "Mewills",
-      "nextOfKinRelationship": "child",
-      "nextOfKinPhone": "0760542056",
-      "tradingName": "Barasa 751924844",
-      "submissionDate": "2026-02-05T09:35:52.518Z",
-      "status": "pending",
-      "emailVerified": false,
-      "adminVerified": false,
-      "idFrontUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770284152518-193_idFront_1770284152521.jpg",
-      "idBackUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770284152518-193_idBack_1770284164156.jpg",
-      "agentPhotoUrl": "https://raw.githubusercontent.com/BarasaGodwilTech/WILLSTECH-LANDINGSITE/main/undefined/undefined/AGENT-1770284152518-193_agentPhoto_1770284174003.jpg"
-    }
-  ],
-  "lastUpdated": "2026-02-05T09:36:24.754Z"
+  "agents": [],
+  "lastUpdated": ""
 }

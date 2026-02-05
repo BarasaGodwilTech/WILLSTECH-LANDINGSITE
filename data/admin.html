@@ -1461,6 +1461,13 @@
             return emailRegex.test(email);
         }
         // ================= AUTO-SYNC SYSTEM =================
+        // Auto-refresh data every 4 seconds
+setInterval(() => {
+    const refreshBtn = document.querySelector('.refresh-btn');
+    if (refreshBtn && !refreshBtn.disabled) {
+        refreshBtn.click();
+    }
+}, 4000);
     
     </script>
 </body>

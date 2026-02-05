@@ -1522,6 +1522,148 @@ Ezee Money Agent Management Team
             const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
             return emailRegex.test(email);
         }
+        // Add Export to Excel button to the header
+document.addEventListener('DOMContentLoaded', function() {
+    // Create export button
+    const exportBtn = document.createElement('button');
+    exportBtn.className = 'action-btn verify-btn';
+    exportBtn.innerHTML = '<i class="fas fa-file-excel"></i> Export to Excel';
+    exportBtn.style.marginLeft = '10px';
+    exportBtn.onclick = exportToExcel;
+    
+    // Find the header actions div and add the button
+    const headerActions = document.querySelector('.header > div');
+    if (headerActions) {
+        headerActions.appendChild(exportBtn);
+    }
+});
+
+// Export all agent data to Excel
+function exportToExcel() {
+    if (!agents || agents.length === 0) {
+        alert('No data available to export.');
+        return;
+    }
+    
+    // Show loading
+    const originalText = event.target.innerHTML;
+    event.target.innerHTML = '<span class="loading"></span> Exporting...';
+    event.target.disabled = true;
+    
+    try {
+        // Create CSV content
+        let csvContent = "data:text/csv;charset=utf-8,";
+        
+        // Create headers
+        const headers = [
+            "Agent ID",
+            "Full Name",
+            "Email",
+            "Email Verified",
+            "Personal Number",
+            "National ID",
+            "Date of Birth",
+            "Gender",
+            "Business Address",
+            "Residential Address",
+            "Next of Kin Name",
+            "Next of Kin Relationship",
+            "Next of Kin Phone",
+            "Trading Name",
+            "Status",
+            "Submission Date",
+            "Admin Verified",
+            "ID Front URL",
+            "ID Back URL",
+            "Agent Photo URL"
+        ];
+        
+        csvContent += headers.join(",") + "\n";
+        
+        // Add data rows
+        agents.forEach(agent => {
+            const row = [
+                `"${agent.id || ''}"`,
+                `"${agent.fullName || ''}"`,
+                `"${agent.email || ''}"`,
+                `"${agent.emailVerified ? 'Yes' : 'No'}"`,
+                `"${agent.personalNumber || ''}"`,
+                `"${agent.nationalId || ''}"`,
+                `"${agent.dob || ''}"`,
+                `"${agent.gender || ''}"`,
+                `"${(agent.businessAddress || '').replace(/"/g, '""')}"`,
+                `"${(agent.residentialAddress || '').replace(/"/g, '""')}"`,
+                `"${agent.nextOfKinName || ''}"`,
+                `"${agent.nextOfKinRelationship || ''}"`,
+                `"${agent.nextOfKinPhone || ''}"`,
+                `"${agent.tradingName || ''}"`,
+                `"${agent.status || ''}"`,
+                `"${agent.submissionDate || ''}"`,
+                `"${agent.adminVerified ? 'Yes' : 'No'}"`,
+                `"${agent.idFrontUrl || ''}"`,
+                `"${agent.idBackUrl || ''}"`,
+                `"${agent.agentPhotoUrl || ''}"`
+            ];
+            csvContent += row.join(",") + "\n";
+        });
+        
+        // Create download link
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        
+        // Generate filename with current date
+        const date = new Date();
+        const dateStr = date.toISOString().split('T')[0];
+        const timeStr = date.toTimeString().split(' ')[0].replace(/:/g, '-');
+        link.setAttribute("download", `EzeeMoney_Agents_${dateStr}_${timeStr}.csv`);
+        
+        // Trigger download
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        
+        // Show success message
+        alert(`✅ Exported ${agents.length} agents to Excel (CSV) file.\n\nFile saved as: EzeeMoney_Agents_${dateStr}_${timeStr}.csv`);
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Error exporting data: ' + error.message);
+    } finally {
+        // Reset button
+        event.target.innerHTML = originalText;
+        event.target.disabled = false;
+    }
+}
+
+// Add CSS for the export button
+const exportStyles = document.createElement('style');
+exportStyles.textContent = `
+    .export-btn {
+        background-color: #2e7d32 !important;
+        color: white !important;
+    }
+    
+    .export-btn:hover {
+        background-color: #1b5e20 !important;
+    }
+    
+    @media (max-width: 768px) {
+        .header > div {
+            width: 100%;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        
+        .export-btn {
+            width: 100%;
+            margin-left: 0 !important;
+        }
+    }
+`;
+document.head.appendChild(exportStyles);
+        
         // ================= AUTO-SYNC SYSTEM =================
         // Auto-refresh data every 4 seconds
 setInterval(() => {

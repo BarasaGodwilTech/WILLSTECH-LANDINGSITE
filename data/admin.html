@@ -1810,45 +1810,23 @@ async function sendVerificationEmail(agentId) {
     const subject = `Ezee Money Agent Registration - Email Verification`;
     
     const emailBody = `
-Dear ${agent.fullName},
+  Dear ${agent.fullName},
 
-Welcome to Ezee Money!
+Thank you for registering as an Ezee Money agent. To activate your account, please reply to this email with "YES" to confirm the following details:
 
-We have received your agent registration with the following details:
 - Full Name: ${agent.fullName}
 - Personal Number: ${agent.personalNumber}
 - National ID: ${agent.nationalId}
 - Email: ${agent.email}
 
-**About Ezee Money:**
-Ezee Money is an electronic, digital, cashless, and secure method for making fast, on-device payments. As an Ezee Money agent, you will help clients make instant payments and earn commission on every transaction you facilitate.
+Once confirmed, you will receive your training materials and login credentials to begin earning commission.
 
-**Next Steps:**
-1. Please reply to this email confirming that this email address (${agent.email}) is correct and belongs to you.
-2. Once confirmed, your agent account will be activated.
-3. You will receive training materials and login credentials to start earning commissions.
+If any details above are incorrect, please reply with the correct information.
 
-**Benefits of being an Ezee Money Agent:**
-✅ Earn commission on every transaction
-✅ Secure digital payments platform
-✅ Real-time transaction tracking
-✅ 24/7 customer support
-✅ Flexible working hours
-✅ No minimum transaction requirements
-
-**Verification Required:**
-To complete your registration, please reply to this email with "YES" to confirm that:
-1. This email address belongs to you
-2. You have provided accurate information
-3. You agree to the terms of service
-
-If this email was sent in error or if you need to update your information, please reply with the correct details.
-
-We're excited to have you join the Ezee Money family!
+Welcome to Ezee Money!
 
 Best regards,
 Ezee Money Agent Management Team
-[Your Contact Information]
     `.trim();
     
     // Encode the email content for mailto link

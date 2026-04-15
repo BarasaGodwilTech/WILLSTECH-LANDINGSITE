@@ -545,7 +545,7 @@ getDefaultStats() {
         if (contactSection) {
             return contactSection.textContent.trim();
         }
-        return "WhatsApp: +256 751 924 844\nEmail: wills.tech.store.ug@gmail.com\nLocations: Kampala & Mbale, Uganda\nBusiness Hours: Mon-Sat 8:00 AM - 8:00 PM, Sun 10:00 AM - 6:00 PM";
+        return "WhatsApp: +256 751 924 844\nEmail: contact@willstech.store\nLocations: Kampala & Mbale, Uganda\nBusiness Hours: Mon-Sat 8:00 AM - 8:00 PM, Sun 10:00 AM - 6:00 PM";
     }
 
     getEmptyDataStructure() {
